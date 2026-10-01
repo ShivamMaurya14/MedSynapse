@@ -148,9 +148,11 @@ class ModelService:
         input_arr = np.array([[pregnancies, glucose, blood_pressure, skin_thickness, insulin, bmi, dpf, age, bmi_cat]])
         scaled_input = scaler.transform(input_arr)
         
-        prediction = int(model.predict(scaled_input)[0])
         probabilities = model.predict_proba(scaled_input)[0]
+        # In Pima Indian Diabetes dataset, Class 1 is Diabetes Mellitus and Class 0 is Negative/Normal
         risk_probability = float(probabilities[1])
+        has_disease = bool(risk_probability >= 0.5)
+        prediction = 1 if has_disease else 0
 
         # Clinical factor analysis
         factors = []
@@ -191,7 +193,7 @@ class ModelService:
         return {
             'disease': 'Diabetes Mellitus',
             'prediction': prediction,
-            'has_disease': bool(prediction == 1),
+            'has_disease': has_disease,
             'risk_probability': round(risk_probability, 4),
             'risk_percentage': round(risk_probability * 100, 1),
             'risk_tier': 'High Risk' if risk_probability >= 0.65 else ('Moderate Risk' if risk_probability >= 0.35 else 'Low Risk'),
@@ -242,9 +244,11 @@ class ModelService:
             raise ValueError("Stored diabetes features must all be finite numeric values.")
 
         scaled_input = scaler.transform(input_arr)
-        prediction = int(model.predict(scaled_input)[0])
         probabilities = model.predict_proba(scaled_input)[0]
-        risk_probability = float(probabilities[1])
+        # In the Cleveland dataset artifact, Class 0 is CAD and Class 1 is normal
+        risk_probability = float(probabilities[0])
+        has_disease = bool(risk_probability >= 0.5)
+        prediction = 1 if has_disease else 0
         glucose = float(model_features['Glucose'])
         bmi = float(model_features['BMI'])
         insulin = float(model_features['Insulin'])
@@ -282,7 +286,7 @@ class ModelService:
         return {
             'disease': 'Diabetes Mellitus',
             'prediction': prediction,
-            'has_disease': bool(prediction == 1),
+            'has_disease': has_disease,
             'risk_probability': round(risk_probability, 4),
             'risk_percentage': round(risk_probability * 100, 1),
             'risk_tier': 'High Risk' if risk_probability >= 0.65 else ('Moderate Risk' if risk_probability >= 0.35 else 'Low Risk'),
@@ -321,9 +325,11 @@ class ModelService:
         input_arr = np.array([[age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal]])
         scaled_input = scaler.transform(input_arr)
 
-        prediction = int(model.predict(scaled_input)[0])
         probabilities = model.predict_proba(scaled_input)[0]
-        risk_probability = float(probabilities[1])
+        # In the Cleveland dataset artifact, Class 0 is CAD and Class 1 is normal
+        risk_probability = float(probabilities[0])
+        has_disease = bool(risk_probability >= 0.5)
+        prediction = 1 if has_disease else 0
 
         factors = []
         if chol >= 240:
@@ -363,7 +369,7 @@ class ModelService:
         return {
             'disease': 'Coronary Heart Disease',
             'prediction': prediction,
-            'has_disease': bool(prediction == 1),
+            'has_disease': has_disease,
             'risk_probability': round(risk_probability, 4),
             'risk_percentage': round(risk_probability * 100, 1),
             'risk_tier': 'High Risk' if risk_probability >= 0.65 else ('Moderate Risk' if risk_probability >= 0.35 else 'Low Risk'),
@@ -597,6 +603,51 @@ class ModelService:
         }
 
     def predict_eye(self, image_bytes: bytes) -> dict:
+        pt_path = os.path.join(self.models_dir, "eye_disease_traced_model.pt")
+        if os.path.exists(pt_path):
+            import torch
+            import torchvision.transforms as transforms
+            if not hasattr(self, "_eye_torch_model") or self._eye_torch_model is None:
+                self._eye_torch_model = torch.jit.load(pt_path, map_location="cpu")
+                self._eye_torch_model.eval()
+            
+            img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+            orig_w, orig_h = img.size
+            tfms = transforms.Compose([
+                transforms.Resize((224, 224)),
+                transforms.ToTensor(),
+            ])
+            inp = tfms(img).unsqueeze(0)
+            with torch.no_grad():
+                logits = self._eye_torch_model(inp)
+                probs = torch.softmax(logits, dim=1).numpy()[0]
+                
+            classes = ["Bulging Eyes", "Cataracts", "Crossed Eyes", "Glaucoma", "Uveitis"]
+            idx = int(np.argmax(probs))
+            top_class = classes[idx]
+            confidence = float(probs[idx])
+            is_positive = True
+            probabilities = {c: round(float(p), 4) for c, p in zip(classes, probs)}
+            
+            return {
+                "disease": "Eye Disease (Ophthalmic)",
+                "prediction": top_class,
+                "diagnosis": top_class,
+                "has_disease": is_positive,
+                "is_positive": is_positive,
+                "risk_probability": round(confidence, 4),
+                "risk_percentage": round(confidence * 100, 1),
+                "confidence_percentage": round(confidence * 100, 1),
+                "risk_tier": "High Risk" if confidence >= 0.70 else "Moderate Risk",
+                "class_probabilities": probabilities,
+                "modality": "Digital Color Retinal Fundus Photography",
+                "image_transformation": {"original_dimensions": f"{orig_w}x{orig_h}", "transformed_shape": "[1, 3, 224, 224]"},
+                "recommendations": [
+                    f"Comprehensive dilated eye examination for {top_class} confirmation.",
+                    "Optical coherence tomography (OCT) and visual field perimetry indicated.",
+                    "Prompt evaluation by a board-certified ophthalmologist."
+                ]
+            }
         return self._predict_planned_image_model(
             image_bytes, model_attr='_eye_model', artifact='eye_disease.keras',
             disease='Eye Disease', positive_label='Eye Disease Detected',
@@ -604,8 +655,15 @@ class ModelService:
         )
 
     def get_eye_model(self):
-        """Expose the active ocular CNN for Grad-CAM report explanations."""
-        return self._load_image_model('_eye_model', 'eye_disease.keras')
+        """Expose the active ocular PyTorch or Keras model."""
+        pt_path = os.path.join(self.models_dir, "eye_disease_traced_model.pt")
+        if os.path.exists(pt_path):
+            if not hasattr(self, "_eye_torch_model") or self._eye_torch_model is None:
+                import torch
+                self._eye_torch_model = torch.jit.load(pt_path, map_location="cpu")
+                self._eye_torch_model.eval()
+            return self._eye_torch_model
+        return None
 
     def get_breast_cancer_model(self):
         if self._breast_model is None:
@@ -654,4 +712,239 @@ class ModelService:
             'contributing_factors': [],
             'recommendations': ['This research screening output requires qualified clinician review.'],
             'model_status': 'artifact_loaded',
+        }
+
+
+    # 6. Brain Tumor Model (MRI 4-Class)
+    def get_brain_tumor_model(self):
+        if not hasattr(self, "_brain_tumor_model") or self._brain_tumor_model is None:
+            model_path = os.path.join(self.models_dir, "brain_tumor_model.keras")
+            custom_objects = {"Flatten": FixedFlatten, "GlobalAveragePooling2D": FixedPooling}
+            try:
+                self._brain_tumor_model = tf.keras.models.load_model(model_path, compile=False, custom_objects=custom_objects)
+            except Exception:
+                self._brain_tumor_model = tf.keras.models.load_model(model_path, compile=False, safe_mode=False, custom_objects=custom_objects)
+        return self._brain_tumor_model
+
+    def predict_brain_tumor(self, image_bytes: bytes) -> dict:
+        model = self.get_brain_tumor_model()
+        tensor, meta = self.transform_image(image_bytes, target_size=(299, 299))
+        preds = model.predict(tensor, verbose=0)[0]
+        classes = ["Glioma", "Meningioma", "No Tumor", "Pituitary Adenoma"]
+        idx = int(np.argmax(preds))
+        top_class = classes[idx]
+        confidence = float(preds[idx])
+        is_tumor = top_class != "No Tumor"
+        tumor_prob = 1.0 - float(preds[2]) if len(preds) > 2 else confidence
+
+        probabilities = {c: round(float(p), 4) for c, p in zip(classes, preds)}
+        
+        descriptions = {
+            "Glioma": "Intra-axial glial neoplasm identified. Commonly arises in cerebral hemispheres with infiltrative margins.",
+            "Meningioma": "Extra-axial dural-tail neoplasm identified. Arises from arachnoid cap cells, typically compressive.",
+            "Pituitary Adenoma": "Sellar/suprasellar mass identified near the pituitary fossa and optic chiasm.",
+            "No Tumor": "Cranial MRI demonstrates unremarkable cerebral and cerebellar parenchyma without focal mass lesions."
+        }
+
+        return {
+            "disease": "Brain Tumor (MRI)",
+            "prediction": top_class,
+            "diagnosis": top_class,
+            "has_disease": is_tumor,
+            "is_positive": is_tumor,
+            "risk_probability": round(tumor_prob, 4),
+            "risk_percentage": round(tumor_prob * 100, 1),
+            "confidence_percentage": round(confidence * 100, 1),
+            "risk_tier": "Low Risk" if not is_tumor else ("High Risk" if tumor_prob >= 0.70 else "Moderate Risk"),
+            "class_probabilities": probabilities,
+            "description": descriptions.get(top_class, ""),
+            "modality": "Cranial Magnetic Resonance Imaging (MRI)",
+            "image_transformation": meta,
+            "recommendations": [
+                "Emergency neuroradiology consultation required for immediate staging." if is_tumor else "Routine neuro-anatomical screening within normal parameters.",
+                "Schedule follow-up contrast-enhanced T1/T2 FLAIR MRI protocol." if is_tumor else "Continue baseline preventative wellness surveillance.",
+                "Have a board-certified radiologist or neurosurgeon review this screening."
+            ]
+        }
+
+    # 7. Kidney Stone & Renal Pathology (CT 4-Class)
+    def get_kidney_model(self):
+        if not hasattr(self, "_kidney_model") or self._kidney_model is None:
+            model_path = os.path.join(self.models_dir, "kidney_stone_efficientnet_model.keras")
+            if not os.path.exists(model_path):
+                model_path = os.path.join(self.models_dir, "kidney_stone_unet_model.keras")
+            custom_objects = {"Flatten": FixedFlatten, "GlobalAveragePooling2D": FixedPooling}
+            try:
+                self._kidney_model = tf.keras.models.load_model(model_path, compile=False, custom_objects=custom_objects)
+            except Exception:
+                self._kidney_model = tf.keras.models.load_model(model_path, compile=False, safe_mode=False, custom_objects=custom_objects)
+        return self._kidney_model
+
+    def predict_kidney_stone(self, image_bytes: bytes) -> dict:
+        model = self.get_kidney_model()
+        tensor, meta = self.transform_image(image_bytes, target_size=(150, 150))
+        # EfficientNet model expects pixel values in [0, 255] as per its internal scaling layers
+        preds = model.predict(tensor * 255.0, verbose=0)[0]
+        classes = ["Cyst", "Normal", "Stone", "Tumor"]
+        idx = int(np.argmax(preds))
+        top_class = classes[idx]
+        confidence = float(preds[idx])
+        is_pathology = top_class != "Normal"
+        pathology_prob = 1.0 - float(preds[1]) if len(preds) > 1 else confidence
+
+        probabilities = {c: round(float(p), 4) for c, p in zip(classes, preds)}
+        
+        descriptions = {
+            "Cyst": "Cortical renal cyst detected on abdominal CT slice.",
+            "Stone": "High-attenuation calcified calculus detected within the renal collecting system.",
+            "Tumor": "Solid hyperdense renal parenchymal mass lesion identified.",
+            "Normal": "Bilateral unremarkable renal parenchyma with no calcifications, cysts, or masses."
+        }
+
+        return {
+            "disease": "Kidney Pathology (CT)",
+            "prediction": top_class,
+            "diagnosis": top_class,
+            "has_disease": is_pathology,
+            "is_positive": is_pathology,
+            "risk_probability": round(pathology_prob, 4),
+            "risk_percentage": round(pathology_prob * 100, 1),
+            "confidence_percentage": round(confidence * 100, 1),
+            "risk_tier": "Low Risk" if not is_pathology else ("High Risk" if pathology_prob >= 0.70 else "Moderate Risk"),
+            "class_probabilities": probabilities,
+            "description": descriptions.get(top_class, ""),
+            "modality": "Non-Contrast Abdominal CT Scan",
+            "image_transformation": meta,
+            "recommendations": [
+                "Urological evaluation recommended for definitive imaging." if is_pathology else "Clear renal parenchyma; annual health checks.",
+                "Correlate with serum creatinine, eGFR, and urinalysis.",
+                "Review by a board-certified urologist or nephrologist."
+            ]
+        }
+
+    # 8. Skin Cancer & Cutaneous Lesions (HAM10000 7-Class)
+    def get_skin_cancer_model(self):
+        if not hasattr(self, "_skin_cancer_model") or self._skin_cancer_model is None:
+            model_path = os.path.join(self.models_dir, "skin_cancer_model.keras")
+            custom_objects = {"Flatten": FixedFlatten, "GlobalAveragePooling2D": FixedPooling}
+            try:
+                self._skin_cancer_model = tf.keras.models.load_model(model_path, compile=False, custom_objects=custom_objects)
+            except Exception:
+                self._skin_cancer_model = tf.keras.models.load_model(model_path, compile=False, safe_mode=False, custom_objects=custom_objects)
+        return self._skin_cancer_model
+
+    def predict_skin_cancer(self, image_bytes: bytes) -> dict:
+        model = self.get_skin_cancer_model()
+        tensor, meta = self.transform_image(image_bytes, target_size=(28, 28))
+        # Skin cancer CNN model was trained on raw [0, 255] pixel arrays
+        preds = model.predict(tensor * 255.0, verbose=0)[0]
+        class_codes = ["nv", "mel", "bkl", "bcc", "akiec", "vasc", "df"]
+        class_names = {
+            "nv": "Melanocytic Nevus (Benign Mole)",
+            "mel": "Melanoma (Malignant)",
+            "bkl": "Benign Keratosis-like Lesion",
+            "bcc": "Basal Cell Carcinoma (Malignant)",
+            "akiec": "Actinic Keratosis / Bowen Disease",
+            "vasc": "Vascular Lesion",
+            "df": "Dermatofibroma"
+        }
+        malignant_codes = {"mel", "bcc"}
+        idx = int(np.argmax(preds))
+        top_code = class_codes[idx]
+        top_name = class_names[top_code]
+        confidence = float(preds[idx])
+        is_malignant = top_code in malignant_codes
+        
+        mel_prob = float(preds[1])
+        bcc_prob = float(preds[3])
+        cancer_risk = mel_prob + bcc_prob
+
+        probabilities = {class_names[c]: round(float(p), 4) for c, p in zip(class_codes, preds)}
+
+        return {
+            "disease": "Skin Cancer & Cutaneous Lesions (HAM10000)",
+            "prediction": top_name,
+            "diagnosis": top_name,
+            "has_disease": is_malignant,
+            "is_positive": is_malignant,
+            "risk_probability": round(cancer_risk, 4),
+            "risk_percentage": round(cancer_risk * 100, 1),
+            "confidence_percentage": round(confidence * 100, 1),
+            "risk_tier": "High Risk" if is_malignant else ("Moderate Risk" if top_code == "akiec" else "Low Risk"),
+            "class_probabilities": probabilities,
+            "modality": "Dermoscopic Photography",
+            "image_transformation": meta,
+            "recommendations": [
+                "Urgent dermatologic examination with dermatoscope." if is_malignant else "Routine skin surveillance using ABCDE rules.",
+                "Biopsy and histopathology recommended for suspicious pigmented lesions.",
+                "Have a qualified dermatologist review this screening."
+            ]
+        }
+
+    # 9. Liver Disease Model (ILPD Tabular)
+    def get_liver_model(self):
+        if not hasattr(self, "_liver_model") or self._liver_model is None:
+            model_path = os.path.join(self.models_dir, "liver_model.pkl")
+            scaler_path = os.path.join(self.models_dir, "liver_scaler.pkl")
+            with open(model_path, "rb") as f:
+                self._liver_model = CustomUnpickler(f).load()
+            with open(scaler_path, "rb") as f:
+                self._liver_scaler = pickle.load(f)
+        return self._liver_model, self._liver_scaler
+
+    def predict_liver(self, inputs: dict) -> dict:
+        model, scaler_dict = self.get_liver_model()
+        features = scaler_dict["feature_names"]
+        mean = scaler_dict["mean"].values
+        std = scaler_dict["std"].values
+        
+        gender_val = inputs.get("gender", inputs.get("Gender", 0))
+        if isinstance(gender_val, str):
+            # In ILPD dataset, Male is 0 and Female is 1
+            gender_val = 0 if gender_val.lower().startswith("m") else 1
+            
+        mapping = {
+            "Age": float(inputs.get("age", inputs.get("Age", 45))),
+            "Gender": float(gender_val),
+            "Total_Bilirubin": float(inputs.get("total_bilirubin", inputs.get("Total_Bilirubin", 1.0))),
+            "Direct_Bilirubin": float(inputs.get("direct_bilirubin", inputs.get("Direct_Bilirubin", 0.3))),
+            "Alkaline_Phosphotase": float(inputs.get("alkaline_phosphotase", inputs.get("Alkaline_Phosphotase", 200))),
+            "Alamine_Aminotransferase": float(inputs.get("alamine_aminotransferase", inputs.get("Alamine_Aminotransferase", 30))),
+            "Aspartate_Aminotransferase": float(inputs.get("aspartate_aminotransferase", inputs.get("Aspartate_Aminotransferase", 35))),
+            "Total_Protiens": float(inputs.get("total_protiens", inputs.get("Total_Protiens", 6.5))),
+            "Albumin": float(inputs.get("albumin", inputs.get("Albumin", 3.5))),
+            "Albumin_and_Globulin_Ratio": float(inputs.get("albumin_and_globulin_ratio", inputs.get("ag_ratio", inputs.get("Albumin_and_Globulin_Ratio", 1.0)))),
+        }
+        
+        x = np.array([mapping[k] for k in features], dtype=np.float32)
+        x_scaled = (x - mean) / std
+        
+        pred = int(model.predict([x_scaled])[0])
+        proba = model.predict_proba([x_scaled])[0]
+        disease_prob = float(proba[1]) if len(proba) > 1 else float(pred)
+        has_disease = bool(pred == 1)
+        
+        factors = []
+        if mapping["Total_Bilirubin"] > 1.2:
+            factors.append({"factor": "Total Bilirubin", "value": f"{mapping['Total_Bilirubin']} mg/dL", "impact": "Elevated (Hepatobiliary dysfunction)"})
+        if mapping["Alamine_Aminotransferase"] > 40:
+            factors.append({"factor": "ALT (SGPT)", "value": f"{mapping['Alamine_Aminotransferase']} IU/L", "impact": "High (Hepatocellular damage)"})
+        if mapping["Aspartate_Aminotransferase"] > 40:
+            factors.append({"factor": "AST (SGOT)", "value": f"{mapping['Aspartate_Aminotransferase']} IU/L", "impact": "High (Hepatic inflammation)"})
+
+        return {
+            "disease": "Liver Disease (ILPD)",
+            "prediction": pred,
+            "has_disease": has_disease,
+            "diagnosis": "Liver Disease Detected" if has_disease else "Healthy (Normal LFT)",
+            "is_positive": has_disease,
+            "risk_probability": round(disease_prob, 4),
+            "risk_percentage": round(disease_prob * 100, 1),
+            "risk_tier": "High Risk" if disease_prob >= 0.65 else ("Moderate Risk" if disease_prob >= 0.35 else "Low Risk"),
+            "contributing_factors": factors,
+            "recommendations": [
+                "Comprehensive gastroenterology/hepatology clinical assessment." if has_disease else "Maintain a balanced diet and regular exercise.",
+                "Abdominal ultrasound to evaluate hepatic parenchymal echotexture.",
+                "Review alcohol intake and hepatotoxic medication profile."
+            ]
         }

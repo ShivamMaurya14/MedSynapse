@@ -104,3 +104,8 @@ data/explanations/
 *.excalidraw
 WhatsApp*
 
+
+models/*.pt
+models/*.pth
+models/*.csv
+datasets/
