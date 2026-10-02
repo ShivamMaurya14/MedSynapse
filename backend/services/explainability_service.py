@@ -201,7 +201,7 @@ class ExplainabilityService:
         return report
 
     @staticmethod
-    def tree_shap(*, model, transformed_input: np.ndarray, feature_names: list[str], raw_values: dict) -> dict:
+    def tree_shap(*, model, transformed_input: np.ndarray, feature_names: list[str], raw_values: dict, positive_class_idx: int = 1) -> dict:
         """Explain a tree-only classifier using the exact scaled inference values."""
         try:
             import shap
@@ -214,18 +214,22 @@ class ExplainabilityService:
             expected_value = explainer.expected_value
             # SHAP versions/models differ: list[class], (rows, features), or
             # (rows, features, classes). Normalize to positive-class values.
+            target_idx = positive_class_idx
             if isinstance(shap_values, list):
-                values = np.asarray(shap_values[1] if len(shap_values) > 1 else shap_values[0])[0]
+                idx = target_idx if len(shap_values) > target_idx else (1 if len(shap_values) > 1 else 0)
+                values = np.asarray(shap_values[idx])[0]
                 base_value = np.asarray(expected_value).reshape(-1)
-                base_value = float(base_value[1] if base_value.size > 1 else base_value[0])
+                base_value = float(base_value[idx] if base_value.size > idx else base_value[0])
             else:
                 values_array = np.asarray(shap_values)
                 if values_array.ndim == 3:
-                    values = values_array[0, :, 1 if values_array.shape[2] > 1 else 0]
+                    idx = target_idx if values_array.shape[2] > target_idx else (1 if values_array.shape[2] > 1 else 0)
+                    values = values_array[0, :, idx]
                 else:
                     values = values_array[0]
                 base_array = np.asarray(expected_value).reshape(-1)
-                base_value = float(base_array[1] if base_array.size > 1 else base_array[0])
+                idx = target_idx if base_array.size > target_idx else (1 if base_array.size > 1 else 0)
+                base_value = float(base_array[idx])
 
             return ExplainabilityService._contribution_report(
                 values=values, base_value=base_value, feature_names=feature_names, raw_values=raw_values,
