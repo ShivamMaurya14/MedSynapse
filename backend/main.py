@@ -1,3 +1,13 @@
+# CRITICAL for macOS conda environment: Initialize TensorFlow and PyTorch runtimes before pandas/pyarrow to prevent dynamic symbol conflict in absl thread pool
+try:
+    import tensorflow as tf
+except Exception:
+    pass
+try:
+    import torch
+except Exception:
+    pass
+
 import os
 import sys
 import io
@@ -114,6 +124,19 @@ class HeartInput(BaseModel):
     thal: Optional[int] = 2
 
 
+class LiverInput(BaseModel):
+    age: float = Field(default=45.0, ge=1, le=120)
+    gender: Any = Field(default=1)
+    total_bilirubin: float = Field(default=1.0, ge=0)
+    direct_bilirubin: float = Field(default=0.3, ge=0)
+    alkaline_phosphotase: float = Field(default=200.0, ge=0)
+    alamine_aminotransferase: float = Field(default=30.0, ge=0)
+    aspartate_aminotransferase: float = Field(default=35.0, ge=0)
+    total_protiens: float = Field(default=6.5, ge=0)
+    albumin: float = Field(default=3.5, ge=0)
+    albumin_and_globulin_ratio: float = Field(default=1.0, ge=0)
+
+
 class BreastCancerInput(BaseModel):
     features: Dict[str, float]
 
@@ -178,7 +201,11 @@ def health_check():
         "diabetes_model": os.path.exists(os.path.join(BASE_DIR, "models", "diabetes_model.pkl")),
         "heart_model": os.path.exists(os.path.join(BASE_DIR, "models", "heart_model.pkl")),
         "xray_pneumonia_model": os.path.exists(os.path.join(BASE_DIR, "models", "xrays_pneumonia.keras")),
-        "eye_disease_model": os.path.exists(os.path.join(BASE_DIR, "models", "eye_disease.keras")),
+        "brain_tumor_model": os.path.exists(os.path.join(BASE_DIR, "models", "brain_tumor_model.keras")),
+        "kidney_stone_model": os.path.exists(os.path.join(BASE_DIR, "models", "kidney_stone_efficientnet_model.keras")),
+        "skin_cancer_model": os.path.exists(os.path.join(BASE_DIR, "models", "skin_cancer_model.keras")),
+        "eye_disease_model": os.path.exists(os.path.join(BASE_DIR, "models", "eye_disease_traced_model.pt")) or os.path.exists(os.path.join(BASE_DIR, "models", "eye_disease.keras")),
+        "liver_disease_model": os.path.exists(os.path.join(BASE_DIR, "models", "liver_model.pkl")),
         "breast_cancer_model": os.path.exists(os.path.join(BASE_DIR, "models", "breast_cancer_model.pkl")),
     }
     return {
@@ -565,6 +592,79 @@ async def _predict_uploaded_image(file: UploadFile, predictor, error_label: str)
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"{error_label} failed: {str(e)}")
 
+
+
+@app.post("/api/predict/brain-tumor")
+async def predict_brain_tumor_endpoint(file: UploadFile = File(...)):
+    try:
+        contents = await file.read()
+        if len(contents) == 0:
+            raise HTTPException(status_code=400, detail="Uploaded MRI scan is empty.")
+        result = model_service.predict_brain_tumor(contents)
+        return create_model_run_response(
+            disease_key="brain_tumor",
+            result=result,
+            inputs={"source_filename": file.filename or "cranial_mri_scan.jpg"},
+            image_bytes=contents,
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Brain tumor analysis failed: {str(e)}")
+
+
+@app.post("/api/predict/kidney-stone")
+async def predict_kidney_stone_endpoint(file: UploadFile = File(...)):
+    try:
+        contents = await file.read()
+        if len(contents) == 0:
+            raise HTTPException(status_code=400, detail="Uploaded CT scan is empty.")
+        result = model_service.predict_kidney_stone(contents)
+        return create_model_run_response(
+            disease_key="kidney_stone",
+            result=result,
+            inputs={"source_filename": file.filename or "kidney_ct_scan.jpg"},
+            image_bytes=contents,
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Kidney pathology analysis failed: {str(e)}")
+
+
+@app.post("/api/predict/skin-cancer")
+async def predict_skin_cancer_endpoint(file: UploadFile = File(...)):
+    try:
+        contents = await file.read()
+        if len(contents) == 0:
+            raise HTTPException(status_code=400, detail="Uploaded dermoscopy image is empty.")
+        result = model_service.predict_skin_cancer(contents)
+        return create_model_run_response(
+            disease_key="skin_cancer",
+            result=result,
+            inputs={"source_filename": file.filename or "dermoscopy_image.jpg"},
+            image_bytes=contents,
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Skin cancer analysis failed: {str(e)}")
+
+
+@app.post("/api/predict/liver")
+def predict_liver_endpoint(payload: LiverInput):
+    try:
+        inputs = payload.model_dump()
+        result = model_service.predict_liver(inputs)
+        return create_model_run_response(
+            disease_key="liver", result=result, inputs=inputs
+        )
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Liver disease prediction failed: {str(e)}")
 
 @app.post("/api/predict/eye")
 async def predict_eye(file: UploadFile = File(...)):

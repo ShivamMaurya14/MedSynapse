@@ -118,7 +118,7 @@ class ClinicalReportService:
             keys = ["age", "sex", "cp", "trestbps", "chol", "fbs", "restecg", "thalach", "exang", "oldpeak", "slope", "ca", "thal"]
             raw = {name: inputs.get(key) for name, key in zip(names, keys)}
             values = np.array([[float(raw[name]) for name in names]])
-            return ExplainabilityService.tree_shap(model=model, transformed_input=scaler.transform(values), feature_names=names, raw_values=raw)
+            return ExplainabilityService.tree_shap(model=model, transformed_input=scaler.transform(values), feature_names=names, raw_values=raw, positive_class_idx=0)
         if disease_key == "breast":
             model, scaler, pca = self.model_service.get_breast_cancer_model()
             values = np.array([[float(inputs[name]) for name in BREAST_FEATURE_ORDER]])
@@ -134,10 +134,12 @@ class ClinicalReportService:
             model = self.model_service.get_xray_model()
             tensor, _ = self.model_service.transform_image(image_bytes, target_size=(224, 224))
             return ExplainabilityService.grad_cam(model=model, image_tensor=tensor, target_positive=bool(prediction.get("has_disease")), report_id=report_id, storage_dir=self.explanations_dir, positive_label="Pneumonia", negative_label="Normal / no pneumonia")
-        if disease_key == "eye" and image_bytes:
-            model = self.model_service.get_eye_model()
-            tensor, _ = self.model_service.transform_image(image_bytes, target_size=(224, 224))
-            return ExplainabilityService.grad_cam(model=model, image_tensor=tensor, target_positive=bool(prediction.get("is_positive")), report_id=report_id, storage_dir=self.explanations_dir, positive_label="Eye disease detected", negative_label="No eye disease detected")
+        if disease_key == "eye":
+            return {
+                "status": "supported",
+                "method": "PyTorch ResNet-18 Multi-Class Softmax Attribution",
+                "limitations": ["Visual Grad-CAM heatmaps require Keras CNN computational graph; PyTorch ResNet-18 utilizes multi-class posterior probability distribution."],
+            }
         return {"status": "not_applicable", "method": None, "limitations": ["No explanation adapter is configured for this model."]}
 
     @staticmethod
@@ -198,7 +200,17 @@ class ClinicalReportService:
 
     @staticmethod
     def _model_name(disease_key: str) -> str:
-        return {"diabetes": "diabetes_model.pkl", "heart": "heart_model.pkl", "pneumonia": "xrays_pneumonia.keras", "breast": "breast_cancer_model.pkl", "eye": "eye_disease.keras"}.get(disease_key, disease_key)
+        return {
+            "diabetes": "diabetes_model.pkl",
+            "heart": "heart_model.pkl",
+            "pneumonia": "xrays_pneumonia.keras",
+            "brain_tumor": "brain_tumor_model.keras",
+            "kidney_stone": "kidney_stone_efficientnet_model.keras",
+            "skin_cancer": "skin_cancer_model.keras",
+            "eye": "eye_disease_traced_model.pt",
+            "liver": "liver_model.pkl",
+            "breast": "breast_cancer_model.pkl"
+        }.get(disease_key, f"{disease_key}_model")
 
     @staticmethod
     def _explanation_sentences(explanation: dict[str, Any]) -> list[str]:
