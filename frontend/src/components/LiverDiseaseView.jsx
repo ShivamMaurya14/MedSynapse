@@ -96,10 +96,31 @@ export default function LiverDiseaseView({ setTab, initialData }) {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const applyPreset = (preset) => {
+  const applyPreset = async (preset) => {
     setFormData(preset.values);
     setError(null);
     setResult(null);
+    setLoading(true);
+    try {
+      const payload = {
+        ...preset.values,
+        age: Number(preset.values.age),
+        total_bilirubin: Number(preset.values.total_bilirubin),
+        direct_bilirubin: Number(preset.values.direct_bilirubin),
+        alkaline_phosphotase: Number(preset.values.alkaline_phosphotase),
+        alamine_aminotransferase: Number(preset.values.alamine_aminotransferase),
+        aspartate_aminotransferase: Number(preset.values.aspartate_aminotransferase),
+        total_protiens: Number(preset.values.total_protiens),
+        albumin: Number(preset.values.albumin),
+        ag_ratio: Number(preset.values.ag_ratio)
+      };
+      const res = await predictLiverDisease(payload);
+      setResult(res);
+    } catch (err) {
+      setError(err.message || 'Liver profile evaluation failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e) => {

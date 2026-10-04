@@ -38,10 +38,19 @@ export default function BreastCancerView({ setTab, initialData }) {
     if (initialData) setFeatures(Object.fromEntries(FEATURES.map(name => [name, initialData[name] ?? ''])));
   }, [initialData]);
 
-  const loadPreset = (presetData) => {
+  const loadPreset = async (presetData) => {
     setFeatures(Object.fromEntries(FEATURES.map(name => [name, presetData[name] ?? ''])));
     setError(null);
     setResult(null);
+    setLoading(true);
+    try {
+      const response = await predictBreastCancer(Object.fromEntries(FEATURES.map(name => [name, Number(presetData[name])])));
+      setResult(response);
+    } catch (err) {
+      setError(err.message || 'Breast-cancer prediction failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const submit = async event => {

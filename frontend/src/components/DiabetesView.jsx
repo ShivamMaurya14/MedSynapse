@@ -32,8 +32,19 @@ export default function DiabetesView({ initialData, extractedHighlights, setTab 
     setFormData(prev => ({ ...prev, [field]: parseFloat(val) || 0 }));
   };
 
-  const handleApplyPreset = (preset) => {
+  const handleApplyPreset = async (preset) => {
     setFormData(preset);
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    try {
+      const res = await predictDiabetes(preset);
+      setResult(res);
+    } catch (err) {
+      setError(err.message || 'Diabetes prediction failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePredict = async (e) => {
