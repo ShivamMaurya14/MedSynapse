@@ -5,32 +5,44 @@ import DiagnosticResultCard from './DiagnosticResultCard';
 
 const EYE_DEMOS = [
   {
-    id: 'dr',
-    title: 'Diabetic Retinopathy (DR)',
-    type: 'Diabetic Retinopathy',
-    desc: 'Microaneurysms, dot-and-blot retinal hemorrhages, and yellowish hard exudates near the macula.',
-    color: '#b91c1c'
+    id: 'cataract',
+    title: 'Cataract (Lens Opacity)',
+    type: 'Cataracts',
+    image: '/test_samples/eye_cataract.jpeg',
+    desc: 'Verified Ocular dataset: Nuclear/cortical lens opacity with media haziness.',
+    color: '#0284c7'
   },
   {
     id: 'glaucoma',
     title: 'Glaucoma (Optic Neuropathy)',
     type: 'Glaucoma',
-    desc: 'Increased cup-to-disc ratio (> 0.65) with neuroretinal rim thinning and vascular nasalization.',
+    image: '/test_samples/eye_glaucoma.jpeg',
+    desc: 'Verified Ocular dataset: Pathological optic cup cupping and neuroretinal margin thinning.',
     color: '#d97706'
   },
   {
-    id: 'cataract',
-    title: 'Cataract (Lens Opacity)',
-    type: 'Cataract',
-    desc: 'Generalized optical media haziness and decreased fundus clarity due to crystalline lens opacification.',
-    color: '#475569'
+    id: 'bulging',
+    title: 'Bulging Eyes (Proptosis)',
+    type: 'Bulging Eyes',
+    image: '/test_samples/eye_bulging.jpeg',
+    desc: 'Verified Ocular dataset: Anterior globe displacement and exophthalmos pattern.',
+    color: '#b91c1c'
   },
   {
-    id: 'normal',
-    title: 'Normal Retinal Fundus (Control)',
-    type: 'Normal / Healthy Retina',
-    desc: 'Sharp optic disc margins, normal cup-to-disc ratio (0.3), and patent retinal arterioles and venules.',
-    color: '#15803d'
+    id: 'crossed',
+    title: 'Crossed Eyes (Strabismus)',
+    type: 'Crossed Eyes',
+    image: '/test_samples/eye_crossed.jpeg',
+    desc: 'Verified Ocular dataset: Extraocular muscle misalignment and convergent axis deviation.',
+    color: '#7c3aed'
+  },
+  {
+    id: 'uveitis',
+    title: 'Uveitis (Intraocular Inflammation)',
+    type: 'Uveitis',
+    image: '/test_samples/eye_uveitis.jpeg',
+    desc: 'Verified Ocular dataset: Ciliary flush, anterior chamber reaction, and uveal inflammation.',
+    color: '#c2410c'
   }
 ];
 
@@ -53,69 +65,26 @@ export default function EyeDiseaseView({ setTab }) {
     setError(null);
   };
 
-  const handleSelectDemo = (demo) => {
+  const handleSelectDemo = async (demo) => {
     setSelectedDemo(demo);
     setError(null);
     setResult(null);
+    setLoading(true);
+    try {
+      const res = await fetch(demo.image);
+      if (!res.ok) throw new Error(`HTTP ${res.status} loading ${demo.image}`);
+      const blob = await res.blob();
+      const sampleFile = new File([blob], `${demo.id}_dataset_eye.jpeg`, { type: 'image/jpeg' });
+      setPreview(demo.image);
+      setFile(sampleFile);
 
-    const canvas = document.createElement('canvas');
-    canvas.width = 224;
-    canvas.height = 224;
-    const ctx = canvas.getContext('2d');
-
-    // Fundus background
-    ctx.fillStyle = '#100a08';
-    ctx.fillRect(0, 0, 224, 224);
-
-    // Retinal orange disc
-    ctx.fillStyle = '#b84a1e';
-    ctx.beginPath();
-    ctx.arc(112, 112, 95, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Optic disc (yellowish-pink circle)
-    ctx.fillStyle = '#f6c382';
-    ctx.beginPath();
-    ctx.arc(75, 112, demo.type === 'Glaucoma' ? 24 : 16, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Optic cup
-    ctx.fillStyle = '#ffeed0';
-    ctx.beginPath();
-    ctx.arc(75, 112, demo.type === 'Glaucoma' ? 18 : 8, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Retinal vessels
-    ctx.strokeStyle = '#6e180c';
-    ctx.lineWidth = 2.5;
-    ctx.beginPath();
-    ctx.moveTo(75, 112); ctx.quadraticCurveTo(110, 70, 160, 50);
-    ctx.moveTo(75, 112); ctx.quadraticCurveTo(110, 150, 160, 170);
-    ctx.stroke();
-
-    // Disease pathology signs
-    if (demo.type === 'Diabetic Retinopathy') {
-      ctx.fillStyle = '#780000';
-      ctx.beginPath();
-      ctx.arc(135, 95, 3, 0, Math.PI * 2);
-      ctx.arc(145, 120, 2.5, 0, Math.PI * 2);
-      ctx.arc(125, 140, 3.5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#fff4a3';
-      ctx.beginPath();
-      ctx.arc(150, 105, 3, 0, Math.PI * 2);
-      ctx.arc(155, 115, 2, 0, Math.PI * 2);
-      ctx.fill();
-    } else if (demo.type === 'Cataract') {
-      ctx.fillStyle = 'rgba(230, 230, 240, 0.45)';
-      ctx.beginPath();
-      ctx.arc(112, 112, 95, 0, Math.PI * 2);
-      ctx.fill();
+      const analysisRes = await predictEye(sampleFile);
+      setResult(analysisRes);
+    } catch (err) {
+      setError('Ophthalmic evaluation failed: ' + (err.message || err));
+    } finally {
+      setLoading(false);
     }
-
-    const dataUrl = canvas.toDataURL('image/png');
-    setPreview(dataUrl);
-    setFile(new File([dataUrl], `${demo.id}_fundus.png`, { type: 'image/png' }));
   };
 
   const runAnalysis = async () => {
@@ -127,21 +96,6 @@ export default function EyeDiseaseView({ setTab }) {
     setError(null);
     try {
       const res = await predictEye(file);
-      if (selectedDemo) {
-        const isHealthy = selectedDemo.type.includes('Normal');
-        res.data.prediction = selectedDemo.type;
-        res.data.diagnosis = selectedDemo.type;
-        res.data.has_disease = !isHealthy;
-        res.data.risk_tier = isHealthy ? 'Low Risk' : 'High Risk';
-        res.data.risk_probability = isHealthy ? 0.048 : 0.935;
-        res.data.risk_percentage = isHealthy ? '4.8' : '93.5';
-        res.data.description = selectedDemo.desc;
-        if (res.clinical_report?.screening) {
-          res.clinical_report.screening.prediction = selectedDemo.type;
-          res.clinical_report.screening.probability = isHealthy ? 0.048 : 0.935;
-          res.clinical_report.screening.risk_tier = isHealthy ? 'Low Risk' : 'High Risk';
-        }
-      }
       setResult(res);
     } catch (err) {
       setError(err.message || 'Retinal fundus analysis failed');

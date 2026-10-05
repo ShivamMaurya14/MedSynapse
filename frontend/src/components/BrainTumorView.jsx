@@ -8,28 +8,32 @@ const DEMO_CASES = [
     id: 'glioma',
     title: 'Glioma MRI (Intra-Axial)',
     type: 'Glioma',
-    description: 'Left frontal lobe infiltrative hyperintense mass with perilesional edema.',
+    image: '/test_samples/brain_glioma.jpg',
+    description: 'Verified Nickparvar dataset: Left frontal lobe infiltrative hyperintense mass.',
     color: '#8b5cf6'
   },
   {
     id: 'meningioma',
     title: 'Meningioma MRI (Dural Tail)',
     type: 'Meningioma',
-    description: 'Extra-axial parasagittal dural-based enhancing mass lesion.',
+    image: '/test_samples/brain_meningioma.jpg',
+    description: 'Verified Nickparvar dataset: Extra-axial parasagittal dural-based enhancing mass.',
     color: '#ec4899'
   },
   {
     id: 'pituitary',
     title: 'Pituitary Adenoma MRI',
     type: 'Pituitary Adenoma',
-    description: 'Sellar/suprasellar mass with optic chiasm abutment.',
+    image: '/test_samples/brain_pituitary.jpg',
+    description: 'Verified Nickparvar dataset: Sellar/suprasellar mass lesion.',
     color: '#f59e0b'
   },
   {
     id: 'healthy',
     title: 'Normal Cranial MRI (Control)',
     type: 'No Tumor',
-    description: 'Symmetrical cerebral parenchyma without focal mass lesion or midline shift.',
+    image: '/test_samples/brain_notumor.jpg',
+    description: 'Verified Nickparvar dataset: Unremarkable cerebral parenchyma without focal mass lesion.',
     color: '#10b981'
   }
 ];
@@ -53,55 +57,26 @@ export default function BrainTumorView({ setTab }) {
     setError(null);
   };
 
-  const handleSelectDemo = (demo) => {
+  const handleSelectDemo = async (demo) => {
     setSelectedDemo(demo);
     setError(null);
     setResult(null);
-    const canvas = document.createElement('canvas');
-    canvas.width = 299;
-    canvas.height = 299;
-    const ctx = canvas.getContext('2d');
-    
-    ctx.fillStyle = '#050505';
-    ctx.fillRect(0, 0, 299, 299);
-    
-    ctx.fillStyle = '#222226';
-    ctx.beginPath();
-    ctx.ellipse(150, 150, 110, 130, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillStyle = '#0a0a0d';
-    ctx.beginPath();
-    ctx.ellipse(135, 140, 12, 35, -0.15, 0, Math.PI * 2);
-    ctx.ellipse(165, 140, 12, 35, 0.15, 0, Math.PI * 2);
-    ctx.fill();
-
-    if (demo.type !== 'No Tumor') {
-      const gradient = ctx.createRadialGradient(
-        demo.type === 'Glioma' ? 115 : demo.type === 'Meningioma' ? 190 : 150,
-        demo.type === 'Glioma' ? 120 : demo.type === 'Meningioma' ? 95 : 180,
-        5,
-        demo.type === 'Glioma' ? 115 : demo.type === 'Meningioma' ? 190 : 150,
-        demo.type === 'Glioma' ? 120 : demo.type === 'Meningioma' ? 95 : 180,
-        28
-      );
-      gradient.addColorStop(0, '#ffffff');
-      gradient.addColorStop(0.5, '#cccccc');
-      gradient.addColorStop(1, 'rgba(120, 120, 130, 0)');
-
-      ctx.fillStyle = gradient;
-      ctx.beginPath();
-      ctx.arc(
-        demo.type === 'Glioma' ? 115 : demo.type === 'Meningioma' ? 190 : 150,
-        demo.type === 'Glioma' ? 120 : demo.type === 'Meningioma' ? 95 : 180,
-        28, 0, Math.PI * 2
-      );
-      ctx.fill();
+    setLoading(true);
+    try {
+      const res = await fetch(demo.image);
+      if (!res.ok) throw new Error(`HTTP ${res.status} loading ${demo.image}`);
+      const blob = await res.blob();
+      const sampleFile = new File([blob], `${demo.id}_dataset_mri.jpg`, { type: 'image/jpeg' });
+      setPreview(demo.image);
+      setFile(sampleFile);
+      
+      const analysisRes = await predictBrainTumor(sampleFile);
+      setResult(analysisRes);
+    } catch (err) {
+      setError('Brain tumor analysis failed: ' + (err.message || err));
+    } finally {
+      setLoading(false);
     }
-
-    const dataUrl = canvas.toDataURL('image/png');
-    setPreview(dataUrl);
-    setFile(new File([dataUrl], `${demo.id}_mri_scan.png`, { type: 'image/png' }));
   };
 
   const runAnalysis = async () => {
@@ -113,20 +88,6 @@ export default function BrainTumorView({ setTab }) {
     setError(null);
     try {
       const res = await predictBrainTumor(file);
-      if (selectedDemo) {
-        res.data.prediction = selectedDemo.type;
-        res.data.diagnosis = selectedDemo.type;
-        res.data.has_disease = selectedDemo.type !== 'No Tumor';
-        res.data.risk_tier = selectedDemo.type === 'No Tumor' ? 'Low Risk' : 'High Risk';
-        res.data.risk_probability = selectedDemo.type === 'No Tumor' ? 0.045 : 0.948;
-        res.data.risk_percentage = selectedDemo.type === 'No Tumor' ? '4.5' : '94.8';
-        res.data.description = selectedDemo.description;
-        if (res.clinical_report?.screening) {
-          res.clinical_report.screening.prediction = selectedDemo.type;
-          res.clinical_report.screening.probability = selectedDemo.type === 'No Tumor' ? 0.045 : 0.948;
-          res.clinical_report.screening.risk_tier = selectedDemo.type === 'No Tumor' ? 'Low Risk' : 'High Risk';
-        }
-      }
       setResult(res);
     } catch (err) {
       setError(err.message || 'Brain tumor analysis failed');

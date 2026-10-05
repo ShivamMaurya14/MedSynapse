@@ -25,59 +25,31 @@ export default function XRayView() {
     setError(null);
     setLoading(true);
     try {
-      // Create a sample canvas radiograph blob
-      const canvas = document.createElement('canvas');
-      canvas.width = 300;
-      canvas.height = 300;
-      const ctx = canvas.getContext('2d');
+      const imgPath = sampleType === 'pneumonia' 
+        ? '/test_samples/xray_pneumonia.jpeg' 
+        : '/test_samples/xray_normal.jpeg';
+      
+      const response = await fetch(imgPath);
+      if (!response.ok) throw new Error(`HTTP ${response.status} loading ${imgPath}`);
+      const blob = await response.blob();
+      const sampleFile = new File([blob], `dataset_${sampleType}_chest_xray.jpeg`, { type: 'image/jpeg' });
+      
+      setFile(sampleFile);
+      setPreview(imgPath);
 
-      // Background
-      ctx.fillStyle = '#0f172a';
-      ctx.fillRect(0, 0, 300, 300);
-
-      // Ribs & Lung fields
-      ctx.fillStyle = sampleType === 'pneumonia' ? '#475569' : '#1e293b';
-      ctx.beginPath();
-      ctx.ellipse(90, 150, 45, 90, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.beginPath();
-      ctx.ellipse(210, 150, 45, 90, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Opacity infiltrate if pneumonia
-      if (sampleType === 'pneumonia') {
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-        ctx.beginPath();
-        ctx.arc(200, 170, 35, 0, Math.PI * 2);
-        ctx.fill();
+      try {
+        const res = await predictXRay(sampleFile);
+        setResult(res);
+        setTimeout(() => {
+          resultRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 150);
+      } catch (err) {
+        setError(err.message || 'X-Ray analysis failed');
+      } finally {
+        setLoading(false);
       }
-
-      // Spine & sternum
-      ctx.fillStyle = '#64748b';
-      ctx.fillRect(140, 30, 20, 240);
-
-      canvas.toBlob(async (blob) => {
-        const sampleFile = new File([blob], `sample_${sampleType}_xray.png`, { type: 'image/png' });
-        setFile(sampleFile);
-        setPreview(URL.createObjectURL(sampleFile));
-
-        // Auto predict
-        try {
-          const res = await predictXRay(sampleFile);
-          setResult(res);
-          setTimeout(() => {
-            resultRef.current?.scrollIntoView({ behavior: 'smooth' });
-          }, 150);
-        } catch (err) {
-          setError(err.message || 'X-Ray analysis failed');
-        } finally {
-          setLoading(false);
-        }
-      }, 'image/png');
-
     } catch (err) {
-      setError('Could not generate sample: ' + err.message);
+      setError('Could not load actual dataset sample: ' + err.message);
       setLoading(false);
     }
   };

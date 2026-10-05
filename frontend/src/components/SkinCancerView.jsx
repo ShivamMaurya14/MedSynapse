@@ -10,7 +10,8 @@ const SKIN_DEMOS = [
     type: 'Melanoma',
     tier: 'High Risk',
     malignant: true,
-    desc: 'Asymmetric pigmented macule with irregular notched borders and blue-white veil.',
+    image: '/test_samples/skin_melanoma.jpg',
+    desc: 'Verified HAM10000 dataset: Pigmented macule with irregular notched borders.',
     color: '#b91c1c'
   },
   {
@@ -19,7 +20,8 @@ const SKIN_DEMOS = [
     type: 'Basal Cell Carcinoma',
     tier: 'High Risk',
     malignant: true,
-    desc: 'Translucent pearly papule with prominent branching arborizing telangiectasias.',
+    image: '/test_samples/skin_basal_cell_carcinoma.jpg',
+    desc: 'Verified HAM10000 dataset: Translucent papule with arborizing telangiectasias.',
     color: '#c2410c'
   },
   {
@@ -27,17 +29,19 @@ const SKIN_DEMOS = [
     title: 'Actinic Keratoses / Bowen Disease',
     type: 'Actinic Keratoses',
     tier: 'Moderate Risk',
-    malignant: true,
-    desc: 'Erythematous scaly plaque with prominent follicular plugging (pre-cancerous).',
+    malignant: false,
+    image: '/test_samples/skin_actinic_keratosis.jpg',
+    desc: 'Verified HAM10000 dataset: Erythematous scaly plaque with follicular plugging.',
     color: '#d97706'
   },
   {
     id: 'nv',
     title: 'Benign Melanocytic Nevus',
-    type: 'Melanocytic Nevus (Benign Mole)',
+    type: 'Melanocytic Nevus',
     tier: 'Low Risk',
     malignant: false,
-    desc: 'Symmetric homogeneous reticular pigment network without atypical streaks or globules.',
+    image: '/test_samples/skin_nevus.jpg',
+    desc: 'Verified HAM10000 dataset: Symmetric homogeneous reticular pigment network.',
     color: '#15803d'
   }
 ];
@@ -61,56 +65,26 @@ export default function SkinCancerView({ setTab }) {
     setError(null);
   };
 
-  const handleSelectDemo = (demo) => {
+  const handleSelectDemo = async (demo) => {
     setSelectedDemo(demo);
     setError(null);
     setResult(null);
+    setLoading(true);
+    try {
+      const res = await fetch(demo.image);
+      if (!res.ok) throw new Error(`HTTP ${res.status} loading ${demo.image}`);
+      const blob = await res.blob();
+      const sampleFile = new File([blob], `${demo.id}_dataset_dermoscopy.jpg`, { type: 'image/jpeg' });
+      setPreview(demo.image);
+      setFile(sampleFile);
 
-    const canvas = document.createElement('canvas');
-    canvas.width = 120;
-    canvas.height = 120;
-    const ctx = canvas.getContext('2d');
-
-    // Skin tone background
-    ctx.fillStyle = '#e8cbb6';
-    ctx.fillRect(0, 0, 120, 120);
-
-    // Draw dermatoscopic lesion
-    if (demo.id === 'mel') {
-      ctx.fillStyle = '#261710';
-      ctx.beginPath();
-      ctx.ellipse(60, 60, 32, 22, 0.4, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#4a2818';
-      ctx.beginPath();
-      ctx.ellipse(55, 58, 20, 15, 0.2, 0, Math.PI * 2);
-      ctx.fill();
-    } else if (demo.id === 'bcc') {
-      ctx.fillStyle = '#d48074';
-      ctx.beginPath();
-      ctx.arc(60, 60, 24, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#8f1e1e';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(50, 60); ctx.lineTo(70, 60);
-      ctx.moveTo(60, 50); ctx.lineTo(60, 70);
-      ctx.stroke();
-    } else if (demo.id === 'akiec') {
-      ctx.fillStyle = '#cf6555';
-      ctx.beginPath();
-      ctx.arc(60, 60, 22, 0, Math.PI * 2);
-      ctx.fill();
-    } else {
-      ctx.fillStyle = '#543622';
-      ctx.beginPath();
-      ctx.arc(60, 60, 20, 0, Math.PI * 2);
-      ctx.fill();
+      const analysisRes = await predictSkinCancer(sampleFile);
+      setResult(analysisRes);
+    } catch (err) {
+      setError('Dermoscopic evaluation failed: ' + (err.message || err));
+    } finally {
+      setLoading(false);
     }
-
-    const dataUrl = canvas.toDataURL('image/png');
-    setPreview(dataUrl);
-    setFile(new File([dataUrl], `${demo.id}_dermoscopy.png`, { type: 'image/png' }));
   };
 
   const runAnalysis = async () => {
@@ -122,20 +96,6 @@ export default function SkinCancerView({ setTab }) {
     setError(null);
     try {
       const res = await predictSkinCancer(file);
-      if (selectedDemo) {
-        res.data.prediction = selectedDemo.type;
-        res.data.diagnosis = selectedDemo.type;
-        res.data.has_disease = selectedDemo.malignant;
-        res.data.risk_tier = selectedDemo.tier;
-        res.data.risk_probability = selectedDemo.malignant ? 0.942 : 0.058;
-        res.data.risk_percentage = selectedDemo.malignant ? '94.2' : '5.8';
-        res.data.description = selectedDemo.desc;
-        if (res.clinical_report?.screening) {
-          res.clinical_report.screening.prediction = selectedDemo.type;
-          res.clinical_report.screening.probability = selectedDemo.malignant ? 0.942 : 0.058;
-          res.clinical_report.screening.risk_tier = selectedDemo.tier;
-        }
-      }
       setResult(res);
     } catch (err) {
       setError(err.message || 'Dermoscopic lesion evaluation failed');

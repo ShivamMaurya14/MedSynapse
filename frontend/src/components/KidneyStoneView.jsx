@@ -7,29 +7,33 @@ const KIDNEY_DEMOS = [
   {
     id: 'stone',
     title: 'Renal Calculi (Kidney Stone)',
-    type: 'Stone (Nephrolithiasis)',
-    desc: 'Dense radio-opaque calculus within the renal pelvis with mild caliceal dilatation.',
+    type: 'Stone',
+    image: '/test_samples/kidney_stone.jpg',
+    desc: 'Verified CT-Kidney dataset: Calcified calculus within the renal collecting system.',
     color: '#e11d48'
   },
   {
     id: 'cyst',
     title: 'Cortical Renal Cyst',
-    type: 'Cyst (Renal Cortical Cyst)',
-    desc: 'Hypoattenuating fluid-filled cortical cyst with smooth imperceptible walls (< 15 HU).',
+    type: 'Cyst',
+    image: '/test_samples/kidney_cyst.jpg',
+    desc: 'Verified CT-Kidney dataset: Hypoattenuating fluid-filled cortical cyst.',
     color: '#0284c7'
   },
   {
     id: 'tumor',
     title: 'Renal Cell Neoplasm (Tumor)',
-    type: 'Tumor (Renal Neoplasm)',
-    desc: 'Heterogeneous soft-tissue renal parenchymal mass with internal vascular enhancement.',
+    type: 'Tumor',
+    image: '/test_samples/kidney_tumor.jpg',
+    desc: 'Verified CT-Kidney dataset: Heterogeneous solid renal parenchymal mass.',
     color: '#7c3aed'
   },
   {
     id: 'normal',
     title: 'Healthy Renal Parenchyma (Control)',
-    type: 'Normal (Healthy Control)',
-    desc: 'Normal bilateral kidney architecture without nephrolithiasis, cysts, or masses.',
+    type: 'Normal',
+    image: '/test_samples/kidney_normal.jpg',
+    desc: 'Verified CT-Kidney dataset: Normal bilateral renal parenchyma without lesions.',
     color: '#16a34a'
   }
 ];
@@ -53,53 +57,26 @@ export default function KidneyStoneView({ setTab }) {
     setError(null);
   };
 
-  const handleSelectDemo = (demo) => {
+  const handleSelectDemo = async (demo) => {
     setSelectedDemo(demo);
     setError(null);
     setResult(null);
+    setLoading(true);
+    try {
+      const res = await fetch(demo.image);
+      if (!res.ok) throw new Error(`HTTP ${res.status} loading ${demo.image}`);
+      const blob = await res.blob();
+      const sampleFile = new File([blob], `${demo.id}_dataset_ct.jpg`, { type: 'image/jpeg' });
+      setPreview(demo.image);
+      setFile(sampleFile);
 
-    const canvas = document.createElement('canvas');
-    canvas.width = 150;
-    canvas.height = 150;
-    const ctx = canvas.getContext('2d');
-
-    // CT scan canvas background
-    ctx.fillStyle = '#080808';
-    ctx.fillRect(0, 0, 150, 150);
-
-    // Draw kidney bean shape
-    ctx.fillStyle = '#26262b';
-    ctx.beginPath();
-    ctx.ellipse(75, 75, 45, 60, 0.2, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Renal pelvis
-    ctx.fillStyle = '#111114';
-    ctx.beginPath();
-    ctx.ellipse(70, 75, 15, 25, 0.2, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Anomaly representation
-    if (demo.type.includes('Stone')) {
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(68, 70, 6, 0, Math.PI * 2);
-      ctx.fill();
-    } else if (demo.type.includes('Cyst')) {
-      ctx.fillStyle = '#0f172a';
-      ctx.beginPath();
-      ctx.arc(95, 60, 14, 0, Math.PI * 2);
-      ctx.fill();
-    } else if (demo.type.includes('Tumor')) {
-      ctx.fillStyle = '#475569';
-      ctx.beginPath();
-      ctx.arc(90, 85, 18, 0, Math.PI * 2);
-      ctx.fill();
+      const analysisRes = await predictKidneyStone(sampleFile);
+      setResult(analysisRes);
+    } catch (err) {
+      setError('Failed to analyze renal CT scan: ' + (err.message || err));
+    } finally {
+      setLoading(false);
     }
-
-    const dataUrl = canvas.toDataURL('image/png');
-    setPreview(dataUrl);
-    setFile(new File([dataUrl], `${demo.id}_kidney_ct.png`, { type: 'image/png' }));
   };
 
   const runAnalysis = async () => {
@@ -111,21 +88,6 @@ export default function KidneyStoneView({ setTab }) {
     setError(null);
     try {
       const res = await predictKidneyStone(file);
-      if (selectedDemo) {
-        const isNormal = selectedDemo.type.includes('Normal');
-        res.data.prediction = selectedDemo.type;
-        res.data.diagnosis = selectedDemo.type;
-        res.data.has_disease = !isNormal;
-        res.data.risk_tier = isNormal ? 'Low Risk' : 'High Risk';
-        res.data.risk_probability = isNormal ? 0.035 : 0.962;
-        res.data.risk_percentage = isNormal ? '3.5' : '96.2';
-        res.data.description = selectedDemo.desc;
-        if (res.clinical_report?.screening) {
-          res.clinical_report.screening.prediction = selectedDemo.type;
-          res.clinical_report.screening.probability = isNormal ? 0.035 : 0.962;
-          res.clinical_report.screening.risk_tier = isNormal ? 'Low Risk' : 'High Risk';
-        }
-      }
       setResult(res);
     } catch (err) {
       setError(err.message || 'Renal CT analysis failed');
