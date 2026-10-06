@@ -43,7 +43,8 @@ const REPORT_MODULES = [
     description: 'Glucose, Insulin, BMI, Blood Pressure, Skin Thickness, Age.', 
     tag: 'Metabolic / ML',
     icon: Droplets,
-    color: '#b42318'
+    color: '#b42318',
+    tabId: 'diabetes'
   },
   { 
     id: 'heart', 
@@ -51,7 +52,8 @@ const REPORT_MODULES = [
     description: 'Resting BP, Serum Chol, Max HR, ST depression, Vessels.', 
     tag: 'Cardiology / ML',
     icon: Heart,
-    color: '#c81e1e'
+    color: '#c81e1e',
+    tabId: 'heart'
   },
   { 
     id: 'xray', 
@@ -79,7 +81,8 @@ const REPORT_MODULES = [
     description: '30 labelled WDBC fine-needle aspirate cytology features.', 
     tag: 'Oncology / ML',
     icon: Ribbon,
-    color: '#b83280'
+    color: '#b83280',
+    tabId: 'breast'
   },
   { 
     id: 'liver', 
@@ -87,7 +90,8 @@ const REPORT_MODULES = [
     description: 'Bilirubin, SGOT/AST, SGPT/ALT, AlkPhos, Albumin/Globulin.', 
     tag: 'Hepatology / ML',
     icon: Activity,
-    color: '#d97706'
+    color: '#d97706',
+    tabId: 'liver'
   },
   { 
     id: 'kidney-stone', 
@@ -442,9 +446,9 @@ export default function OCRScannerView({ onApplyParams, setTab }) {
                   </span>
                 </div>
 
-                {module.isVision && (
+                {module.tabId && (
                   <div style={{ marginTop: '8px', paddingTop: '6px', borderTop: '1px dashed #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.68rem', color: '#64748b' }}>Vision imaging</span>
+                    <span style={{ fontSize: '0.68rem', color: '#64748b' }}>{module.isVision ? 'Vision Imaging' : 'Direct Analysis'}</span>
                     {setTab && (
                       <button
                         type="button"
@@ -453,19 +457,21 @@ export default function OCRScannerView({ onApplyParams, setTab }) {
                           setTab(module.tabId);
                         }}
                         style={{
-                          fontSize: '0.68rem',
-                          color: '#0284c7',
+                          fontSize: '0.72rem',
+                          color: '#0f172a',
                           fontWeight: 700,
-                          background: 'transparent',
-                          border: 'none',
+                          backgroundColor: '#f1f5f9',
+                          border: '1px solid #cbd5e1',
+                          borderRadius: '5px',
                           cursor: 'pointer',
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '2px',
-                          padding: 0
+                          gap: '3px',
+                          padding: '3px 7px'
                         }}
                       >
-                        Direct Scan →
+                        <span>⚡ Direct Analysis & Presets</span>
+                        <ArrowRight size={11} />
                       </button>
                     )}
                   </div>
