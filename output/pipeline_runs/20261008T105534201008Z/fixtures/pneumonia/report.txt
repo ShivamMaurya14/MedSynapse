@@ -1,0 +1,5 @@
+CHEST IMAGING TEST REPORT
+Patient: Synthetic Test Patient
+Modality: Chest X-ray
+Attached image: pneumonia_input.png
+Synthetic image; no clinical ground truth.

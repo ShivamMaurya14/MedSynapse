@@ -1,0 +1,11 @@
+METABOLIC LABORATORY REPORT
+Patient: Synthetic Test Patient
+Age: 42 years
+Sex: Female
+Pregnancies: 2
+Fasting Blood Glucose: 168 mg/dL
+Blood Pressure: 142/90 mmHg
+Skin Thickness: 28 mm
+Fasting Insulin: 42.5 uIU/mL
+Body Mass Index: 33.4 kg/m2
+Diabetes Pedigree Function: 0.65

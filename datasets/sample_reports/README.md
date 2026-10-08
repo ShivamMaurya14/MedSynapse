@@ -13,7 +13,6 @@ This folder contains diverse dummy clinical reports and diagnostic scan files ac
 | **`03_healthy_annual_wellness`** | `.pdf`, `.png`, `.txt` | **Healthy Baseline / Executive Checkup** | 🩸 Diabetes / ❤️ Heart | Glucose: `84 mg/dL`, BP: `116/74`, Cholesterol: `165 mg/dL`, BMI: `21.4` |
 | **`04_prediabetic_borderline_report`** | `.pdf`, `.png`, `.txt` | **Prediabetic / Borderline Risk** | 🩸 Diabetes | Glucose: `114 mg/dL`, BP: `128/82`, Cholesterol: `218 mg/dL`, BMI: `27.6` |
 | **`05_sample_chest_xray.png`** | `.png` | **Chest Radiograph (X-Ray)** | 🩻 Pneumonia | Synthetic lung field radiograph scan |
-| **`06_sample_brain_mri.png`** | `.png` | **Cranial MRI Scan** | 🧠 Brain Tumor | Synthetic axial brain MRI slice |
 
 ---
 
@@ -32,4 +31,3 @@ This folder contains diverse dummy clinical reports and diagnostic scan files ac
 
 ### 3️⃣ Testing Medical Scans
 - Upload `05_sample_chest_xray.png` in the **Pneumonia X-Ray** tab.
-- Upload `06_sample_brain_mri.png` in the **Brain Tumor MRI** tab.

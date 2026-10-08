@@ -1,0 +1,103 @@
+{
+  "report_version": "1.0",
+  "report_id": "6868acb3-ee6c-4797-95b0-2fd92f9f99d0",
+  "generated_at": "2026-10-08T10:57:07.912140+00:00",
+  "screening": {
+    "disease": "Diabetes Mellitus",
+    "model_name": "diabetes_model.pkl",
+    "prediction": 0,
+    "probability": 0.0071,
+    "risk_tier": "Low Risk",
+    "decision_threshold": 0.5,
+    "input_source": "direct_submission",
+    "feature_extraction_id": null
+  },
+  "decision_trace": {
+    "input_validation": "passed",
+    "feature_source": "direct_submission",
+    "routing": {
+      "method": "explicit disease-model endpoint",
+      "selected_model": "diabetes_model.pkl",
+      "result": "routed"
+    },
+    "model_probability": 0.0071,
+    "decision_threshold": 0.5,
+    "threshold_result": "negative",
+    "model_decision": 0
+  },
+  "clinical_inputs": [
+    {
+      "name": "pregnancies",
+      "value": 0.0,
+      "source": "validated model input"
+    },
+    {
+      "name": "glucose",
+      "value": 84.0,
+      "source": "validated model input"
+    },
+    {
+      "name": "blood_pressure",
+      "value": 74.0,
+      "source": "validated model input"
+    },
+    {
+      "name": "skin_thickness",
+      "value": 18.0,
+      "source": "validated model input"
+    },
+    {
+      "name": "insulin",
+      "value": 8.4,
+      "source": "validated model input"
+    },
+    {
+      "name": "bmi",
+      "value": 21.4,
+      "source": "validated model input"
+    },
+    {
+      "name": "dpf",
+      "value": 0.22,
+      "source": "validated model input"
+    },
+    {
+      "name": "age",
+      "value": 29.0,
+      "source": "validated model input"
+    }
+  ],
+  "model_output": {
+    "disease": "Diabetes Mellitus",
+    "prediction": 0,
+    "has_disease": false,
+    "risk_probability": 0.0071,
+    "risk_percentage": 0.7,
+    "risk_tier": "Low Risk",
+    "contributing_factors": [
+      {
+        "factor": "Metabolic Profile",
+        "value": "Optimal",
+        "impact": "Parameters within standard baseline"
+      }
+    ],
+    "recommendations": [
+      "Maintain a balanced, nutrient-dense diet and stay physically active.",
+      "Undergo routine annual wellness and preventative metabolic screenings.",
+      "Keep body mass index (BMI) within the healthy range (18.5 - 24.9 kg/m\u00b2)."
+    ]
+  },
+  "explainability": {
+    "status": "unavailable",
+    "method": "SHAP PermutationExplainer (full diabetes voting ensemble)",
+    "reason": "Reference background data is missing: diabetes_background_scaled_9.npy. Export it during model training.",
+    "limitations": [
+      "No feature attribution was generated."
+    ]
+  },
+  "safety": {
+    "screening_only": true,
+    "requires_clinician_review": true,
+    "disclaimer": "This is an AI screening result, not a diagnosis or treatment recommendation."
+  }
+}

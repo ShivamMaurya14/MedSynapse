@@ -1,0 +1,104 @@
+{
+  "report_version": "1.0",
+  "report_id": "6eea668c-ae2b-4471-afb1-6ee46535c962",
+  "generated_at": "2026-10-08T10:57:09.932335+00:00",
+  "screening": {
+    "disease": "Pneumonia",
+    "model_name": "xrays_pneumonia.keras",
+    "prediction": 1,
+    "probability": 0.8446,
+    "risk_tier": "High Risk",
+    "decision_threshold": 0.5,
+    "input_source": "uploaded_image_persisted_local_database",
+    "feature_extraction_id": "d827ae64-4d5a-4a3e-8bc7-08c146aad296"
+  },
+  "decision_trace": {
+    "input_validation": "passed",
+    "feature_source": "uploaded_image_persisted_local_database",
+    "routing": {
+      "method": "explicit disease-model endpoint",
+      "selected_model": "xrays_pneumonia.keras",
+      "result": "routed"
+    },
+    "model_probability": 0.8446,
+    "decision_threshold": 0.5,
+    "threshold_result": "positive",
+    "model_decision": 1
+  },
+  "clinical_inputs": [
+    {
+      "name": "source_filename",
+      "value": "pneumonia_input.png",
+      "source": "validated model input"
+    }
+  ],
+  "model_output": {
+    "disease": "Pneumonia",
+    "prediction": 1,
+    "has_disease": true,
+    "risk_probability": 0.8446,
+    "risk_percentage": 84.5,
+    "risk_tier": "High Risk",
+    "contributing_factors": [
+      {
+        "factor": "Pneumonia probability",
+        "value": "84.5%",
+        "impact": "Positive radiographic classification"
+      }
+    ],
+    "modality": "Chest Radiography (X-Ray)",
+    "diagnosis": "Pneumonia",
+    "is_positive": true,
+    "pneumonia_probability": 0.8446,
+    "confidence_percentage": 84.5,
+    "severity": "Elevated Radiological Density",
+    "image_transformation": {
+      "original_dimensions": "400 \u00d7 400 px",
+      "original_mode": "RGB",
+      "transformed_shape": "224 \u00d7 224 \u00d7 3",
+      "normalization": "Float32 [0.0 - 1.0]"
+    },
+    "image_features": {
+      "feature_type": "normalized_chest_xray_pixel_tensor",
+      "feature_count": 150528,
+      "tensor_shape": [
+        1,
+        224,
+        224,
+        3
+      ],
+      "preprocessing": {
+        "original_dimensions": "400 \u00d7 400 px",
+        "original_mode": "RGB",
+        "transformed_shape": "224 \u00d7 224 \u00d7 3",
+        "normalization": "Float32 [0.0 - 1.0]"
+      },
+      "pixel_summary": {
+        "mean": 0.174893,
+        "standard_deviation": 0.137645,
+        "minimum": 0.058824,
+        "maximum": 0.509804
+      },
+      "note": "The CNN consumes all normalized pixels, not the summary statistics."
+    },
+    "recommendations": [
+      "Immediate medical evaluation by a pulmonologist or primary care physician.",
+      "Confirm clinical symptoms (fever, productive cough, shortness of breath, pleuritic chest pain).",
+      "Evaluate for antibiotic or antiviral treatment depending on clinical etiology.",
+      "Pulse oximetry monitoring for adequate oxygen saturation (> 94%)."
+    ]
+  },
+  "explainability": {
+    "status": "unavailable",
+    "method": "Grad-CAM",
+    "reason": "Grad-CAM computation failed: 'list' object has no attribute 'shape'",
+    "limitations": [
+      "No image explanation was generated."
+    ]
+  },
+  "safety": {
+    "screening_only": true,
+    "requires_clinician_review": true,
+    "disclaimer": "This is an AI screening result, not a diagnosis or treatment recommendation."
+  }
+}

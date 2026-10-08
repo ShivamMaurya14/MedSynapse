@@ -1,0 +1,16 @@
+CARDIOLOGY EVALUATION REPORT
+Patient: Synthetic Test Patient
+Age: 58 years
+Sex: Male
+Chest Pain: Typical Angina (Type 0)
+Resting Blood Pressure: 152/94 mmHg
+Total Cholesterol: 275 mg/dL
+Fasting Blood Glucose: 130 mg/dL
+FastingBloodSugar: 1
+Resting ECG: ST-T wave abnormality (1)
+Maximum Heart Rate: 122 bpm
+Exercise Induced Angina: Yes (1)
+ST Depression: 2.6 mm
+Slope: Flat (1)
+Major Vessels: 2
+Thalassemia: Reversible Defect (3)

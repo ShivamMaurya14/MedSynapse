@@ -1,0 +1,143 @@
+{
+  "report_version": "1.0",
+  "report_id": "864a61dd-ba18-4a45-a775-dbb6c9d3a774",
+  "generated_at": "2026-10-08T10:57:07.942129+00:00",
+  "screening": {
+    "disease": "Coronary Heart Disease",
+    "model_name": "heart_model.pkl",
+    "prediction": 0,
+    "probability": 0.0,
+    "risk_tier": "Low Risk",
+    "decision_threshold": 0.5,
+    "input_source": "direct_submission",
+    "feature_extraction_id": null
+  },
+  "decision_trace": {
+    "input_validation": "passed",
+    "feature_source": "direct_submission",
+    "routing": {
+      "method": "explicit disease-model endpoint",
+      "selected_model": "heart_model.pkl",
+      "result": "routed"
+    },
+    "model_probability": 0.0,
+    "decision_threshold": 0.5,
+    "threshold_result": "negative",
+    "model_decision": 0
+  },
+  "clinical_inputs": [
+    {
+      "name": "age",
+      "value": 58.0,
+      "source": "validated model input"
+    },
+    {
+      "name": "sex",
+      "value": 1,
+      "source": "validated model input"
+    },
+    {
+      "name": "cp",
+      "value": 0,
+      "source": "validated model input"
+    },
+    {
+      "name": "trestbps",
+      "value": 152.0,
+      "source": "validated model input"
+    },
+    {
+      "name": "chol",
+      "value": 275.0,
+      "source": "validated model input"
+    },
+    {
+      "name": "fbs",
+      "value": 1,
+      "source": "validated model input"
+    },
+    {
+      "name": "restecg",
+      "value": 1,
+      "source": "validated model input"
+    },
+    {
+      "name": "thalach",
+      "value": 122.0,
+      "source": "validated model input"
+    },
+    {
+      "name": "exang",
+      "value": 1,
+      "source": "validated model input"
+    },
+    {
+      "name": "oldpeak",
+      "value": 2.6,
+      "source": "validated model input"
+    },
+    {
+      "name": "slope",
+      "value": 1,
+      "source": "validated model input"
+    },
+    {
+      "name": "ca",
+      "value": 2,
+      "source": "validated model input"
+    },
+    {
+      "name": "thal",
+      "value": 3,
+      "source": "validated model input"
+    }
+  ],
+  "model_output": {
+    "disease": "Coronary Heart Disease",
+    "prediction": 0,
+    "has_disease": false,
+    "risk_probability": 0.0,
+    "risk_percentage": 0.0,
+    "risk_tier": "Low Risk",
+    "contributing_factors": [
+      {
+        "factor": "Serum Cholesterol",
+        "value": "275.0 mg/dL",
+        "impact": "High (Atherosclerosis risk)"
+      },
+      {
+        "factor": "Resting BP",
+        "value": "152.0 mm Hg",
+        "impact": "Stage 2 Hypertension"
+      },
+      {
+        "factor": "Exercise Induced Angina",
+        "value": "Present",
+        "impact": "Myocardial ischemia indicator"
+      },
+      {
+        "factor": "ST Depression (Oldpeak)",
+        "value": "2.6 mm",
+        "impact": "Significant ST depression"
+      }
+    ],
+    "recommendations": [
+      "Continue heart-healthy lifestyle with regular physical exercise.",
+      "Maintain optimal blood pressure (< 120/80 mm Hg) and cholesterol levels (< 200 mg/dL).",
+      "Schedule annual preventative cardiac checkups."
+    ]
+  },
+  "explainability": {
+    "status": "unavailable",
+    "method": "SHAP TreeExplainer",
+    "reason": "Install the optional 'shap' package to compute tabular explanations.",
+    "limitations": [
+      "No feature attribution was generated."
+    ]
+  },
+  "safety": {
+    "screening_only": true,
+    "requires_clinician_review": true,
+    "disclaimer": "This is an AI screening result, not a diagnosis or treatment recommendation."
+  }
+}
