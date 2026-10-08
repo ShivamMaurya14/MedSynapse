@@ -1,5 +1,0 @@
-OCULAR IMAGING TEST REPORT
-Patient: Synthetic Test Patient
-Modality: Ocular image
-Attached image: eye_input.png
-Synthetic image; no clinical ground truth.

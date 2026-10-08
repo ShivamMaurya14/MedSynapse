@@ -66,21 +66,3 @@ models/brain_tumor_model/*.keras
 
 # Logs
 *.log
-
-# Databases & local state
-*.db
-*.sqlite3
-data/*.db
-data/*.sqlite3
-
-# Local clinical feature store (contains sensitive extracted evidence)
-data/medsynapse.db
-data/medsynapse.db-*
-
-# Node / Frontend
-node_modules/
-frontend/node_modules/
-dist/
-frontend/dist/
-.vite/
-frontend/.vite/
