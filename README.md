@@ -8,9 +8,11 @@
     <img src="https://img.shields.io/badge/Architecture-LLM--Agent_Orchestration-8A2BE2?style=for-the-badge&logo=openai&logoColor=white" alt="Agentic LLM">
     <img src="https://img.shields.io/badge/Explainability-SHAP_+_LIME_+_Grad--CAM-ff4b4b?style=for-the-badge" alt="XAI">
     <img src="https://img.shields.io/badge/Modules-9_Disease_Backbone-00b4d8?style=for-the-badge" alt="9 Modules">
-    <img src="https://img.shields.io/badge/Frontend-React_+_Vite-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React">
-    <img src="https://img.shields.io/badge/Backend-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI">
     <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+    <img src="https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white" alt="PyTorch">
+    <img src="https://img.shields.io/badge/TensorFlow_Keras-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white" alt="TensorFlow">
+    <img src="https://img.shields.io/badge/scikit--learn-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white" alt="Scikit-Learn">
+    <img src="https://img.shields.io/badge/Jupyter-Notebooks-F37626?style=for-the-badge&logo=jupyter&logoColor=white" alt="Jupyter">
   </div>
 </div>
 
@@ -20,7 +22,7 @@
 
 Modern healthcare AI systems largely operate as isolated, single-disease classifiers that output raw, uncalibrated probability scores without clinically interpretable context. In real clinical workflows, patients rarely present with a single, neatly isolated concern, and clinicians require transparent evidence, counterfactual reasoning, and guideline alignment rather than black-box probabilities.
 
-**MedSynapse** introduces an **agentic, multi-modal diagnostic framework** unifying **nine disease-specific machine learning and deep learning modules**—spanning metabolic, cardiovascular, pulmonary, neuro-oncological, oncological, hepatic, renal, dermatological, and ophthalmic domains—under a single coordinating Large Language Model (LLM) agent and a real-time clinical screening portal.
+**MedSynapse** introduces an **agentic, multi-modal diagnostic framework** unifying **nine disease-specific machine learning and deep learning modules**—spanning metabolic, cardiovascular, pulmonary, neuro-oncological, oncological, hepatic, renal, dermatological, and ophthalmic domains—under a single coordinating Large Language Model (LLM) agent.
 
 The system ingests **multi-modal patient inputs** (clinical text, spoken audio, radiologic/photographic imaging, and lab reports), dynamically routes queries to the relevant disease backbones, and enriches predictions through a **fused multi-method explainability layer (SHAP, LIME, Grad-CAM, counterfactuals)**. The LLM agent synthesizes cross-module correlations (e.g., linking diabetic and renal risk signals), grounds findings in clinical guidelines, and generates a calibrated, confidence-aware clinical summary with quantified hallucination safeguards.
 
@@ -84,46 +86,17 @@ The system ingests **multi-modal patient inputs** (clinical text, spoken audio, 
 
 ---
 
-## ⚡ Active Web Application & Diagnostic Pipeline
+## 🔬 Core Contributions
 
-```mermaid
-flowchart LR
-    A[Patient report or manual input] --> B{Input type}
-    B -->|PDF or report image| C[Tesseract OCR and parameter extraction]
-    B -->|Clinical values| D[Schema validation]
-    B -->|Chest X-ray / MRI / Fundus| E[Image decoding, resize and normalization]
-    C --> D
-    D --> F[Diabetes or heart preprocessing]
-    F --> G[Scikit-learn model inference]
-    E --> H[Deep Learning model inference]
-    G --> I[Risk result and contributing factors]
-    H --> J[Diagnosis result and confidence]
-```
-
-### Technology Stack
-| Layer | Implementation |
-|---|---|
-| Frontend | React, Vite, Lucide React, Tailwind / Modern CSS |
-| API | FastAPI, Pydantic, Uvicorn |
-| OCR | Tesseract OCR 5, PyMuPDF |
-| Tabular ML | scikit-learn, XGBoost, LightGBM, NumPy, Pandas |
-| Image ML | TensorFlow / Keras 3, PyTorch, Torchvision, Pillow |
-| Local feature store | SQLite |
-| LLM Agent / Report | Groq Chat Completions & Ollama local Gemma models |
-
-### API Endpoints
-| Endpoint | Purpose |
-|---|---|
-| `GET /api/health` | Reports API and active model-artifact status |
-| `GET /api/sample-reports` | Returns sample clinical text reports |
-| `POST /api/ocr/parse-report` | Extracts clinical parameters from text, PDF, or image input |
-| `POST /api/predict/diabetes` | Runs diabetes risk prediction |
-| `POST /api/predict/diabetes/from-feature-store/{id}` | Runs diabetes prediction from stored validated features |
-| `POST /api/predict/heart` | Runs coronary heart disease risk prediction |
-| `POST /api/predict/xray` | Runs pneumonia screening on a chest X-ray |
-| `GET /api/model-runs/{id}` | Returns the persisted prediction, explanation, review, and final report |
-| `POST /api/model-runs/{id}/review` | Records clinician approval or rejection |
-| `POST /api/model-runs/{id}/final-report` | Calls Groq after clinician approval and persists the validated report |
+1. **Multi-Modal Input Ingestion**: Ingests free-text clinical complaints, spoken audio via Automatic Speech Recognition, high-resolution medical imaging, and digitized multi-format clinical lab reports.
+2. **9-Module Multi-Specialty Diagnostic Backbone**: Integrates nine validated machine learning and deep learning architectures covering metabolic, cardiovascular, oncological, hepatic, renal, dermatological, ophthalmic, and pulmonary conditions.
+3. **Fused Multi-Method Explainability (XAI)**: Replaces isolated single-method explanations with a fused evidence representation:
+   - **Tabular**: Kernel/Tree SHAP, LIME, Counterfactuals (DiCE), Anchor explanations, and SHAP interaction values.
+   - **Imaging**: Grad-CAM/Grad-CAM++, Integrated Gradients, DeepSHAP/GradientSHAP, and lesion localization.
+   - **Evidence Fusion**: Merges feature attributions, counterfactual changes, and SHAP-vs-LIME rank agreement into a unified structured JSON block before prompting the LLM.
+4. **LLM-as-Agent Orchestration**: Implements confidence-weighted autonomous routing and cross-module clinical reasoning (e.g., recognizing co-occurring diabetic, hypertensive, and renal distress).
+5. **Calibrated Uncertainty & Hallucination Mitigation**: Uses Expected Calibration Error (ECE), conformal prediction, and Monte Carlo dropout instead of raw softmax probabilities. Constrains the LLM to ground all findings strictly on structured evidence and retrieved clinical guidelines.
+6. **End-to-End Evaluation Framework**: Validates both model-level predictive accuracy (AUC-ROC, F1, calibration) and clinical report quality (factual consistency, clarity, hallucination rate, and clinician usefulness).
 
 ---
 
@@ -163,39 +136,100 @@ All nine modules are organized with standardized research notebooks located in [
 
 ---
 
-## 💻 Environment Setup & Running Locally
+## 💡 Fused Explainability (XAI) & Evidence Fusion
 
-### 1️⃣ Clone & Configure Environment
+A cornerstone contribution of MedSynapse is **Evidence Fusion for LLM Grounding**:
+
+1. **Dual-Method Agreement Analysis**: Both SHAP and LIME are evaluated simultaneously. The rank correlation between the top-$k$ SHAP features and LIME explanations is computed. High agreement signals high explanation fidelity to the LLM agent.
+2. **Actionable Counterfactuals**: For tabular predictions (e.g. diabetes or heart disease), counterfactual instances (generated via DiCE) determine the minimal clinical biomarker change (e.g., *"Reducing fasting glucose by 18 mg/dL and systolic BP by 12 mmHg transitions risk from High to Moderate"*).
+3. **Structured JSON Evidence Block**: Feature attributions, visual attention coordinates, counterfactual deltas, and uncertainty metrics are merged into a typed JSON schema passed directly to the LLM prompt. The LLM is strictly constrained to synthesize reports **only from this evidence block**, systematically eliminating hallucinations.
+
+---
+
+## 📂 Repository Structure
+
+The repository is structured to support both local development and cloud/Kaggle model training:
+
+```
+MedSynapse/
+├── README.md                     # Project documentation & clinical paper overview
+├── datasets/                     # Clinical training & benchmark datasets
+│   ├── brain tumor/              # Cranial MRI dataset (Glioma, Meningioma, Pituitary, No Tumor)
+│   ├── chest_xray/               # Pulmonary radiography dataset (Normal vs Pneumonia)
+│   └── sample_reports/           # Multi-modal clinical reports for OCR & evaluation
+├── docs/                         # Detailed clinical module documentation & empirical benchmark reports
+│   ├── README.md                 # Documentation portal & cross-module benchmark table
+│   ├── 01_diabetes_prediction.md
+│   ├── 02_heart_disease_prediction.md
+│   ├── 03_chest_xray_pneumonia_prediction.md
+│   ├── 04_brain_tumor_prediction.md
+│   ├── 05_breast_cancer_prediction.md
+│   ├── 06_liver_disease_prediction.md
+│   ├── 07_kidney_stone_prediction.md
+│   ├── 08_skin_cancer_prediction.md
+│   └── 09_eye_disease_prediction.md
+├── models/                       # Standardized 1-Click Production Artifact Bundles
+│   ├── brain_tumor_artifacts.zip # Xception MRI weights (.keras, .h5, classes.json)
+│   ├── breast_cancer_artifacts.zip # PCA + Logistic Regression ensemble (.pkl)
+│   ├── chest_xray_artifacts.zip  # Pulmonary CNN weights (.h5, .keras)
+│   ├── diabetes_artifacts.zip    # Glycemic soft-voting ensemble & scaler (.pkl)
+│   ├── eye_disease_artifacts.zip # PyTorch ResNet-18 weights (.pt, class_dict)
+│   ├── heart_artifacts.zip       # Cardiovascular model & scaler (.pkl)
+│   ├── kidney_stone_artifacts.zip# MobileNetV2 models (.keras, .h5)
+│   ├── liver_disease_artifacts.zip# Multi-model LFT estimators & scaler (.pkl)
+│   └── skin_cancer_artifacts.zip # 4-Block CNN dermoscopy weights (.keras, .h5)
+└── notebooks/                    # 9 standardized disease training & research notebooks
+    ├── Final_Brain_Tumor_Prediction.ipynb
+    ├── Final_Breast_Cancer_Prediction.ipynb
+    ├── Final_Chest_XRay_Prediction.ipynb
+    ├── Final_Diabetes_Prediction.ipynb
+    ├── Final_Eye_Disease_Prediction.ipynb
+    ├── Final_Heart_Disease_Prediction.ipynb
+    ├── Final_Kidney_Stone_Prediction.ipynb
+    ├── Final_Liver_Disease_Prediction.ipynb
+    └── Final_Skin_Cancer_Prediction.ipynb
+```
+
+---
+
+## ⚡ Kaggle Cloud Training & 1-Click Artifact Downloads
+
+All nine notebooks in [`notebooks/`](notebooks) are configured to execute in Kaggle GPU/TPU environments. Each notebook includes an automated serialization and packaging cell at the end that:
+- **Serializes the Best Model**: Automatically saves the highest-accuracy checkpoint (in `.keras`, `.h5`, or `.pkl` format).
+- **Preserves Preprocessing Transformers**: Dumps fitted `StandardScaler`, `PCA` transformers, and label index mappings (`classes.json`).
+- **Packages into a ZIP Archive**: Bundles all generated weights and artifacts into a single `.zip` file for 1-click download.
+- **Renders Clickable Browser Links**: Uses `IPython.display.FileLink` to provide direct download links right inside the Kaggle notebook output.
+
+---
+
+## 💻 Environment Setup & Getting Started
+
+### 1️⃣ Prerequisites
+- Python 3.10+
+- (Optional) CUDA-compatible GPU for training vision models
+
+### 2️⃣ Clone Repository & Set Up Virtual Environment
 ```bash
+# Clone the repository
 git clone https://github.com/ShivamMaurya14/MedSynapse.git
 cd MedSynapse
 
+# Create and activate virtual environment
 python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
+
+# Install dependencies
+pip install torch torchvision tensorflow scikit-learn pandas numpy matplotlib seaborn plotly
 ```
 
-### 2️⃣ Configure Groq Final-Report Provider (Optional)
-Copy `.env.example` to `.env` and configure your credentials:
-```dotenv
-LLM_API_URL=https://api.groq.com/openai/v1/chat/completions
-LLM_API_KEY=your_groq_api_key
-LLM_MODEL=openai/gpt-oss-20b
-LLM_TIMEOUT_SECONDS=30
-```
-
-### 3️⃣ Run Application
+### 3️⃣ Running the Notebooks
+To explore, train, or evaluate any of the 9 disease prediction models:
 ```bash
-python run_app.py
+jupyter lab
+# Or:
+jupyter notebook
 ```
-The launcher serves the API and built frontend, normally at `http://localhost:8080`.
-
-For frontend development:
-```bash
-cd frontend
-npm install
-npm run dev
-```
+Navigate to [`notebooks/`](notebooks) and open any model notebook (e.g. `Final_Diabetes_Prediction.ipynb` or `Final_Brain_Tumor_Prediction.ipynb`).
 
 ---
 
@@ -219,4 +253,3 @@ npm run dev
   year={2026}
 }
 ```
-
