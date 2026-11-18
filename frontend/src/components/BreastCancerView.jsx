@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { FileText, Ribbon, Sparkles } from 'lucide-react';
 import { predictBreastCancer } from '../services/api';
 import DiagnosticResultCard from './DiagnosticResultCard';
-import DiabetesPipelineProgressModal from './DiabetesPipelineProgressModal';
-import useDiabetesPipelineProgress from '../hooks/useDiabetesPipelineProgress';
+import ClinicalPipelineProgressModal from './ClinicalPipelineProgressModal';
+import useClinicalPipelineProgress from '../hooks/useClinicalPipelineProgress';
 
 const BASE = ['radius', 'texture', 'perimeter', 'area', 'smoothness', 'compactness', 'concavity', 'concave_points', 'symmetry', 'fractal_dimension'];
 const FEATURES = ['mean', 'se', 'worst'].flatMap(metric => BASE.map(name => `${name}_${metric}`));
@@ -27,12 +27,12 @@ const BENIGN_SAMPLE = {
   compactness_worst: 0.1773, concavity_worst: 0.239, concave_points_worst: 0.1288, symmetry_worst: 0.2977, fractal_dimension_worst: 0.07259
 };
 
-export default function BreastCancerView({ setTab, initialData }) {
+export default function BreastCancerView({ setTab, initialData, onNavigateToLLMReport, onNavigateToDiagnosticReport }) {
   const [features, setFeatures] = useState(() => Object.fromEntries(FEATURES.map(name => [name, ''])));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
-  const pipelineProgress = useDiabetesPipelineProgress();
+  const pipelineProgress = useClinicalPipelineProgress();
 
   useEffect(() => {
     if (initialData) setFeatures(Object.fromEntries(FEATURES.map(name => [name, initialData[name] ?? ''])));
@@ -43,11 +43,26 @@ export default function BreastCancerView({ setTab, initialData }) {
     setError(null);
     setResult(null);
     setLoading(true);
+    pipelineProgress.start();
     try {
       const response = await predictBreastCancer(Object.fromEntries(FEATURES.map(name => [name, Number(presetData[name])])));
-      setResult(response);
+      pipelineProgress.transition('awaiting_review');
+      if (onNavigateToDiagnosticReport) {
+        onNavigateToDiagnosticReport({
+          result: response,
+          title: 'Breast Cancer WDBC FNA Assessment',
+          diseaseKey: 'breast',
+          sourceTab: 'breast',
+          inputs: presetData,
+          onWorkflowStageChange: pipelineProgress.handleWorkflowStageChange,
+        });
+      } else {
+        setResult(response);
+      }
     } catch (err) {
-      setError(err.message || 'Breast-cancer prediction failed');
+      const msg = err.message || 'Breast-cancer prediction failed';
+      setError(msg);
+      pipelineProgress.fail(msg, 'prediction');
     } finally {
       setLoading(false);
     }
@@ -61,8 +76,19 @@ export default function BreastCancerView({ setTab, initialData }) {
     pipelineProgress.start();
     try {
       const response = await predictBreastCancer(Object.fromEntries(FEATURES.map(name => [name, Number(features[name])])));
-      setResult(response);
       pipelineProgress.transition('awaiting_review');
+      if (onNavigateToDiagnosticReport) {
+        onNavigateToDiagnosticReport({
+          result: response,
+          title: 'Breast Cancer WDBC FNA Assessment',
+          diseaseKey: 'breast',
+          sourceTab: 'breast',
+          inputs: features,
+          onWorkflowStageChange: pipelineProgress.handleWorkflowStageChange,
+        });
+      } else {
+        setResult(response);
+      }
     } catch (err) {
       const message = err.message || 'Breast-cancer prediction failed';
       setError(message);
@@ -72,12 +98,25 @@ export default function BreastCancerView({ setTab, initialData }) {
   };
 
   return <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-    <DiabetesPipelineProgressModal
+    <ClinicalPipelineProgressModal
       isOpen={pipelineProgress.isOpen}
+      moduleName="BREAST CANCER (WDBC FNA)"
+      modality="tabular"
       stage={pipelineProgress.stage}
       error={pipelineProgress.error}
       failedAt={pipelineProgress.failedAt}
       onClose={pipelineProgress.close}
+      onDownloadMLReport={result ? () => window.print() : undefined}
+      onGenerateLLMReport={result && onNavigateToLLMReport ? () => {
+        pipelineProgress.close();
+        onNavigateToLLMReport({
+          diseaseKey: 'breast',
+          prediction: result,
+          inputs: features,
+          clinicalReport: result?.clinical_report || null,
+          modelRunId: result?.model_run_id || null,
+        });
+      } : undefined}
     />
     <div>
       <span className="badge badge-purple"><Ribbon size={13} /> Module M5 • Oncology</span>
@@ -125,13 +164,52 @@ export default function BreastCancerView({ setTab, initialData }) {
       </button>
     </form>
     
-    {result && (
+    {result && (!onNavigateToDiagnosticReport ? (
       <DiagnosticResultCard
         result={result}
         title="Breast Cancer WDBC FNA Assessment"
+        diseaseKey="breast"
+        inputs={features}
         onWorkflowStageChange={pipelineProgress.handleWorkflowStageChange}
         onReset={() => { setResult(null); pipelineProgress.reset(); }}
+        onNavigateToLLMReport={onNavigateToLLMReport}
       />
-    )}
+    ) : (
+      <div style={{
+        padding: '1rem 1.25rem',
+        background: '#f0fdf4',
+        border: '1px solid #86efac',
+        borderRadius: '12px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '12px'
+      }}>
+        <div>
+          <div style={{ fontWeight: 700, color: '#15803d', fontSize: '0.92rem' }}>
+            Active Breast Cancer FNA Assessment Available
+          </div>
+          <div style={{ fontSize: '0.8rem', color: '#166534' }}>
+            Biomarker morphometric evaluation and SHAP analysis are open on the dedicated report route.
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => onNavigateToDiagnosticReport({
+            result,
+            title: 'Breast Cancer WDBC FNA Assessment',
+            diseaseKey: 'breast',
+            sourceTab: 'breast',
+            inputs: features,
+            onWorkflowStageChange: pipelineProgress.handleWorkflowStageChange,
+          })}
+          className="btn-primary"
+          style={{ padding: '6px 14px', fontSize: '0.82rem' }}
+        >
+          Open Dedicated Diagnostic Report →
+        </button>
+      </div>
+    ))}
   </div>;
 }

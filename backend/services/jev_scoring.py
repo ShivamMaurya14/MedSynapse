@@ -25,6 +25,12 @@ TABULAR_PROFILES: dict[str, tuple[str, ...]] = {
         "age", "sex", "cp", "trestbps", "chol", "fbs", "restecg",
         "thalach", "exang", "oldpeak", "slope", "ca", "thal",
     ),
+    "liver": (
+        "age", "sex", "total_bilirubin", "direct_bilirubin",
+        "alkaline_phosphotase", "alamine_aminotransferase",
+        "aspartate_aminotransferase", "total_protiens", "albumin",
+        "albumin_and_globulin_ratio",
+    ),
 }
 
 
@@ -95,6 +101,8 @@ def score_disease_suitability(
         scores.append(_score_profile("Diabetes Mellitus", TABULAR_PROFILES["diabetes"], parameters, source="OCR parameters"))
     if selected in {"all", "heart"}:
         scores.append(_score_profile("Coronary Heart Disease", TABULAR_PROFILES["heart"], parameters, source="OCR parameters"))
+    if selected in {"all", "liver"}:
+        scores.append(_score_profile("Liver Disease (ILPD)", TABULAR_PROFILES["liver"], parameters, source="OCR parameters"))
     if selected == "breast":
         # Gemma's validated WDBC objects carry their own status/confidence.
         scores.append(_score_profile("Breast Cancer", BREAST_FEATURE_ORDER, breast_features or {}, source="Gemma WDBC feature contract"))
@@ -110,10 +118,49 @@ def score_disease_suitability(
                 "confidence_percentage": 0.0,
                 "status": "image_required",
                 "available_features": [],
-                "missing_features": ["chest X-ray image"],
+                "missing_features": ["Chest X-ray image"],
                 "required_feature_count": 1,
                 "available_feature_count": 0,
                 "note": "Upload an X-ray; report OCR features cannot route an image model.",
+            },
+            {
+                "disease": "Brain Tumor",
+                "source": "Cranial MRI required",
+                "suitability_score": 0.0,
+                "suitability_percentage": 0.0,
+                "confidence_percentage": 0.0,
+                "status": "image_required",
+                "available_features": [],
+                "missing_features": ["Cranial MRI scan"],
+                "required_feature_count": 1,
+                "available_feature_count": 0,
+                "note": "Upload a brain MRI; report OCR features cannot route an image model.",
+            },
+            {
+                "disease": "Kidney Pathology",
+                "source": "Abdominal CT required",
+                "suitability_score": 0.0,
+                "suitability_percentage": 0.0,
+                "confidence_percentage": 0.0,
+                "status": "image_required",
+                "available_features": [],
+                "missing_features": ["Abdominal CT scan"],
+                "required_feature_count": 1,
+                "available_feature_count": 0,
+                "note": "Upload a renal CT scan; report OCR features cannot route an image model.",
+            },
+            {
+                "disease": "Skin Cancer",
+                "source": "Dermoscopic image required",
+                "suitability_score": 0.0,
+                "suitability_percentage": 0.0,
+                "confidence_percentage": 0.0,
+                "status": "image_required",
+                "available_features": [],
+                "missing_features": ["Dermoscopic photograph"],
+                "required_feature_count": 1,
+                "available_feature_count": 0,
+                "note": "Upload a skin lesion photo; report OCR features cannot route an image model.",
             },
             {
                 "disease": "Eye Disease",
@@ -123,7 +170,7 @@ def score_disease_suitability(
                 "confidence_percentage": 0.0,
                 "status": "image_required",
                 "available_features": [],
-                "missing_features": ["fundus or ocular image"],
+                "missing_features": ["Fundus or ocular image"],
                 "required_feature_count": 1,
                 "available_feature_count": 0,
                 "note": "Upload an ocular image; report OCR features cannot route an image model.",

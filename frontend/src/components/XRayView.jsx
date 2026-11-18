@@ -2,14 +2,17 @@ import React, { useState, useRef } from 'react';
 import { Scan, Upload, Play, RefreshCw, AlertCircle, CheckCircle, Image as ImageIcon, Sparkles, FileText } from 'lucide-react';
 import { predictXRay } from '../services/api';
 import DiagnosticResultCard from './DiagnosticResultCard';
+import ClinicalPipelineProgressModal from './ClinicalPipelineProgressModal';
+import useClinicalPipelineProgress from '../hooks/useClinicalPipelineProgress';
 
-export default function XRayView() {
+export default function XRayView({ setTab, onNavigateToLLMReport, onNavigateToDiagnosticReport }) {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
   const resultRef = useRef(null);
+  const pipelineProgress = useClinicalPipelineProgress();
 
   const handleFileChange = (e) => {
     const selected = e.target.files[0];
@@ -21,9 +24,25 @@ export default function XRayView() {
     }
   };
 
+  const handleDownloadMLReportFromModal = () => {
+    window.print();
+  };
+
+  const handleGenerateLLMReportFromModal = () => {
+    pipelineProgress.close();
+    onNavigateToLLMReport?.({
+      diseaseKey: 'xray',
+      prediction: result?.data || result || {},
+      inputs: { source_filename: file?.name || 'chest_xray.jpeg' },
+      clinicalReport: result?.clinical_report || null,
+      modelRunId: result?.model_run_id || null,
+    });
+  };
+
   const handleLoadSampleScan = async (sampleType) => {
     setError(null);
     setLoading(true);
+    pipelineProgress.start();
     try {
       const imgPath = sampleType === 'pneumonia' 
         ? '/test_samples/xray_pneumonia.jpeg' 
@@ -39,17 +58,33 @@ export default function XRayView() {
 
       try {
         const res = await predictXRay(sampleFile);
-        setResult(res);
-        setTimeout(() => {
-          resultRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }, 150);
+        pipelineProgress.transition('awaiting_review');
+        if (onNavigateToDiagnosticReport) {
+          onNavigateToDiagnosticReport({
+            result: res,
+            title: 'Chest Radiography Diagnostic Report',
+            diseaseKey: 'xray',
+            sourceTab: 'xray',
+            inputs: { source_filename: sampleFile.name, sample_type: sampleType },
+            onWorkflowStageChange: pipelineProgress.handleWorkflowStageChange,
+          });
+        } else {
+          setResult(res);
+          setTimeout(() => {
+            resultRef.current?.scrollIntoView({ behavior: 'smooth' });
+          }, 150);
+        }
       } catch (err) {
-        setError(err.message || 'X-Ray analysis failed');
+        const msg = err.message || 'X-Ray analysis failed';
+        setError(msg);
+        pipelineProgress.fail(msg, 'prediction');
       } finally {
         setLoading(false);
       }
     } catch (err) {
-      setError('Could not load actual dataset sample: ' + err.message);
+      const msg = 'Could not load actual dataset sample: ' + err.message;
+      setError(msg);
+      pipelineProgress.fail(msg, 'input');
       setLoading(false);
     }
   };
@@ -63,14 +98,30 @@ export default function XRayView() {
 
     setLoading(true);
     setError(null);
+    setResult(null);
+    pipelineProgress.start();
     try {
       const res = await predictXRay(file);
-      setResult(res);
-      setTimeout(() => {
-        resultRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, 150);
+      pipelineProgress.transition('awaiting_review');
+      if (onNavigateToDiagnosticReport) {
+        onNavigateToDiagnosticReport({
+          result: res,
+          title: 'Chest Radiography Diagnostic Report',
+          diseaseKey: 'xray',
+          sourceTab: 'xray',
+          inputs: { source_filename: file.name },
+          onWorkflowStageChange: pipelineProgress.handleWorkflowStageChange,
+        });
+      } else {
+        setResult(res);
+        setTimeout(() => {
+          resultRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 150);
+      }
     } catch (err) {
-      setError(err.message || 'X-Ray analysis failed');
+      const msg = err.message || 'X-Ray analysis failed';
+      setError(msg);
+      pipelineProgress.fail(msg, 'prediction');
     } finally {
       setLoading(false);
     }
@@ -78,6 +129,17 @@ export default function XRayView() {
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+      <ClinicalPipelineProgressModal
+        isOpen={pipelineProgress.isOpen}
+        moduleName="PNEUMONIA CHEST X-RAY ANALYZER"
+        modality="imaging"
+        stage={pipelineProgress.stage}
+        error={pipelineProgress.error}
+        failedAt={pipelineProgress.failedAt}
+        onClose={pipelineProgress.close}
+        onDownloadMLReport={handleDownloadMLReportFromModal}
+        onGenerateLLMReport={handleGenerateLLMReportFromModal}
+      />
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
@@ -242,13 +304,55 @@ export default function XRayView() {
 
       {/* Results Card */}
       <div ref={resultRef}>
-        {result && (
+        {result && (!onNavigateToDiagnosticReport ? (
           <DiagnosticResultCard
             result={result}
             title="Chest Radiography Diagnostic Report"
+            diseaseKey="xray"
+            inputs={{ source_filename: file?.name || 'chest_xray.jpeg' }}
             onReset={() => { setResult(null); setFile(null); setPreview(null); }}
+            onNavigateToLLMReport={onNavigateToLLMReport}
           />
-        )}
+        ) : (
+          <div style={{
+            padding: '1rem 1.25rem',
+            background: '#f0fdf4',
+            border: '1px solid #86efac',
+            borderRadius: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '12px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <CheckCircle size={20} color="#15803d" />
+              <div>
+                <div style={{ fontWeight: 700, color: '#15803d', fontSize: '0.92rem' }}>
+                  Active Chest Radiography Assessment Available
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#166534' }}>
+                  Pneumonia screening report and Grad-CAM activations are open on the dedicated report route.
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => onNavigateToDiagnosticReport({
+                result,
+                title: 'Chest Radiography Diagnostic Report',
+                diseaseKey: 'xray',
+                sourceTab: 'xray',
+                inputs: { source_filename: file?.name || 'chest_xray.jpeg' },
+                onWorkflowStageChange: pipelineProgress.handleWorkflowStageChange,
+              })}
+              className="btn-primary"
+              style={{ padding: '6px 14px', fontSize: '0.82rem' }}
+            >
+              Open Dedicated Diagnostic Report →
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );

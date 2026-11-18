@@ -51,6 +51,19 @@ def compat_randomstate_ctor(*args, **kwargs):
 
 class CustomUnpickler(pickle.Unpickler):
     def find_class(self, module, name):
+        if module == '_loss' or module.endswith('._loss'):
+            try:
+                import sklearn._loss.loss
+                if hasattr(sklearn._loss.loss, name):
+                    return getattr(sklearn._loss.loss, name)
+            except Exception:
+                pass
+            try:
+                import sklearn._loss._loss
+                if hasattr(sklearn._loss._loss, name):
+                    return getattr(sklearn._loss._loss, name)
+            except Exception:
+                pass
         if 'MT19937' in name or module.startswith('numpy.random'):
             if 'MT19937' in name:
                 return CompatMT19937
@@ -145,8 +158,16 @@ class ModelService:
         else:
             bmi_cat = 3
 
-        input_arr = np.array([[pregnancies, glucose, blood_pressure, skin_thickness, insulin, bmi, dpf, age, bmi_cat]])
-        scaled_input = scaler.transform(input_arr)
+        feature_names = [
+            'Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness',
+            'Insulin', 'BMI', 'DiabetesPedigreeFunction', 'Age', 'BMI_Cat'
+        ]
+        import pandas as pd
+        input_df = pd.DataFrame(
+            [[pregnancies, glucose, blood_pressure, skin_thickness, insulin, bmi, dpf, age, bmi_cat]],
+            columns=feature_names
+        )
+        scaled_input = scaler.transform(input_df)
         
         probabilities = model.predict_proba(scaled_input)[0]
         # In Pima Indian Diabetes dataset, Class 1 is Diabetes Mellitus and Class 0 is Negative/Normal
@@ -468,7 +489,9 @@ class ModelService:
 
     def get_xray_model(self):
         if self._xray_model is None:
-            model_path = os.path.join(self.models_dir, 'xrays_pneumonia.keras')
+            model_path = os.path.join(self.models_dir, 'chest_xray_model.keras')
+            if not os.path.exists(model_path):
+                model_path = os.path.join(self.models_dir, 'xrays_pneumonia.keras')
             custom_objects = {
                 'Flatten': FixedFlatten,
                 'GlobalAveragePooling2D': FixedPooling

@@ -14,20 +14,23 @@ import {
   Square,
   Layers,
   ClipboardList,
-  UserCheck,
-  Ban,
-  TrendingUp,
-  TrendingDown,
   Award,
-  Sparkles
+  Sparkles,
+  SlidersHorizontal,
+  Edit3,
 } from 'lucide-react';
 import { generateFinalReport, reviewModelRun } from '../services/api';
+import ClinicianDecisionTweakCenter from './ClinicianDecisionTweakCenter';
 
 export default function DiagnosticResultCard({ 
   result: resultProp,
   onReset, 
   title = 'Diagnostic Risk Assessment',
+  diseaseKey: diseaseKeyProp,
+  inputs: inputsProp,
   onWorkflowStageChange,
+  onNavigateToLLMReport,
+  onNavigateToForm,
 }) {
   const assessmentResponse = resultProp?.success && resultProp?.data ? resultProp : null;
   const result = assessmentResponse?.data || resultProp;
@@ -66,18 +69,46 @@ export default function DiagnosticResultCard({
     return [...pos, ...neg];
   }, [clinicalReport]);
 
-  const [verifiedFeatures, setVerifiedFeatures] = useState(() => {
+  const checklistItems = useMemo(() => {
     if (shapContributions.length > 0) {
-      return new Set(shapContributions.map(c => c.feature));
+      return shapContributions.map(item => ({
+        key: item.feature,
+        label: item.feature,
+        badge: (Number(item.shap_value) >= 0 ? `+${Number(item.shap_value).toFixed(4)}` : Number(item.shap_value).toFixed(4)),
+      }));
     }
-    return new Set(['Glucose', 'Age', 'BloodPressure', 'BMI', 'Insulin', 'Pregnancies', 'SkinThickness', 'DiabetesPedigreeFunction', 'BMI_Cat']);
+    if (clinicalInputs.length > 0) {
+      return clinicalInputs.map(item => ({
+        key: item.name || item.display_name,
+        label: item.display_name || item.name,
+        badge: item.unit ? `${item.value} ${item.unit}` : `${item.value}`,
+      }));
+    }
+    const dKey = result?.disease?.toLowerCase() || '';
+    let fallbackNames = ['Image Quality & Resolution', 'Anatomical Field of View', 'Classification Confidence Threshold', 'Neural Activation Distribution'];
+    if (dKey.includes('heart')) {
+      fallbackNames = ['Age', 'Sex', 'Chest Pain', 'Resting BP', 'Cholesterol', 'Fasting Blood Sugar', 'Resting ECG', 'Max Heart Rate', 'Exercise Angina', 'ST Oldpeak', 'ST Slope', 'Major Vessels', 'Thalassemia'];
+    } else if (dKey.includes('liver')) {
+      fallbackNames = ['Age', 'Gender', 'Total Bilirubin', 'Direct Bilirubin', 'ALP', 'ALT', 'AST', 'Total Proteins', 'Albumin', 'A/G Ratio'];
+    } else if (dKey.includes('breast')) {
+      fallbackNames = ['Cell Nuclei Radius', 'Texture', 'Perimeter', 'Area', 'Smoothness', 'Compactness', 'Concavity', 'Concave Points', 'Symmetry', 'Fractal Dimension'];
+    }
+    return fallbackNames.map(name => ({
+      key: name,
+      label: name,
+      badge: 'Clinical Evidence',
+    }));
+  }, [shapContributions, clinicalInputs, result?.disease]);
+
+  const [verifiedFeatures, setVerifiedFeatures] = useState(() => {
+    return new Set(checklistItems.map(c => c.key));
   });
 
   React.useEffect(() => {
-    if (shapContributions.length > 0 && verifiedFeatures.size === 0) {
-      setVerifiedFeatures(new Set(shapContributions.map(c => c.feature)));
+    if (checklistItems.length > 0 && verifiedFeatures.size === 0) {
+      setVerifiedFeatures(new Set(checklistItems.map(c => c.key)));
     }
-  }, [shapContributions]);
+  }, [checklistItems]);
 
   const toggleFeatureVerification = (featureName) => {
     setVerifiedFeatures(prev => {
@@ -92,8 +123,8 @@ export default function DiagnosticResultCard({
   };
 
   const verifyAllFeatures = () => {
-    if (shapContributions.length > 0) {
-      setVerifiedFeatures(new Set(shapContributions.map(c => c.feature)));
+    if (checklistItems.length > 0) {
+      setVerifiedFeatures(new Set(checklistItems.map(c => c.key)));
     }
   };
 
@@ -143,16 +174,141 @@ export default function DiagnosticResultCard({
   const modelName = clinicalReport?.screening?.model_name || 
                     (result.disease ? `${result.disease}_model` : 'Classifier Ensemble');
 
-  // Dynamic Severity & Threshold Coloring
-  const isBelowThreshold = isHealthy || prob < decisionThreshold;
+  // Baseline Model Determinations
+  const assessmentData = assessmentResponse?.data || resultProp?.data || null;
+  const originalDiagnosis = result.diagnosis || result.prediction || (isHealthy ? 'Baseline Physiological Control' : 'Elevated Risk Indication');
+  const originalRiskTier = riskTier;
+  const originalRiskPercent = riskPercent;
+  const originalDecisionThreshold = decisionThreshold;
+  const originalRecommendations = result.recommendations || [];
+
+  const targetDiseaseStr = (diseaseKeyProp || assessmentData?.disease || result?.disease || result?.data?.disease || title || '').toLowerCase();
+  const resolvedDiseaseKey = diseaseKeyProp || (
+    targetDiseaseStr.includes('diabetes') ? 'diabetes' :
+    targetDiseaseStr.includes('heart') || targetDiseaseStr.includes('cardiac') ? 'heart' :
+    targetDiseaseStr.includes('breast') ? 'breast' :
+    targetDiseaseStr.includes('liver') || targetDiseaseStr.includes('hepatic') ? 'liver' :
+    targetDiseaseStr.includes('brain') ? 'brain-tumor' :
+    targetDiseaseStr.includes('kidney') ? 'kidney-stone' :
+    targetDiseaseStr.includes('skin') ? 'skin-cancer' :
+    targetDiseaseStr.includes('eye') ? 'eye' :
+    targetDiseaseStr.includes('pneumonia') || targetDiseaseStr.includes('xray') ? 'xray' : 'diabetes'
+  );
+
+  const clinicalInputsObj = useMemo(() => {
+    const obj = {};
+    if (Array.isArray(clinicalInputs)) {
+      clinicalInputs.forEach(item => {
+        const key = item.name || item.display_name;
+        if (key && item.value !== undefined && item.value !== null) {
+          obj[key] = item.value;
+        }
+      });
+    }
+    return obj;
+  }, [clinicalInputs]);
+
+  const resolvedInputs = useMemo(() => {
+    if (inputsProp && Object.keys(inputsProp).length > 0) return inputsProp;
+    if (result.inputs && Object.keys(result.inputs).length > 0) return result.inputs;
+    if (assessmentResponse?.inputs && Object.keys(assessmentResponse.inputs).length > 0) return assessmentResponse.inputs;
+    return clinicalInputsObj;
+  }, [inputsProp, result.inputs, assessmentResponse?.inputs, clinicalInputsObj]);
+
+  // Clinician Decision Overrides & Parameter Tweaks State
+  const [tweaks, setTweaks] = useState({
+    diagnosis: { isTweaked: false, value: '', reason: '' },
+    riskTier: { isTweaked: false, value: '', reason: '' },
+    riskProbability: { isTweaked: false, value: '', reason: '' },
+    decisionThreshold: { isTweaked: false, value: '', reason: '' },
+    recommendations: { isTweaked: false, value: originalRecommendations, reason: '' },
+    featureRationales: {},
+  });
+
+  const [isTweakPanelOpen, setIsTweakPanelOpen] = useState(false);
+
+  const handleUpdateTweak = (field, value, reason) => {
+    setTweaks(prev => ({
+      ...prev,
+      [field]: {
+        isTweaked: true,
+        value,
+        reason: reason || prev[field]?.reason || '',
+      }
+    }));
+  };
+
+  const handleResetTweak = (field) => {
+    setTweaks(prev => ({
+      ...prev,
+      [field]: {
+        isTweaked: false,
+        value: field === 'recommendations' ? originalRecommendations : '',
+        reason: '',
+      }
+    }));
+  };
+
+  const handleResetAllTweaks = () => {
+    setTweaks({
+      diagnosis: { isTweaked: false, value: '', reason: '' },
+      riskTier: { isTweaked: false, value: '', reason: '' },
+      riskProbability: { isTweaked: false, value: '', reason: '' },
+      decisionThreshold: { isTweaked: false, value: '', reason: '' },
+      recommendations: { isTweaked: false, value: originalRecommendations, reason: '' },
+      featureRationales: {},
+    });
+  };
+
+  const handleUpdateFeatureRationale = (feature, status, reason) => {
+    setTweaks(prev => ({
+      ...prev,
+      featureRationales: {
+        ...prev.featureRationales,
+        [feature]: { status, reason: reason || '' },
+      }
+    }));
+  };
+
+  const effectiveDiagnosis = tweaks.diagnosis.isTweaked && tweaks.diagnosis.value ? tweaks.diagnosis.value : originalDiagnosis;
+  const effectiveRiskTier = tweaks.riskTier.isTweaked && tweaks.riskTier.value ? tweaks.riskTier.value : originalRiskTier;
+  const effectiveRiskPercent = tweaks.riskProbability.isTweaked && tweaks.riskProbability.value !== '' ? tweaks.riskProbability.value : originalRiskPercent;
+  const effectiveThreshold = tweaks.decisionThreshold.isTweaked && tweaks.decisionThreshold.value !== '' ? tweaks.decisionThreshold.value : originalDecisionThreshold;
+  const effectiveRecommendations = tweaks.recommendations.isTweaked && tweaks.recommendations.value ? tweaks.recommendations.value : originalRecommendations;
+
+  const hasAnyTweaks = useMemo(() => {
+    return Boolean(
+      tweaks.diagnosis.isTweaked ||
+      tweaks.riskTier.isTweaked ||
+      tweaks.riskProbability.isTweaked ||
+      tweaks.decisionThreshold.isTweaked ||
+      tweaks.recommendations.isTweaked ||
+      Object.keys(tweaks.featureRationales).length > 0
+    );
+  }, [tweaks]);
+
+  const totalTweaksCount = useMemo(() => {
+    let count = 0;
+    if (tweaks.diagnosis.isTweaked) count++;
+    if (tweaks.riskTier.isTweaked) count++;
+    if (tweaks.riskProbability.isTweaked) count++;
+    if (tweaks.decisionThreshold.isTweaked) count++;
+    if (tweaks.recommendations.isTweaked) count++;
+    count += Object.keys(tweaks.featureRationales).length;
+    return count;
+  }, [tweaks]);
+
+  // Dynamic Severity & Threshold Coloring reflecting effective (tweaked) values
+  const effectiveProbNumber = Number(effectiveRiskPercent) / 100;
+  const isBelowThreshold = isHealthy ? (effectiveRiskTier === 'Low Risk') : (effectiveProbNumber < effectiveThreshold || effectiveRiskTier === 'Low Risk');
 
   let severityTheme;
   if (isBelowThreshold) {
     severityTheme = {
       level: 'normal',
-      tier: 'Low Risk',
+      tier: effectiveRiskTier || 'Low Risk',
       statusPill: 'NEGATIVE / BASELINE NORMAL (BELOW THRESHOLD)',
-      statusDesc: `Calibrated Score (${(prob * 100).toFixed(1)}%) is below the diagnostic threshold (${(decisionThreshold * 100).toFixed(0)}%) — Within expected physiological baseline.`,
+      statusDesc: `Calibrated Score (${effectiveRiskPercent}%) is below the diagnostic threshold (${(effectiveThreshold * 100).toFixed(0)}%) — Within expected physiological baseline.`,
       bg: '#ecfdf5',
       border: '#10b981',
       borderDark: '#059669',
@@ -413,7 +569,29 @@ export default function DiagnosticResultCard({
           </span>
         </div>
 
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <button 
+            type="button"
+            onClick={() => setIsTweakPanelOpen(!isTweakPanelOpen)}
+            className="btn-secondary"
+            style={{
+              padding: '6px 14px',
+              fontSize: '0.82rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: hasAnyTweaks ? '#f0fdf4' : '#ffffff',
+              color: hasAnyTweaks ? '#166534' : '#0f172a',
+              border: hasAnyTweaks ? '1.5px solid #16a34a' : '1px solid #cbd5e1',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontWeight: hasAnyTweaks ? 700 : 500,
+            }}
+          >
+            <SlidersHorizontal size={14} color={hasAnyTweaks ? '#16a34a' : '#475569'} />
+            <span>{hasAnyTweaks ? `Model Decisions Tweaked (${totalTweaksCount})` : 'Tweak Model Decisions'}</span>
+          </button>
+
           <button 
             onClick={handleDownloadPDF} 
             className="btn-primary" 
@@ -430,8 +608,58 @@ export default function DiagnosticResultCard({
               cursor: 'pointer'
             }}
           >
-            <FileDown size={14} /> Download A4 PDF Report
+            <FileDown size={14} /> Download ML Report
           </button>
+
+          {onNavigateToLLMReport && (
+            <button
+              onClick={() => {
+                const tweakedPayload = {
+                  hasTweaks: hasAnyTweaks,
+                  summary: hasAnyTweaks ? 'Attending clinician manually adjusted AI model decisions with recorded clinical rationale.' : 'No manual overrides.',
+                  diagnosis: tweaks.diagnosis.isTweaked ? { original: originalDiagnosis, tweaked: tweaks.diagnosis.value, reason: tweaks.diagnosis.reason } : null,
+                  riskTier: tweaks.riskTier.isTweaked ? { original: originalRiskTier, tweaked: tweaks.riskTier.value, reason: tweaks.riskTier.reason } : null,
+                  riskProbability: tweaks.riskProbability.isTweaked ? { original: originalRiskPercent, tweaked: tweaks.riskProbability.value, reason: tweaks.riskProbability.reason } : null,
+                  decisionThreshold: tweaks.decisionThreshold.isTweaked ? { original: originalDecisionThreshold, tweaked: tweaks.decisionThreshold.value, reason: tweaks.decisionThreshold.reason } : null,
+                  recommendations: tweaks.recommendations.isTweaked ? { original: originalRecommendations, tweaked: tweaks.recommendations.value, reason: tweaks.recommendations.reason } : null,
+                  featureRationales: tweaks.featureRationales,
+                };
+
+                onNavigateToLLMReport({
+                  diseaseKey: resolvedDiseaseKey,
+                  prediction: {
+                    ...(assessmentData || {}),
+                    ...result,
+                    diagnosis: effectiveDiagnosis,
+                    prediction: effectiveDiagnosis,
+                    risk_tier: effectiveRiskTier,
+                    risk_percentage: Number(effectiveRiskPercent),
+                    risk_probability: Number(effectiveRiskPercent) / 100,
+                    recommendations: effectiveRecommendations,
+                  },
+                  inputs: resolvedInputs,
+                  clinicalReport: assessmentResponse?.clinical_report || null,
+                  modelRunId: assessmentResponse?.model_run_id || null,
+                  tweakedDecisions: tweakedPayload,
+                });
+              }}
+              className="btn-primary"
+              style={{
+                padding: '6px 14px',
+                fontSize: '0.82rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: 'linear-gradient(135deg, #0d9488 0%, #0f766e 100%)',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              <Sparkles size={14} color="#5eead4" /> Generate Report via LLM
+            </button>
+          )}
           <button 
             onClick={handleDownloadPDF} 
             className="btn-secondary" 
@@ -469,6 +697,31 @@ export default function DiagnosticResultCard({
           )}
         </div>
       </div>
+
+      {/* Clinician Decision Overrides & Parameter Tweak Center */}
+      <ClinicianDecisionTweakCenter
+        isOpen={isTweakPanelOpen}
+        onClose={() => setIsTweakPanelOpen(false)}
+        originalDecisions={{
+          originalDiagnosis,
+          originalRiskTier,
+          originalRiskPercent,
+          originalDecisionThreshold,
+          originalRecommendations,
+          shapContributions,
+          isHealthy,
+          inputs: resolvedInputs,
+          diseaseKey: resolvedDiseaseKey,
+        }}
+        diseaseKey={resolvedDiseaseKey}
+        clinicalInputs={resolvedInputs}
+        onNavigateToForm={onNavigateToForm || onReset}
+        tweaks={tweaks}
+        onUpdateTweak={handleUpdateTweak}
+        onResetTweak={handleResetTweak}
+        onResetAll={handleResetAllTweaks}
+        onUpdateFeatureRationale={handleUpdateFeatureRationale}
+      />
 
       {/* =========================================================================
           2. SPECIMEN & PATIENT CLINICAL DATA SUMMARY
@@ -520,16 +773,47 @@ export default function DiagnosticResultCard({
       {/* Structured Input Biomarkers Table */}
       {clinicalInputs && clinicalInputs.length > 0 && (
         <div className="break-inside-avoid" style={{ marginBottom: '16px' }}>
-          <h4 style={{
-            fontSize: '0.82rem',
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px',
-            color: '#334155',
-            margin: '0 0 6px 0'
-          }}>
-            Measured Biomarkers & Clinical Parameters
-          </h4>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+            <h4 style={{
+              fontSize: '0.82rem',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              color: '#334155',
+              margin: 0
+            }}>
+              Measured Biomarkers & Clinical Parameters
+            </h4>
+            {(onNavigateToForm || onReset) && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (onNavigateToForm) {
+                    onNavigateToForm(resolvedDiseaseKey, resolvedInputs);
+                  } else if (onReset) {
+                    onReset();
+                  }
+                }}
+                className="btn-secondary"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '4px 10px',
+                  fontSize: '0.74rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  background: '#f8fafc',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '4px',
+                }}
+                title="Edit these input values directly in the clinical form"
+              >
+                <SlidersHorizontal size={13} color="#0d9488" />
+                <span>Tweak Biomarkers in Form</span>
+              </button>
+            )}
+          </div>
           <table className="print-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
             <thead>
               <tr style={{ background: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>
@@ -603,29 +887,89 @@ export default function DiagnosticResultCard({
             </span>
           </div>
 
-          <h2 style={{
-            fontSize: '1.38rem',
-            fontWeight: 800,
-            color: severityTheme.textMain,
-            margin: '4px 0 6px 0',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px'
-          }}>
-            {severityTheme.icon}
-            <span>{result.diagnosis || result.prediction || (isHealthy ? 'Baseline Physiological Control' : 'Elevated Risk Indication')}</span>
-          </h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <h2 style={{
+              fontSize: '1.38rem',
+              fontWeight: 800,
+              color: severityTheme.textMain,
+              margin: '4px 0 6px 0',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px'
+            }}>
+              {severityTheme.icon}
+              <span>{effectiveDiagnosis}</span>
+            </h2>
+
+            {tweaks.diagnosis.isTweaked && (
+              <span className="badge badge-warning" style={{ fontSize: '0.68rem', background: '#fef3c7', color: '#92400e', border: '1px solid #fcd34d', fontWeight: 800 }}>
+                TWEAKED BY CLINICIAN
+              </span>
+            )}
+
+            <button
+              type="button"
+              onClick={() => setIsTweakPanelOpen(true)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '2px 8px',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                background: '#f8fafc',
+                color: '#0f766e',
+                border: '1px solid #cbd5e1',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+              title="Click to override this diagnosis or change parameters"
+            >
+              <Edit3 size={11} />
+              <span>{tweaks.diagnosis.isTweaked ? 'Edit Tweak' : 'Tweak Decision'}</span>
+            </button>
+          </div>
+
+          {tweaks.diagnosis.isTweaked && (
+            <div style={{
+              fontSize: '0.75rem',
+              background: '#fffbeb',
+              border: '1px solid #fde68a',
+              borderRadius: '4px',
+              padding: '4px 10px',
+              margin: '4px 0 8px 0',
+              color: '#92400e',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              flexWrap: 'wrap'
+            }}>
+              <MessageSquare size={12} color="#b45309" />
+              <span><strong>Model Output:</strong> "{originalDiagnosis}"</span>
+              <span>•</span>
+              <span><strong>Physician Rationale:</strong> "{tweaks.diagnosis.reason || 'Clinical adjustment'}"</span>
+            </div>
+          )}
 
           <p style={{ fontSize: '0.82rem', color: severityTheme.textMain, margin: '0 0 6px 0', fontWeight: 500 }}>
             {severityTheme.statusDesc}
           </p>
 
           <div style={{ fontSize: '0.78rem', color: '#475569', display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
-            <span>Decision Threshold: <strong style={{ color: '#0f172a' }}>0.50</strong></span>
+            <span>
+              Decision Threshold: <strong style={{ color: '#0f172a' }}>{effectiveThreshold.toFixed(2)}</strong>
+              {tweaks.decisionThreshold.isTweaked && <span style={{ color: '#d97706', fontSize: '0.7rem' }}> (Tweaked)</span>}
+            </span>
             <span>•</span>
-            <span>Calibrated Risk Score: <strong style={{ color: severityTheme.textMain }}>{prob.toFixed(4)}</strong></span>
+            <span>
+              Calibrated Risk Score: <strong style={{ color: severityTheme.textMain }}>{(Number(effectiveRiskPercent)/100).toFixed(4)}</strong>
+              {tweaks.riskProbability.isTweaked && <span style={{ color: '#d97706', fontSize: '0.7rem' }}> (Tweaked)</span>}
+            </span>
             <span>•</span>
-            <span>Risk Tier: <strong style={{ color: severityTheme.textMain }}>{riskTier}</strong></span>
+            <span>
+              Risk Tier: <strong style={{ color: severityTheme.textMain }}>{effectiveRiskTier}</strong>
+              {tweaks.riskTier.isTweaked && <span style={{ color: '#d97706', fontSize: '0.7rem' }}> (Tweaked)</span>}
+            </span>
           </div>
         </div>
 
@@ -646,8 +990,23 @@ export default function DiagnosticResultCard({
             color: severityTheme.metricColor,
             lineHeight: 1.1
           }}>
-            {riskPercent}%
+            {effectiveRiskPercent}%
           </div>
+          {tweaks.riskProbability.isTweaked && (
+            <div style={{
+              fontSize: '0.62rem',
+              fontWeight: 800,
+              background: '#fef3c7',
+              color: '#92400e',
+              border: '1px solid #fcd34d',
+              borderRadius: '3px',
+              padding: '1px 4px',
+              margin: '2px 0',
+              textTransform: 'uppercase'
+            }}>
+              TWEAKED (ORIG: {originalRiskPercent}%)
+            </div>
+          )}
           <div style={{
             fontSize: '0.7rem',
             textTransform: 'uppercase',
@@ -1087,12 +1446,12 @@ export default function DiagnosticResultCard({
             </span>
           </div>
 
-          {/* Feature verification checklist for SHAP */}
-          {shapContributions.length > 0 && (
+          {/* Feature verification checklist */}
+          {checklistItems.length > 0 && (
             <div style={{ marginBottom: '14px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                 <strong style={{ fontSize: '0.8rem', color: '#1e293b' }}>
-                  Verify Biomarker SHAP Drivers ({verifiedFeatures.size}/{shapContributions.length} Verified)
+                  Verify Clinical Evidence & Biomarkers ({verifiedFeatures.size}/{checklistItems.length} Verified)
                 </strong>
                 <div style={{ display: 'flex', gap: '6px' }}>
                   <button
@@ -1115,14 +1474,12 @@ export default function DiagnosticResultCard({
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '6px' }}>
-                {shapContributions.map((item) => {
-                  const isVerified = verifiedFeatures.has(item.feature);
-                  const shapVal = Number(item.shap_value || 0);
-                  const isPos = shapVal >= 0;
+                {checklistItems.map((item) => {
+                  const isVerified = verifiedFeatures.has(item.key);
                   return (
                     <div
-                      key={item.feature}
-                      onClick={() => workflowStatus !== 'final_report_generated' && toggleFeatureVerification(item.feature)}
+                      key={item.key}
+                      onClick={() => workflowStatus !== 'final_report_generated' && toggleFeatureVerification(item.key)}
                       style={{
                         padding: '6px 10px',
                         borderRadius: '4px',
@@ -1137,10 +1494,10 @@ export default function DiagnosticResultCard({
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         {isVerified ? <CheckSquare size={14} color="#0f172a" /> : <Square size={14} color="#94a3b8" />}
-                        <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#0f172a' }}>{item.feature}</span>
+                        <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#0f172a' }}>{item.label}</span>
                       </div>
                       <span style={{ fontSize: '0.74rem', fontFamily: 'monospace', fontWeight: 700, color: '#334155' }}>
-                        {isPos ? `+${shapVal.toFixed(4)}` : shapVal.toFixed(4)}
+                        {item.badge}
                       </span>
                     </div>
                   );
@@ -1311,23 +1668,50 @@ export default function DiagnosticResultCard({
       {/* =========================================================================
           7. EVIDENCE-BASED RECOMMENDATIONS & CLINICAL PROTOCOL
           ========================================================================= */}
-      {result.recommendations && result.recommendations.length > 0 && (
+      {effectiveRecommendations && effectiveRecommendations.length > 0 && (
         <div className="break-inside-avoid" style={{ marginBottom: '16px' }}>
-          <h4 style={{
-            fontSize: '0.84rem',
-            fontWeight: 800,
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px',
-            color: '#0f172a',
-            margin: '0 0 8px 0',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px'
-          }}>
-            <ClipboardList size={15} color="#0f172a" /> Recommended Next Steps & Clinical Management Protocol
-          </h4>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '0 0 8px 0', flexWrap: 'wrap', gap: '8px' }}>
+            <h4 style={{
+              fontSize: '0.84rem',
+              fontWeight: 800,
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              color: '#0f172a',
+              margin: 0,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <ClipboardList size={15} color="#0f172a" /> Recommended Next Steps & Clinical Management Protocol
+            </h4>
+
+            {tweaks.recommendations.isTweaked && (
+              <span className="badge badge-warning" style={{ fontSize: '0.68rem', background: '#fef3c7', color: '#92400e', border: '1px solid #fcd34d' }}>
+                CUSTOMIZED BY CLINICIAN
+              </span>
+            )}
+          </div>
+
+          {tweaks.recommendations.isTweaked && tweaks.recommendations.reason && (
+            <div style={{
+              fontSize: '0.75rem',
+              background: '#fffbeb',
+              border: '1px solid #fde68a',
+              borderRadius: '4px',
+              padding: '4px 8px',
+              marginBottom: '8px',
+              color: '#92400e',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <MessageSquare size={12} color="#b45309" />
+              <span><strong>Protocol Adjustment Rationale:</strong> "{tweaks.recommendations.reason}"</span>
+            </div>
+          )}
+
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '5px' }}>
-            {result.recommendations.map((rec, idx) => (
+            {effectiveRecommendations.map((rec, idx) => (
               <li key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '0.82rem', color: '#334155' }}>
                 <span style={{ color: severityTheme.borderDark, fontWeight: 800, lineHeight: 1.2 }}>•</span>
                 <span style={{ lineHeight: 1.4 }}>{rec}</span>

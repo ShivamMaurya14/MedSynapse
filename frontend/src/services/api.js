@@ -193,3 +193,30 @@ export async function generateFinalReport(modelRunId) {
   }
   return res.json();
 }
+
+export async function generateDirectLlmReport(payload) {
+  const res = await fetch(`${API_BASE_URL}/api/reports/generate-llm-report`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'LLM report generation failed');
+  }
+  return res.json();
+}
+
+export async function sendLlmChatMessage(payload) {
+  const res = await fetch(`${API_BASE_URL}/api/reports/llm-chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'LLM chat failed');
+  }
+  return res.json();
+}
+

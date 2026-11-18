@@ -5,14 +5,9 @@ import {
   ScanText,
   Sparkles,
   Database,
-  CheckCircle2,
-  XCircle,
-  LoaderCircle,
-  Circle,
-  Clock,
   ArrowRight,
-  Cpu,
 } from 'lucide-react';
+import ProcessTrackerBar from './ProcessTrackerBar';
 
 const STAGES = [
   {
@@ -102,186 +97,70 @@ export default function OCRProgressModal({
     return `${mins > 0 ? `${mins}m ` : ''}${secs}s`;
   };
 
-  const modalContent = (
-    <div className="pipeline-modal-backdrop" role="presentation" onClick={isComplete || hasError ? onClose : undefined}>
-      <section
-        className="pipeline-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="ocr-pipeline-title"
-        aria-describedby="ocr-pipeline-desc"
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Close Button */}
-        {(isComplete || hasError) && (
-          <button className="pipeline-modal-close" type="button" onClick={onClose} aria-label="Close progress modal">
-            <XCircle size={18} />
-          </button>
-        )}
+  const getStageTitle = () => {
+    if (hasError) return 'Document Parsing Failed';
+    if (isComplete) return 'Biomarkers & Evidence Extracted!';
+    if (stage === 'gemma_extraction') return 'Gemma 3:4B Local Feature Extraction';
+    if (stage === 'ocr_extraction') return 'Tesseract OCR Biomarker Match';
+    if (stage === 'feature_store_saving') return 'SQLite Feature Store Saving';
+    return 'Document Parsing & Page Ingestion';
+  };
 
-        {/* Modal Header */}
-        <header className="pipeline-modal-header">
-          <div className={`pipeline-modal-symbol ${hasError ? 'is-error' : isComplete ? 'is-complete' : 'is-active'}`}>
-            {hasError ? (
-              <XCircle size={26} />
-            ) : isComplete ? (
-              <CheckCircle2 size={26} />
-            ) : (
-              <Cpu size={26} />
-            )}
-          </div>
-          <div className="pipeline-modal-titles">
-            <div className="pipeline-modal-eyebrow-row">
-              <p className="pipeline-modal-eyebrow">
-                {hasError
-                  ? 'OCR Pipeline Error'
-                  : isComplete
-                    ? 'Extraction Complete'
-                    : 'Processing Lab Report'}
-              </p>
-              {!hasError && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Clock size={13} color="#25854a" />
-                  <span className="pipeline-modal-pct">⏱ {formatTime(elapsed)}</span>
-                </div>
-              )}
-            </div>
-            <h2 id="ocr-pipeline-title">
-              {hasError
-                ? 'Document Parsing Failed'
-                : isComplete
-                  ? 'Biomarkers & Evidence Extracted!'
-                  : stage === 'gemma_extraction'
-                    ? 'Gemma 3:4B Analyzing Clinical Values…'
-                    : 'Extracting Clinical Parameters…'}
-            </h2>
-            <p id="ocr-pipeline-desc">
-              {filename ? `Document: ${filename} • ` : ''}
-              {hasError
-                ? 'Review error output below and retry.'
-                : isComplete
-                  ? 'All parameters extracted and validated against medical normal ranges.'
-                  : stage === 'gemma_extraction'
-                    ? 'Local Gemma model is performing deep semantic extraction and schema validation.'
-                    : 'Running optical scan and regex matching across laboratory biomarker panels.'}
-            </p>
-          </div>
-        </header>
+  const mappedSteps = STAGES.map((s, index) => {
+    let status = 'pending';
+    if (hasError) {
+      if (index < currentIndex) status = 'complete';
+      else if (index === currentIndex) status = 'error';
+      else status = 'pending';
+    } else if (isComplete) {
+      status = 'complete';
+    } else {
+      if (index < currentIndex) status = 'complete';
+      else if (index === currentIndex) status = 'active';
+      else status = 'pending';
+    }
 
-        {/* Progress Bar Track */}
-        <div className="pipeline-progress-track" aria-label={`OCR progress ${Math.round(progressPercent)}%`}>
-          <span
-            className={`pipeline-progress-fill ${!isComplete && !hasError ? 'is-animated' : ''}`}
-            style={{
-              width: `${progressPercent}%`,
-              background: hasError ? '#dc2626' : undefined,
-            }}
-          />
-        </div>
+    return {
+      key: s.key,
+      number: s.number,
+      title: s.title,
+      description: s.description,
+      status,
+    };
+  });
 
-        {/* Step List */}
-        <div className="pipeline-step-list" aria-live="polite">
-          {STAGES.map((s, index) => {
-            let status = 'pending';
-            if (hasError) {
-              if (index < currentIndex) status = 'complete';
-              else if (index === currentIndex) status = 'error';
-              else status = 'pending';
-            } else if (isComplete) {
-              status = 'complete';
-            } else {
-              if (index < currentIndex) status = 'complete';
-              else if (index === currentIndex) status = 'active';
-              else status = 'pending';
-            }
+  const actions = [];
+  if (isComplete || hasError) {
+    actions.push({
+      label: isComplete ? 'View Extracted Results' : 'Close & Retry',
+      icon: <ArrowRight size={14} />,
+      onClick: onClose,
+      variant: 'primary',
+    });
+  }
 
-            return (
-              <div className={`pipeline-step is-${status}`} key={s.key}>
-                <div className="pipeline-step-icon">
-                  {status === 'complete' && <CheckCircle2 size={16} strokeWidth={2.5} />}
-                  {status === 'active' && <LoaderCircle size={17} className="animate-spin" />}
-                  {status === 'error' && <XCircle size={16} strokeWidth={2.5} />}
-                  {status === 'pending' && <Circle size={11} fill="currentColor" opacity={0.4} />}
-                </div>
-                <div className="pipeline-step-content">
-                  <div className="pipeline-step-title-row">
-                    <span className="pipeline-step-num">{s.number}</span>
-                    <h3>{s.title}</h3>
-                  </div>
-                  <p>{s.description}</p>
-                </div>
-                <div className="pipeline-step-badge-wrap">
-                  {status === 'complete' && (
-                    <span className="pipeline-step-badge is-complete">Completed</span>
-                  )}
-                  {status === 'active' && (
-                    <span className="pipeline-step-badge is-active">
-                      <span className="pipeline-pulse-dot" />
-                      In Progress
-                    </span>
-                  )}
-                  {status === 'error' && (
-                    <span className="pipeline-step-badge is-error">Failed</span>
-                  )}
-                  {status === 'pending' && (
-                    <span className="pipeline-step-badge is-pending">Queued</span>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Local Gemma Notice */}
-        {!isComplete && !hasError && stage === 'gemma_extraction' && (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '10px 14px',
-              borderRadius: '10px',
-              background: '#f0fdf4',
-              border: '1px solid #bbf7d0',
-              fontSize: '0.8rem',
-              color: '#166534',
-              marginTop: '10px',
-            }}
-          >
-            <Sparkles size={16} color="#16a34a" className="flex-shrink-0 animate-pulse" />
-            <span>
-              <strong>Local Gemma 3:4B Model Active:</strong> Deep structured extraction takes ~45–75 seconds on CPU. Please keep this tab open.
-            </span>
-          </div>
-        )}
-
-        {/* Error Display */}
-        {error && (
-          <div className="pipeline-modal-error">
-            <XCircle size={16} className="flex-shrink-0" />
-            <div>
-              <strong>Extraction Error:</strong> {error}
-            </div>
-          </div>
-        )}
-
-        {/* Modal Footer */}
-        <footer className="pipeline-modal-footer">
-          <span className="pipeline-modal-footer-note">
-            {!isComplete && !hasError
-              ? '⚡ Running local neural pipeline • Data never leaves your machine'
-              : 'Extraction result logged in local SQLite feature store.'}
-          </span>
-          {(isComplete || hasError) && (
-            <button className="btn-primary pipeline-action-btn" type="button" onClick={onClose}>
-              <span>{isComplete ? 'View Extracted Results' : 'Close & Retry'}</span>
-              <ArrowRight size={16} />
-            </button>
-          )}
-        </footer>
-      </section>
-    </div>
+  const trackerElement = (
+    <ProcessTrackerBar
+      isOpen={isOpen}
+      moduleLabel={diseaseType && diseaseType !== 'all' ? `OCR • ${diseaseType.toUpperCase()}` : 'OCR SCANNER'}
+      currentProcessName={getStageTitle()}
+      currentProcessDesc={
+        filename
+          ? `File: ${filename} • ${hasError ? 'Extraction encountered an error' : isComplete ? 'Validated in local SQLite store' : 'Local neural extraction in progress'}`
+          : 'Local neural extraction in progress'
+      }
+      progressPercent={progressPercent}
+      isActive={!isComplete && !hasError}
+      isComplete={isComplete}
+      isError={hasError}
+      errorMessage={error}
+      elapsedText={formatTime(elapsed)}
+      steps={mappedSteps}
+      actions={actions}
+      onClose={onClose}
+      defaultExpanded={false}
+    />
   );
 
-  return createPortal(modalContent, document.body);
+  return createPortal(trackerElement, document.body);
 }

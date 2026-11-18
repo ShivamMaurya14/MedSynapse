@@ -12,7 +12,9 @@ import {
   FlaskConical, 
   Layers, 
   AlertTriangle, 
-  Eye
+  Eye,
+  Sparkles,
+  FileCheck
 } from 'lucide-react';
 
 const NAV_MODULES = [
@@ -27,6 +29,8 @@ const NAV_MODULES = [
   { id: 'kidney-stone', label: 'Kidney CT (M7)', short: 'Kidney CT', icon: Layers, color: '#059669' },
   { id: 'skin-cancer', label: 'Skin Cancer (M8)', short: 'Skin Cancer', icon: AlertTriangle, color: '#dc2626' },
   { id: 'eye', label: 'Eye Ophthalmic (M9)', short: 'Eye Disease', icon: Eye, color: '#6b46c1' },
+  { id: 'diagnostic-report', label: 'ML Diagnostic Report', short: 'ML Report', icon: FileCheck, color: '#059669' },
+  { id: 'llm-report', label: 'LLM Clinical Report', short: 'LLM Report', icon: Sparkles, color: '#0d9488' },
 ];
 
 export default function Navbar({ currentTab, setTab, systemStatus, onRefreshStatus }) {

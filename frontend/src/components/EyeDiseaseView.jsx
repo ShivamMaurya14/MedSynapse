@@ -1,7 +1,9 @@
 import React, { useRef, useState } from 'react';
-import { Eye, Upload, RefreshCw, FileText, CheckCircle2, ShieldCheck, AlertCircle, Sparkles } from 'lucide-react';
+import { Eye, Upload, RefreshCw, FileText, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
 import { predictEye } from '../services/api';
 import DiagnosticResultCard from './DiagnosticResultCard';
+import ClinicalPipelineProgressModal from './ClinicalPipelineProgressModal';
+import useClinicalPipelineProgress from '../hooks/useClinicalPipelineProgress';
 
 const EYE_DEMOS = [
   {
@@ -46,7 +48,7 @@ const EYE_DEMOS = [
   }
 ];
 
-export default function EyeDiseaseView({ setTab }) {
+export default function EyeDiseaseView({ setTab, onNavigateToLLMReport, onNavigateToDiagnosticReport }) {
   const inputRef = useRef(null);
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -54,6 +56,7 @@ export default function EyeDiseaseView({ setTab }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
+  const pipelineProgress = useClinicalPipelineProgress();
 
   const handleFileChange = (e) => {
     const selected = e.target.files?.[0];
@@ -65,11 +68,27 @@ export default function EyeDiseaseView({ setTab }) {
     setError(null);
   };
 
+  const handleDownloadMLReportFromModal = () => {
+    window.print();
+  };
+
+  const handleGenerateLLMReportFromModal = () => {
+    pipelineProgress.close();
+    onNavigateToLLMReport?.({
+      diseaseKey: 'eye',
+      prediction: result?.data || result || {},
+      inputs: { source_filename: file?.name || 'retinal_fundus_photo.jpeg' },
+      clinicalReport: result?.clinical_report || null,
+      modelRunId: result?.model_run_id || null,
+    });
+  };
+
   const handleSelectDemo = async (demo) => {
     setSelectedDemo(demo);
     setError(null);
     setResult(null);
     setLoading(true);
+    pipelineProgress.start();
     try {
       const res = await fetch(demo.image);
       if (!res.ok) throw new Error(`HTTP ${res.status} loading ${demo.image}`);
@@ -79,9 +98,23 @@ export default function EyeDiseaseView({ setTab }) {
       setFile(sampleFile);
 
       const analysisRes = await predictEye(sampleFile);
-      setResult(analysisRes);
+      pipelineProgress.transition('awaiting_review');
+      if (onNavigateToDiagnosticReport) {
+        onNavigateToDiagnosticReport({
+          result: analysisRes,
+          title: 'Ophthalmic Retinal Fundus Assessment',
+          diseaseKey: 'eye',
+          sourceTab: 'eye',
+          inputs: { source_filename: sampleFile.name, demo_id: demo.id },
+          onWorkflowStageChange: pipelineProgress.handleWorkflowStageChange,
+        });
+      } else {
+        setResult(analysisRes);
+      }
     } catch (err) {
-      setError('Ophthalmic evaluation failed: ' + (err.message || err));
+      const msg = 'Ophthalmic evaluation failed: ' + (err.message || err);
+      setError(msg);
+      pipelineProgress.fail(msg, 'prediction');
     } finally {
       setLoading(false);
     }
@@ -94,11 +127,27 @@ export default function EyeDiseaseView({ setTab }) {
     }
     setLoading(true);
     setError(null);
+    setResult(null);
+    pipelineProgress.start();
     try {
       const res = await predictEye(file);
-      setResult(res);
+      pipelineProgress.transition('awaiting_review');
+      if (onNavigateToDiagnosticReport) {
+        onNavigateToDiagnosticReport({
+          result: res,
+          title: 'Ophthalmic Retinal Fundus Assessment',
+          diseaseKey: 'eye',
+          sourceTab: 'eye',
+          inputs: { source_filename: file.name },
+          onWorkflowStageChange: pipelineProgress.handleWorkflowStageChange,
+        });
+      } else {
+        setResult(res);
+      }
     } catch (err) {
-      setError(err.message || 'Retinal fundus analysis failed');
+      const msg = err.message || 'Retinal fundus analysis failed';
+      setError(msg);
+      pipelineProgress.fail(msg, 'prediction');
     } finally {
       setLoading(false);
     }
@@ -106,6 +155,17 @@ export default function EyeDiseaseView({ setTab }) {
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <ClinicalPipelineProgressModal
+        isOpen={pipelineProgress.isOpen}
+        moduleName="RETINAL FUNDUS OPHTHALMOLOGY"
+        modality="imaging"
+        stage={pipelineProgress.stage}
+        error={pipelineProgress.error}
+        failedAt={pipelineProgress.failedAt}
+        onClose={pipelineProgress.close}
+        onDownloadMLReport={handleDownloadMLReportFromModal}
+        onGenerateLLMReport={handleGenerateLLMReportFromModal}
+      />
       
       {/* Header Banner */}
       <div>
@@ -262,13 +322,55 @@ export default function EyeDiseaseView({ setTab }) {
       </div>
 
       {/* Result Card */}
-      {result && (
+      {result && (!onNavigateToDiagnosticReport ? (
         <DiagnosticResultCard 
           result={result} 
           title="Ophthalmic Retinal Fundus Assessment"
+          diseaseKey="eye"
+          inputs={{ source_filename: file?.name || 'retinal_fundus_photo.jpeg' }}
           onReset={() => { setResult(null); setFile(null); setPreview(null); setSelectedDemo(null); }}
+          onNavigateToLLMReport={onNavigateToLLMReport}
         />
-      )}
+      ) : (
+        <div style={{
+          padding: '1rem 1.25rem',
+          background: '#f0fdf4',
+          border: '1px solid #86efac',
+          borderRadius: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <CheckCircle2 size={20} color="#15803d" />
+            <div>
+              <div style={{ fontWeight: 700, color: '#15803d', fontSize: '0.92rem' }}>
+                Active Retinal Fundus Assessment Available
+              </div>
+              <div style={{ fontSize: '0.8rem', color: '#166534' }}>
+                Ocular multi-class pathology evaluation and Grad-CAM visualizations are open on the dedicated report route.
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => onNavigateToDiagnosticReport({
+              result,
+              title: 'Ophthalmic Retinal Fundus Assessment',
+              diseaseKey: 'eye',
+              sourceTab: 'eye',
+              inputs: { source_filename: file?.name || 'retinal_fundus_photo.jpeg' },
+              onWorkflowStageChange: pipelineProgress.handleWorkflowStageChange,
+            })}
+            className="btn-primary"
+            style={{ padding: '6px 14px', fontSize: '0.82rem' }}
+          >
+            Open Dedicated Diagnostic Report →
+          </button>
+        </div>
+      ))}
 
     </div>
   );

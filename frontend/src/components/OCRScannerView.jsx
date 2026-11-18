@@ -9,10 +9,6 @@ import {
   Play,
   RefreshCw,
   FileCode,
-  Check,
-  Database,
-  ShieldCheck,
-  Cpu,
   ChevronLeft,
   ChevronRight,
   Droplets,
@@ -27,6 +23,7 @@ import {
 } from 'lucide-react';
 import { parseReportOCR, getSampleReports } from '../services/api';
 import OCRProgressModal from './OCRProgressModal';
+import OCRResultsView from './OCRResultsView';
 
 const REPORT_MODULES = [
   { 
@@ -135,6 +132,7 @@ export default function OCRScannerView({ onApplyParams, setTab }) {
   const [sampleReports, setSampleReports] = useState([]);
   const [selectedSampleId, setSelectedSampleId] = useState('');
   const [selectedModule, setSelectedModule] = useState('all');
+  const [viewMode, setViewMode] = useState('scanner'); // 'scanner' | 'results'
 
   // OCR Modal progress states
   const [ocrModalOpen, setOcrModalOpen] = useState(false);
@@ -226,6 +224,7 @@ export default function OCRScannerView({ onApplyParams, setTab }) {
       setTimeout(() => {
         setOcrResult(res);
         setOcrStage('complete');
+        setViewMode('results');
       }, 500);
     } catch (err) {
       clearProgressTimeouts();
@@ -254,6 +253,27 @@ export default function OCRScannerView({ onApplyParams, setTab }) {
     }
   };
 
+  if (viewMode === 'results' && ocrResult) {
+    return (
+      <>
+        <OCRProgressModal
+          isOpen={ocrModalOpen}
+          stage={ocrStage}
+          error={ocrModalError}
+          onClose={() => setOcrModalOpen(false)}
+          diseaseType={selectedModule}
+          filename={file?.name || (selectedSampleId ? `Sample: ${selectedSampleId}` : 'Clinical Text Input')}
+        />
+        <OCRResultsView
+          ocrResult={ocrResult}
+          onBack={() => setViewMode('scanner')}
+          onTransferToPredictor={handleTransferToPredictor}
+          sourceInfo={file?.name || (selectedSampleId ? `Sample: ${selectedSampleId}` : (rawText ? 'Custom Clinical Text' : 'Lab Document'))}
+        />
+      </>
+    );
+  }
+
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
       <OCRProgressModal
@@ -264,6 +284,42 @@ export default function OCRScannerView({ onApplyParams, setTab }) {
         diseaseType={selectedModule}
         filename={file?.name || (selectedSampleId ? `Sample: ${selectedSampleId}` : 'Clinical Text Input')}
       />
+
+      {/* Active Extraction Banner if results exist */}
+      {ocrResult && (
+        <div style={{
+          padding: '1rem 1.25rem',
+          borderRadius: '12px',
+          background: '#f0fdf4',
+          border: '1px solid #bbf7d0',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '12px',
+          boxShadow: 'var(--shadow-sm)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <CheckCircle2 size={20} color="#16a34a" />
+            <div>
+              <strong style={{ color: '#166534', fontSize: '0.92rem' }}>
+                Extracted Biomarker Results & JEV Suitability Available
+              </strong>
+              <div style={{ fontSize: '0.78rem', color: '#1e3a2b' }}>
+                {ocrResult.extracted_count} biomarkers identified • Audited in SQLite Store
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => setViewMode('results')}
+            className="btn-primary"
+            style={{ padding: '8px 16px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <span>View Extracted Features Page</span>
+            <ArrowRight size={14} />
+          </button>
+        </div>
+      )}
 
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
@@ -618,195 +674,6 @@ export default function OCRScannerView({ onApplyParams, setTab }) {
         }}>
           <AlertCircle size={18} />
           <span>{error}</span>
-        </div>
-      )}
-
-      {/* Extracted Parameters Results Section */}
-      {ocrResult && (
-        <div className="glass-panel glass-panel-glow animate-fade-in" style={{ padding: '1.75rem' }}>
-          
-          {/* Database Persistence & Feature Store Status Banner */}
-          <div style={{
-            marginBottom: '1.5rem',
-            padding: '1.1rem 1.25rem',
-            borderRadius: '12px',
-            background: '#f0fdf4',
-            border: '1px solid #bbf7d0',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '8px'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Database size={18} color="#16a34a" />
-                <strong style={{ color: '#166534', fontSize: '0.92rem' }}>
-                  Features Persisted to SQLite Feature Store (`data/medsynapse.db`)
-                </strong>
-              </div>
-              <span className="badge badge-success" style={{ fontSize: '0.72rem' }}>
-                <ShieldCheck size={12} /> Immutable Audit Ledger
-              </span>
-            </div>
-            <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', fontSize: '0.78rem', color: '#1e3a2b', marginTop: '2px' }}>
-              {ocrResult.feature_extraction_id && (
-                <div>
-                  <strong>Diabetes Feature Extraction ID:</strong>{' '}
-                  <code style={{ background: '#dcfce7', padding: '2px 6px', borderRadius: '4px', fontFamily: 'var(--font-mono)' }}>
-                    {ocrResult.feature_extraction_id}
-                  </code>
-                </div>
-              )}
-              {ocrResult.heart_feature_extraction_id && (
-                <div>
-                  <strong>Heart Feature Extraction ID:</strong>{' '}
-                  <code style={{ background: '#dcfce7', padding: '2px 6px', borderRadius: '4px', fontFamily: 'var(--font-mono)' }}>
-                    {ocrResult.heart_feature_extraction_id}
-                  </code>
-                </div>
-              )}
-              {ocrResult.breast_feature_extraction_id && (
-                <div>
-                  <strong>Breast Feature Extraction ID:</strong>{' '}
-                  <code style={{ background: '#dcfce7', padding: '2px 6px', borderRadius: '4px', fontFamily: 'var(--font-mono)' }}>
-                    {ocrResult.breast_feature_extraction_id}
-                  </code>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* JEV Evidence Suitability Scoring */}
-          {Array.isArray(ocrResult.jev_scoring) && (
-            <div style={{ marginBottom: '1.5rem', paddingBottom: '1.25rem', borderBottom: '1px solid var(--border-card)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.35rem' }}>
-                <span className="badge badge-purple">JEV Evidence Suitability</span>
-                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Routing signal based on extracted biomarker completeness</span>
-              </div>
-              <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.9rem' }}>
-                Scores indicate completeness and clinical suitability of extracted features for each downstream prediction model:
-              </p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem' }}>
-                {ocrResult.jev_scoring.map(score => (
-                  <div key={score.disease} style={{ padding: '0.9rem', border: '1px solid var(--border-card)', borderRadius: '10px', background: '#f5faf6' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', alignItems: 'center' }}>
-                      <strong style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>{score.disease}</strong>
-                      <span className={`badge ${score.status === 'ready_for_routing' ? 'badge-success' : 'badge-warning'}`} style={{ fontSize: '0.62rem' }}>
-                        {score.confidence_percentage}%
-                      </span>
-                    </div>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '6px' }}>
-                      {score.status === 'ready_for_routing' ? 'Evidence complete for routing' : `Missing: ${score.missing_features.join(', ')}`}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Extracted Parameters Header & Transfer Actions */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '1rem' }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span className="badge badge-success">
-                  <CheckCircle2 size={13} /> {ocrResult.extracted_count} Biomarkers Identified
-                </span>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                  Scanned {ocrResult.line_count} document lines
-                </span>
-              </div>
-              <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#ffffff', marginTop: '4px' }}>
-                Extracted Clinical Parameters
-              </h2>
-            </div>
-
-            {/* Quick Actions to Send to Models */}
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-              <button 
-                onClick={() => handleTransferToPredictor('diabetes')}
-                className="btn-accent"
-                style={{ background: 'linear-gradient(135deg, #e11d48, #f43f5e)', padding: '10px 18px' }}
-              >
-                <span>Apply to Diabetes Predictor</span>
-                <ArrowRight size={16} />
-              </button>
-
-              <button 
-                onClick={() => handleTransferToPredictor('heart')}
-                className="btn-primary"
-                style={{ padding: '10px 18px' }}
-              >
-                <span>Apply to Cardiac Predictor</span>
-                <ArrowRight size={16} />
-              </button>
-
-              <button
-                onClick={() => handleTransferToPredictor('breast')}
-                disabled={ocrResult.gemma_breast_cancer?.status !== 'ready_for_inference'}
-                className="btn-primary"
-                style={{ padding: '10px 18px' }}
-                title={ocrResult.gemma_breast_cancer?.status !== 'ready_for_inference' ? 'All 30 explicitly labelled WDBC FNA features are required before screening.' : ''}
-              >
-                <span>Apply to Breast Predictor</span>
-                <ArrowRight size={16} />
-              </button>
-            </div>
-          </div>
-
-          {/* Grid of Extracted Parameter Cards */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gap: '1rem',
-            marginTop: '1.5rem'
-          }}>
-            {Object.entries(ocrResult.parameters || {}).map(([key, item]) => (
-              <div
-                key={key}
-                style={{
-                  padding: '14px',
-                  backgroundColor: '#f5faf6',
-                  borderRadius: '12px',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '6px'
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
-                    {key.replace('_', ' ')}
-                  </span>
-                  <span className="badge badge-cyan" style={{ fontSize: '0.65rem' }}>
-                    {(item.confidence * 100).toFixed(0)}% Conf
-                  </span>
-                </div>
-
-                <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#ffffff', fontFamily: 'var(--font-mono)' }}>
-                  {item.display || item.value} <span style={{ fontSize: '0.85rem', color: '#38bdf8', fontWeight: 500 }}>{item.unit || ''}</span>
-                </div>
-
-                {item.normal_range && (
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                    Standard Ref: <strong style={{ color: 'var(--text-secondary)' }}>{item.normal_range}</strong>
-                  </div>
-                )}
-
-                {(item.clinical_status || item.status) && (
-                  <div>
-                    <span className={`badge ${(item.clinical_status || item.status).includes('Normal') || (item.clinical_status || item.status).includes('Desirable') ? 'badge-success' : 'badge-danger'}`} style={{ fontSize: '0.65rem' }}>
-                      {item.clinical_status || item.status}
-                    </span>
-                  </div>
-                )}
-
-                {item.matched_text && (
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', backgroundColor: '#eef7f0', padding: '4px 6px', borderRadius: '4px', fontFamily: 'var(--font-mono)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    Match: "{item.matched_text}"
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
         </div>
       )}
     </div>

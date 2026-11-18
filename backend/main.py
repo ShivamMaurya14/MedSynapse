@@ -200,7 +200,7 @@ def health_check():
     models_status = {
         "diabetes_model": os.path.exists(os.path.join(BASE_DIR, "models", "diabetes_model.pkl")),
         "heart_model": os.path.exists(os.path.join(BASE_DIR, "models", "heart_model.pkl")),
-        "xray_pneumonia_model": os.path.exists(os.path.join(BASE_DIR, "models", "xrays_pneumonia.keras")),
+        "xray_pneumonia_model": os.path.exists(os.path.join(BASE_DIR, "models", "chest_xray_model.keras")) or os.path.exists(os.path.join(BASE_DIR, "models", "xrays_pneumonia.keras")),
         "brain_tumor_model": os.path.exists(os.path.join(BASE_DIR, "models", "brain_tumor_model.keras")),
         "kidney_stone_model": os.path.exists(os.path.join(BASE_DIR, "models", "kidney_stone_efficientnet_model.keras")),
         "skin_cancer_model": os.path.exists(os.path.join(BASE_DIR, "models", "skin_cancer_model.keras")),
@@ -723,6 +723,69 @@ def predict_breast_cancer_from_feature_store(feature_extraction_id: str):
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+class LLMReportInput(BaseModel):
+    disease_key: Optional[str] = "diabetes"
+    prediction: Optional[Dict[str, Any]] = None
+    inputs: Optional[Dict[str, Any]] = None
+    clinical_report: Optional[Dict[str, Any]] = None
+    model_run_id: Optional[str] = None
+    tweaked_decisions: Optional[Dict[str, Any]] = None
+    edited_sections: Optional[Dict[str, Any]] = None
+
+
+class LLMChatInput(BaseModel):
+    messages: List[Dict[str, str]]
+    report_context: Optional[Dict[str, Any]] = None
+
+
+@app.post("/api/reports/llm-chat")
+def chat_with_clinical_llm(payload: LLMChatInput):
+    """Interactive chat with clinical LLM assistant contextualized to the current report."""
+    try:
+        res = clinical_report_service.chat_with_llm(
+            messages=payload.messages,
+            report_context=payload.report_context or {}
+        )
+        return res
+    except Exception as exc:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"LLM Chat failed: {str(exc)}")
+
+
+@app.post("/api/reports/generate-llm-report")
+def generate_direct_llm_report(payload: LLMReportInput):
+    """Generate structured LLM clinical report for the dedicated second route."""
+    try:
+        has_tweaks = bool(payload.tweaked_decisions and payload.tweaked_decisions.get("hasTweaks"))
+        has_edits = bool(payload.edited_sections and any(payload.edited_sections.values()))
+        if payload.model_run_id and not (has_tweaks or has_edits):
+            try:
+                approved_package = build_approved_report_package(payload.model_run_id)
+                generated = clinical_report_service.generate_final_report(approved_package)
+                saved = save_final_report(payload.model_run_id, approved_package, generated)
+                return {"success": True, "data": saved["final_report"], "model_run": saved}
+            except Exception:
+                pass
+
+        disease_key = payload.disease_key or "diabetes"
+        prediction = payload.prediction or {}
+        inputs = payload.inputs or {}
+        clinical_report = payload.clinical_report or {}
+
+        report = clinical_report_service.synthesize_report_direct(
+            disease_key=disease_key,
+            prediction=prediction,
+            inputs=inputs,
+            clinical_report=clinical_report,
+            tweaked_decisions=payload.tweaked_decisions,
+            edited_sections=payload.edited_sections,
+        )
+        return {"success": True, "data": report}
+    except Exception as exc:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"LLM Report generation failed: {str(exc)}")
 
 
 @app.post("/api/reports/generate-narrative")

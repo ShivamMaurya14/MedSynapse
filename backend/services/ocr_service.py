@@ -343,6 +343,130 @@ class MedicalOCREngine:
                 'matched_text': oldpeak_text.strip()
             }
 
+        # 17. Total Bilirubin
+        tb_val, tb_text = find_param_number([
+            r'(?:total\s*bilirubin|serum\s*bilirubin|t\.?\s*bilirubin|bilirubin\s*total)[^0-9\n]{0,25}?([0-9]{1,2}(?:\.[0-9]+)?)'
+        ], min_val=0.1, max_val=50.0)
+        if tb_val is not None:
+            extracted['total_bilirubin'] = {
+                'value': tb_val,
+                'confidence': 0.95,
+                'unit': 'mg/dL',
+                'normal_range': '0.1 - 1.2 mg/dL',
+                'matched_text': tb_text.strip(),
+                'status': 'Elevated' if tb_val > 1.2 else 'Normal'
+            }
+
+        # 18. Direct Bilirubin (Conjugated)
+        db_val, db_text = find_param_number([
+            r'(?:direct\s*bilirubin|conjugated\s*bilirubin|d\.?\s*bilirubin|bilirubin\s*direct)[^0-9\n]{0,25}?([0-9]{1,2}(?:\.[0-9]+)?)'
+        ], min_val=0.0, max_val=30.0)
+        if db_val is not None:
+            extracted['direct_bilirubin'] = {
+                'value': db_val,
+                'confidence': 0.94,
+                'unit': 'mg/dL',
+                'normal_range': '0.0 - 0.3 mg/dL',
+                'matched_text': db_text.strip(),
+                'status': 'Elevated' if db_val > 0.3 else 'Normal'
+            }
+
+        # 19. Alkaline Phosphatase (ALP)
+        alp_val, alp_text = find_param_number([
+            r'(?:alkaline\s*phosphatase|alkaline\s*phosphotase|alp|alk\s*phos)[^0-9\n]{0,25}?([0-9]{2,4}(?:\.[0-9]+)?)'
+        ], min_val=20, max_val=2500)
+        if alp_val is not None:
+            extracted['alkaline_phosphotase'] = {
+                'value': alp_val,
+                'confidence': 0.95,
+                'unit': 'IU/L',
+                'normal_range': '30 - 120 IU/L',
+                'matched_text': alp_text.strip(),
+                'status': 'Elevated' if alp_val > 140 else 'Normal'
+            }
+
+        # 20. Alanine Aminotransferase (ALT / SGPT)
+        alt_val, alt_text = find_param_number([
+            r'(?:alamine\s*aminotransferase|alanine\s*aminotransferase|alt|sgpt)[^0-9\n]{0,25}?([0-9]{1,4}(?:\.[0-9]+)?)'
+        ], min_val=5, max_val=2500)
+        if alt_val is not None:
+            extracted['alamine_aminotransferase'] = {
+                'value': alt_val,
+                'confidence': 0.95,
+                'unit': 'IU/L',
+                'normal_range': '7 - 56 IU/L',
+                'matched_text': alt_text.strip(),
+                'status': 'Elevated' if alt_val > 56 else 'Normal'
+            }
+
+        # 21. Aspartate Aminotransferase (AST / SGOT)
+        ast_val, ast_text = find_param_number([
+            r'(?:aspartate\s*aminotransferase|ast|sgot)[^0-9\n]{0,25}?([0-9]{1,4}(?:\.[0-9]+)?)'
+        ], min_val=5, max_val=2500)
+        if ast_val is not None:
+            extracted['aspartate_aminotransferase'] = {
+                'value': ast_val,
+                'confidence': 0.95,
+                'unit': 'IU/L',
+                'normal_range': '10 - 40 IU/L',
+                'matched_text': ast_text.strip(),
+                'status': 'Elevated' if ast_val > 40 else 'Normal'
+            }
+
+        # 22. Total Proteins
+        tp_val, tp_text = find_param_number([
+            r'(?:total\s*proteins|total\s*protiens|total\s*protein|serum\s*protein)[^0-9\n]{0,25}?([0-9]{1,2}(?:\.[0-9]+)?)'
+        ], min_val=2.0, max_val=15.0)
+        if tp_val is not None:
+            extracted['total_protiens'] = {
+                'value': tp_val,
+                'confidence': 0.95,
+                'unit': 'g/dL',
+                'normal_range': '6.0 - 8.3 g/dL',
+                'matched_text': tp_text.strip(),
+                'status': 'Normal' if 6.0 <= tp_val <= 8.3 else ('Low' if tp_val < 6.0 else 'High')
+            }
+
+        # 23. Albumin
+        alb_val, alb_text = find_param_number([
+            r'(?:serum\s*albumin|albumin)[^0-9\n]{0,25}?([0-9]{1,2}(?:\.[0-9]+)?)'
+        ], min_val=1.0, max_val=10.0)
+        if alb_val is not None:
+            extracted['albumin'] = {
+                'value': alb_val,
+                'confidence': 0.95,
+                'unit': 'g/dL',
+                'normal_range': '3.5 - 5.5 g/dL',
+                'matched_text': alb_text.strip(),
+                'status': 'Normal' if 3.5 <= alb_val <= 5.5 else ('Low' if alb_val < 3.5 else 'High')
+            }
+
+        # 24. Albumin and Globulin (A/G) Ratio
+        ag_val, ag_text = find_param_number([
+            r'(?:albumin\s*(?:and|to|/)?\s*globulin\s*ratio|a\s*/\s*g\s*ratio|ag\s*ratio)[^0-9\n]{0,20}?([0-9]{1,2}(?:\.[0-9]+)?)'
+        ], min_val=0.2, max_val=5.0)
+        if ag_val is not None:
+            extracted['albumin_and_globulin_ratio'] = {
+                'value': ag_val,
+                'confidence': 0.93,
+                'unit': 'ratio',
+                'normal_range': '1.0 - 2.2',
+                'matched_text': ag_text.strip()
+            }
+        elif alb_val is not None and tp_val is not None and tp_val > alb_val:
+            globulin = tp_val - alb_val
+            derived_ag = round(alb_val / globulin, 2)
+            extracted['albumin_and_globulin_ratio'] = {
+                'value': derived_ag,
+                'confidence': 0.90,
+                'status': 'derived',
+                'rule_id': 'AG_RATIO_FROM_ALBUMIN_TOTAL_PROTEINS',
+                'source_features': ['albumin', 'total_protiens'],
+                'unit': 'ratio',
+                'normal_range': '1.0 - 2.2',
+                'matched_text': f"Albumin ({alb_val}) / Globulin ({round(globulin, 2)}) -> {derived_ag}"
+            }
+
         # Build disease ready default objects with fallbacks
         diabetes_defaults = {
             'pregnancies': int(extracted.get('pregnancies', {}).get('value', 1 if extracted.get('sex', {}).get('value', 1) == 0 else 0)),
@@ -371,6 +495,19 @@ class MedicalOCREngine:
             'thal': int(extracted.get('thal', {}).get('value', 2))
         }
 
+        liver_defaults = {
+            'age': int(extracted.get('age', {}).get('value', 45)),
+            'gender': 0 if extracted.get('sex', {}).get('value', 1) == 1 else 1,
+            'total_bilirubin': float(extracted.get('total_bilirubin', {}).get('value', 1.0)),
+            'direct_bilirubin': float(extracted.get('direct_bilirubin', {}).get('value', 0.3)),
+            'alkaline_phosphotase': float(extracted.get('alkaline_phosphotase', {}).get('value', 200.0)),
+            'alamine_aminotransferase': float(extracted.get('alamine_aminotransferase', {}).get('value', 30.0)),
+            'aspartate_aminotransferase': float(extracted.get('aspartate_aminotransferase', {}).get('value', 35.0)),
+            'total_protiens': float(extracted.get('total_protiens', {}).get('value', 6.5)),
+            'albumin': float(extracted.get('albumin', {}).get('value', 3.5)),
+            'albumin_and_globulin_ratio': float(extracted.get('albumin_and_globulin_ratio', {}).get('value', 1.0))
+        }
+
         return {
             'raw_text': text,
             'line_count': len(lines),
@@ -378,6 +515,7 @@ class MedicalOCREngine:
             'parameters': extracted,
             'ready_inputs': {
                 'diabetes': diabetes_defaults,
-                'heart': heart_defaults
+                'heart': heart_defaults,
+                'liver': liver_defaults
             }
         }

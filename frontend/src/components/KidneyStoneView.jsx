@@ -1,7 +1,9 @@
 import React, { useRef, useState } from 'react';
-import { Activity, Upload, RefreshCw, FileText, CheckCircle2, ShieldCheck, AlertCircle, Sparkles } from 'lucide-react';
+import { Activity, Upload, RefreshCw, FileText, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
 import { predictKidneyStone } from '../services/api';
 import DiagnosticResultCard from './DiagnosticResultCard';
+import ClinicalPipelineProgressModal from './ClinicalPipelineProgressModal';
+import useClinicalPipelineProgress from '../hooks/useClinicalPipelineProgress';
 
 const KIDNEY_DEMOS = [
   {
@@ -38,7 +40,7 @@ const KIDNEY_DEMOS = [
   }
 ];
 
-export default function KidneyStoneView({ setTab }) {
+export default function KidneyStoneView({ setTab, onNavigateToLLMReport, onNavigateToDiagnosticReport }) {
   const inputRef = useRef(null);
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -46,6 +48,7 @@ export default function KidneyStoneView({ setTab }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
+  const pipelineProgress = useClinicalPipelineProgress();
 
   const handleFileChange = (e) => {
     const selected = e.target.files?.[0];
@@ -57,11 +60,27 @@ export default function KidneyStoneView({ setTab }) {
     setError(null);
   };
 
+  const handleDownloadMLReportFromModal = () => {
+    window.print();
+  };
+
+  const handleGenerateLLMReportFromModal = () => {
+    pipelineProgress.close();
+    onNavigateToLLMReport?.({
+      diseaseKey: 'kidney-stone',
+      prediction: result?.data || result || {},
+      inputs: { source_filename: file?.name || 'kidney_ct_scan.jpg' },
+      clinicalReport: result?.clinical_report || null,
+      modelRunId: result?.model_run_id || null,
+    });
+  };
+
   const handleSelectDemo = async (demo) => {
     setSelectedDemo(demo);
     setError(null);
     setResult(null);
     setLoading(true);
+    pipelineProgress.start();
     try {
       const res = await fetch(demo.image);
       if (!res.ok) throw new Error(`HTTP ${res.status} loading ${demo.image}`);
@@ -71,9 +90,23 @@ export default function KidneyStoneView({ setTab }) {
       setFile(sampleFile);
 
       const analysisRes = await predictKidneyStone(sampleFile);
-      setResult(analysisRes);
+      pipelineProgress.transition('awaiting_review');
+      if (onNavigateToDiagnosticReport) {
+        onNavigateToDiagnosticReport({
+          result: analysisRes,
+          title: 'Renal CT Pathology & Stone Assessment',
+          diseaseKey: 'kidney-stone',
+          sourceTab: 'kidney-stone',
+          inputs: { source_filename: sampleFile.name, demo_id: demo.id },
+          onWorkflowStageChange: pipelineProgress.handleWorkflowStageChange,
+        });
+      } else {
+        setResult(analysisRes);
+      }
     } catch (err) {
-      setError('Failed to analyze renal CT scan: ' + (err.message || err));
+      const msg = 'Failed to analyze renal CT scan: ' + (err.message || err);
+      setError(msg);
+      pipelineProgress.fail(msg, 'prediction');
     } finally {
       setLoading(false);
     }
@@ -86,11 +119,27 @@ export default function KidneyStoneView({ setTab }) {
     }
     setLoading(true);
     setError(null);
+    setResult(null);
+    pipelineProgress.start();
     try {
       const res = await predictKidneyStone(file);
-      setResult(res);
+      pipelineProgress.transition('awaiting_review');
+      if (onNavigateToDiagnosticReport) {
+        onNavigateToDiagnosticReport({
+          result: res,
+          title: 'Renal CT Pathology & Stone Assessment',
+          diseaseKey: 'kidney-stone',
+          sourceTab: 'kidney-stone',
+          inputs: { source_filename: file.name },
+          onWorkflowStageChange: pipelineProgress.handleWorkflowStageChange,
+        });
+      } else {
+        setResult(res);
+      }
     } catch (err) {
-      setError(err.message || 'Renal CT analysis failed');
+      const msg = err.message || 'Renal CT analysis failed';
+      setError(msg);
+      pipelineProgress.fail(msg, 'prediction');
     } finally {
       setLoading(false);
     }
@@ -98,6 +147,17 @@ export default function KidneyStoneView({ setTab }) {
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <ClinicalPipelineProgressModal
+        isOpen={pipelineProgress.isOpen}
+        moduleName="KIDNEY PATHOLOGY & CALCULI (CT)"
+        modality="imaging"
+        stage={pipelineProgress.stage}
+        error={pipelineProgress.error}
+        failedAt={pipelineProgress.failedAt}
+        onClose={pipelineProgress.close}
+        onDownloadMLReport={handleDownloadMLReportFromModal}
+        onGenerateLLMReport={handleGenerateLLMReportFromModal}
+      />
       
       {/* Header Banner */}
       <div>
@@ -254,13 +314,55 @@ export default function KidneyStoneView({ setTab }) {
       </div>
 
       {/* Result Card */}
-      {result && (
+      {result && (!onNavigateToDiagnosticReport ? (
         <DiagnosticResultCard 
           result={result} 
           title="Renal CT Pathology & Stone Assessment"
+          diseaseKey="kidney-stone"
+          inputs={{ source_filename: file?.name || 'kidney_ct_scan.jpg' }}
           onReset={() => { setResult(null); setFile(null); setPreview(null); setSelectedDemo(null); }}
+          onNavigateToLLMReport={onNavigateToLLMReport}
         />
-      )}
+      ) : (
+        <div style={{
+          padding: '1rem 1.25rem',
+          background: '#f0fdf4',
+          border: '1px solid #86efac',
+          borderRadius: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <CheckCircle2 size={20} color="#15803d" />
+            <div>
+              <div style={{ fontWeight: 700, color: '#15803d', fontSize: '0.92rem' }}>
+                Active Renal CT Assessment Available
+              </div>
+              <div style={{ fontSize: '0.8rem', color: '#166534' }}>
+                Kidney calculus/cyst/tumor evaluation and Grad-CAM visualizations are open on the dedicated report route.
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => onNavigateToDiagnosticReport({
+              result,
+              title: 'Renal CT Pathology & Stone Assessment',
+              diseaseKey: 'kidney-stone',
+              sourceTab: 'kidney-stone',
+              inputs: { source_filename: file?.name || 'kidney_ct_scan.jpg' },
+              onWorkflowStageChange: pipelineProgress.handleWorkflowStageChange,
+            })}
+            className="btn-primary"
+            style={{ padding: '6px 14px', fontSize: '0.82rem' }}
+          >
+            Open Dedicated Diagnostic Report →
+          </button>
+        </div>
+      ))}
 
     </div>
   );

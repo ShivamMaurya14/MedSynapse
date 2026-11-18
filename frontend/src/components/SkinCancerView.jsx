@@ -1,7 +1,9 @@
 import React, { useRef, useState } from 'react';
-import { Eye, Upload, RefreshCw, FileText, CheckCircle2, ShieldCheck, AlertCircle, Sparkles, AlertTriangle } from 'lucide-react';
+import { Eye, Upload, RefreshCw, FileText, CheckCircle2, AlertCircle, Sparkles, AlertTriangle } from 'lucide-react';
 import { predictSkinCancer } from '../services/api';
 import DiagnosticResultCard from './DiagnosticResultCard';
+import ClinicalPipelineProgressModal from './ClinicalPipelineProgressModal';
+import useClinicalPipelineProgress from '../hooks/useClinicalPipelineProgress';
 
 const SKIN_DEMOS = [
   {
@@ -46,7 +48,7 @@ const SKIN_DEMOS = [
   }
 ];
 
-export default function SkinCancerView({ setTab }) {
+export default function SkinCancerView({ setTab, onNavigateToLLMReport, onNavigateToDiagnosticReport }) {
   const inputRef = useRef(null);
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -54,6 +56,7 @@ export default function SkinCancerView({ setTab }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
+  const pipelineProgress = useClinicalPipelineProgress();
 
   const handleFileChange = (e) => {
     const selected = e.target.files?.[0];
@@ -65,11 +68,27 @@ export default function SkinCancerView({ setTab }) {
     setError(null);
   };
 
+  const handleDownloadMLReportFromModal = () => {
+    window.print();
+  };
+
+  const handleGenerateLLMReportFromModal = () => {
+    pipelineProgress.close();
+    onNavigateToLLMReport?.({
+      diseaseKey: 'skin-cancer',
+      prediction: result?.data || result || {},
+      inputs: { source_filename: file?.name || 'dermoscopy_image.jpg' },
+      clinicalReport: result?.clinical_report || null,
+      modelRunId: result?.model_run_id || null,
+    });
+  };
+
   const handleSelectDemo = async (demo) => {
     setSelectedDemo(demo);
     setError(null);
     setResult(null);
     setLoading(true);
+    pipelineProgress.start();
     try {
       const res = await fetch(demo.image);
       if (!res.ok) throw new Error(`HTTP ${res.status} loading ${demo.image}`);
@@ -79,9 +98,23 @@ export default function SkinCancerView({ setTab }) {
       setFile(sampleFile);
 
       const analysisRes = await predictSkinCancer(sampleFile);
-      setResult(analysisRes);
+      pipelineProgress.transition('awaiting_review');
+      if (onNavigateToDiagnosticReport) {
+        onNavigateToDiagnosticReport({
+          result: analysisRes,
+          title: 'Dermoscopic Skin Cancer Assessment (HAM10000)',
+          diseaseKey: 'skin-cancer',
+          sourceTab: 'skin-cancer',
+          inputs: { source_filename: sampleFile.name, demo_id: demo.id },
+          onWorkflowStageChange: pipelineProgress.handleWorkflowStageChange,
+        });
+      } else {
+        setResult(analysisRes);
+      }
     } catch (err) {
-      setError('Dermoscopic evaluation failed: ' + (err.message || err));
+      const msg = 'Dermoscopic evaluation failed: ' + (err.message || err);
+      setError(msg);
+      pipelineProgress.fail(msg, 'prediction');
     } finally {
       setLoading(false);
     }
@@ -94,11 +127,27 @@ export default function SkinCancerView({ setTab }) {
     }
     setLoading(true);
     setError(null);
+    setResult(null);
+    pipelineProgress.start();
     try {
       const res = await predictSkinCancer(file);
-      setResult(res);
+      pipelineProgress.transition('awaiting_review');
+      if (onNavigateToDiagnosticReport) {
+        onNavigateToDiagnosticReport({
+          result: res,
+          title: 'Dermoscopic Skin Cancer Assessment (HAM10000)',
+          diseaseKey: 'skin-cancer',
+          sourceTab: 'skin-cancer',
+          inputs: { source_filename: file.name },
+          onWorkflowStageChange: pipelineProgress.handleWorkflowStageChange,
+        });
+      } else {
+        setResult(res);
+      }
     } catch (err) {
-      setError(err.message || 'Dermoscopic lesion evaluation failed');
+      const msg = err.message || 'Dermoscopic lesion evaluation failed';
+      setError(msg);
+      pipelineProgress.fail(msg, 'prediction');
     } finally {
       setLoading(false);
     }
@@ -106,6 +155,17 @@ export default function SkinCancerView({ setTab }) {
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <ClinicalPipelineProgressModal
+        isOpen={pipelineProgress.isOpen}
+        moduleName="SKIN CANCER & LESIONS (HAM10000)"
+        modality="imaging"
+        stage={pipelineProgress.stage}
+        error={pipelineProgress.error}
+        failedAt={pipelineProgress.failedAt}
+        onClose={pipelineProgress.close}
+        onDownloadMLReport={handleDownloadMLReportFromModal}
+        onGenerateLLMReport={handleGenerateLLMReportFromModal}
+      />
       
       {/* Header Banner */}
       <div>
@@ -262,13 +322,55 @@ export default function SkinCancerView({ setTab }) {
       </div>
 
       {/* Result Card */}
-      {result && (
+      {result && (!onNavigateToDiagnosticReport ? (
         <DiagnosticResultCard 
           result={result} 
           title="Dermoscopic Skin Cancer Assessment (HAM10000)"
+          diseaseKey="skin-cancer"
+          inputs={{ source_filename: file?.name || 'dermoscopy_image.jpg' }}
           onReset={() => { setResult(null); setFile(null); setPreview(null); setSelectedDemo(null); }}
+          onNavigateToLLMReport={onNavigateToLLMReport}
         />
-      )}
+      ) : (
+        <div style={{
+          padding: '1rem 1.25rem',
+          background: '#f0fdf4',
+          border: '1px solid #86efac',
+          borderRadius: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <CheckCircle2 size={20} color="#15803d" />
+            <div>
+              <div style={{ fontWeight: 700, color: '#15803d', fontSize: '0.92rem' }}>
+                Active Dermoscopic Assessment Available
+              </div>
+              <div style={{ fontSize: '0.8rem', color: '#166534' }}>
+                7-class HAM10000 lesion evaluation and Grad-CAM visualizations are open on the dedicated report route.
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => onNavigateToDiagnosticReport({
+              result,
+              title: 'Dermoscopic Skin Cancer Assessment (HAM10000)',
+              diseaseKey: 'skin-cancer',
+              sourceTab: 'skin-cancer',
+              inputs: { source_filename: file?.name || 'dermoscopy_image.jpg' },
+              onWorkflowStageChange: pipelineProgress.handleWorkflowStageChange,
+            })}
+            className="btn-primary"
+            style={{ padding: '6px 14px', fontSize: '0.82rem' }}
+          >
+            Open Dedicated Diagnostic Report →
+          </button>
+        </div>
+      ))}
 
     </div>
   );

@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Heart, Sparkles, AlertCircle, FileText, Play, RefreshCw, Activity } from 'lucide-react';
 import { predictHeart } from '../services/api';
 import DiagnosticResultCard from './DiagnosticResultCard';
+import ClinicalPipelineProgressModal from './ClinicalPipelineProgressModal';
+import useClinicalPipelineProgress from '../hooks/useClinicalPipelineProgress';
 
-export default function HeartView({ initialData, setTab }) {
+export default function HeartView({ initialData, setTab, onNavigateToLLMReport, onNavigateToDiagnosticReport }) {
   const [formData, setFormData] = useState({
     age: 52,
     sex: 1,
@@ -23,6 +25,7 @@ export default function HeartView({ initialData, setTab }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
+  const pipelineProgress = useClinicalPipelineProgress();
 
   useEffect(() => {
     if (initialData) {
@@ -39,11 +42,26 @@ export default function HeartView({ initialData, setTab }) {
     setLoading(true);
     setError(null);
     setResult(null);
+    pipelineProgress.start();
     try {
       const res = await predictHeart(preset);
-      setResult(res);
+      pipelineProgress.transition('awaiting_review');
+      if (onNavigateToDiagnosticReport) {
+        onNavigateToDiagnosticReport({
+          result: res,
+          title: 'Coronary Cardiovascular Risk Report',
+          diseaseKey: 'heart',
+          sourceTab: 'heart',
+          inputs: preset,
+          onWorkflowStageChange: pipelineProgress.handleWorkflowStageChange,
+        });
+      } else {
+        setResult(res);
+      }
     } catch (err) {
-      setError(err.message || 'Heart disease prediction failed');
+      const msg = err.message || 'Heart disease prediction failed';
+      setError(msg);
+      pipelineProgress.fail(msg, 'prediction');
     } finally {
       setLoading(false);
     }
@@ -53,18 +71,60 @@ export default function HeartView({ initialData, setTab }) {
     if (e) e.preventDefault();
     setLoading(true);
     setError(null);
+    setResult(null);
+    pipelineProgress.start();
     try {
       const res = await predictHeart(formData);
-      setResult(res);
+      pipelineProgress.transition('awaiting_review');
+      if (onNavigateToDiagnosticReport) {
+        onNavigateToDiagnosticReport({
+          result: res,
+          title: 'Coronary Cardiovascular Risk Report',
+          diseaseKey: 'heart',
+          sourceTab: 'heart',
+          inputs: formData,
+          onWorkflowStageChange: pipelineProgress.handleWorkflowStageChange,
+        });
+      } else {
+        setResult(res);
+      }
     } catch (err) {
-      setError(err.message || 'Heart disease prediction failed');
+      const msg = err.message || 'Heart disease prediction failed';
+      setError(msg);
+      pipelineProgress.fail(msg, 'prediction');
     } finally {
       setLoading(false);
     }
   };
 
+  const handleDownloadMLReportFromModal = () => {
+    window.print();
+  };
+
+  const handleGenerateLLMReportFromModal = () => {
+    pipelineProgress.close();
+    onNavigateToLLMReport?.({
+      diseaseKey: 'heart',
+      prediction: result?.data || result || {},
+      inputs: formData,
+      clinicalReport: result?.clinical_report || null,
+      modelRunId: result?.model_run_id || null,
+    });
+  };
+
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+      <ClinicalPipelineProgressModal
+        isOpen={pipelineProgress.isOpen}
+        moduleName="CORONARY HEART DISEASE ANALYZER"
+        modality="tabular"
+        stage={pipelineProgress.stage}
+        error={pipelineProgress.error}
+        failedAt={pipelineProgress.failedAt}
+        onClose={pipelineProgress.close}
+        onDownloadMLReport={handleDownloadMLReportFromModal}
+        onGenerateLLMReport={handleGenerateLLMReportFromModal}
+      />
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
@@ -372,13 +432,55 @@ export default function HeartView({ initialData, setTab }) {
       )}
 
       {/* Results Card */}
-      {result && (
+      {result && (!onNavigateToDiagnosticReport ? (
         <DiagnosticResultCard
           result={result}
           title="Coronary Cardiovascular Risk Report"
+          diseaseKey="heart"
+          inputs={formData}
           onReset={() => setResult(null)}
+          onNavigateToLLMReport={onNavigateToLLMReport}
         />
-      )}
+      ) : (
+        <div style={{
+          padding: '1rem 1.25rem',
+          background: '#f0fdf4',
+          border: '1px solid #86efac',
+          borderRadius: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Activity size={20} color="#15803d" />
+            <div>
+              <div style={{ fontWeight: 700, color: '#15803d', fontSize: '0.92rem' }}>
+                Active Heart Disease Assessment Available
+              </div>
+              <div style={{ fontSize: '0.8rem', color: '#166534' }}>
+                Screening report is open on the dedicated report route.
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => onNavigateToDiagnosticReport({
+              result,
+              title: 'Coronary Cardiovascular Risk Report',
+              diseaseKey: 'heart',
+              sourceTab: 'heart',
+              inputs: formData,
+              onWorkflowStageChange: pipelineProgress.handleWorkflowStageChange,
+            })}
+            className="btn-primary"
+            style={{ padding: '6px 14px', fontSize: '0.82rem' }}
+          >
+            Open Dedicated Diagnostic Report →
+          </button>
+        </div>
+      ))}
     </div>
   );
 }

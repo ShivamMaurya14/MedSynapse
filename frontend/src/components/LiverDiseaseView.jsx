@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Activity, Droplet, Sparkles, RefreshCw, FileText, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Activity, Droplet, Sparkles, RefreshCw, FileText, CheckCircle2, AlertCircle, FileDown, ArrowRight } from 'lucide-react';
 import { predictLiverDisease } from '../services/api';
 import DiagnosticResultCard from './DiagnosticResultCard';
+import ClinicalPipelineProgressModal from './ClinicalPipelineProgressModal';
+import useClinicalPipelineProgress from '../hooks/useClinicalPipelineProgress';
 
 const LIVER_PRESETS = [
   {
@@ -74,7 +76,7 @@ const LIVER_PRESETS = [
   }
 ];
 
-export default function LiverDiseaseView({ setTab, initialData }) {
+export default function LiverDiseaseView({ setTab, initialData, onNavigateToLLMReport, onNavigateToDiagnosticReport }) {
   const [formData, setFormData] = useState({
     age: initialData?.Age ?? initialData?.age ?? 45,
     gender: initialData?.Gender ?? initialData?.gender ?? 'Male',
@@ -91,9 +93,25 @@ export default function LiverDiseaseView({ setTab, initialData }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
+  const pipelineProgress = useClinicalPipelineProgress();
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleDownloadMLReportFromModal = () => {
+    window.print();
+  };
+
+  const handleGenerateLLMReportFromModal = () => {
+    pipelineProgress.close();
+    onNavigateToLLMReport?.({
+      diseaseKey: 'liver',
+      prediction: result?.data || result || {},
+      inputs: formData,
+      clinicalReport: result?.clinical_report || null,
+      modelRunId: result?.model_run_id || null,
+    });
   };
 
   const applyPreset = async (preset) => {
@@ -101,6 +119,7 @@ export default function LiverDiseaseView({ setTab, initialData }) {
     setError(null);
     setResult(null);
     setLoading(true);
+    pipelineProgress.start();
     try {
       const payload = {
         ...preset.values,
@@ -115,9 +134,23 @@ export default function LiverDiseaseView({ setTab, initialData }) {
         ag_ratio: Number(preset.values.ag_ratio)
       };
       const res = await predictLiverDisease(payload);
-      setResult(res);
+      pipelineProgress.transition('awaiting_review');
+      if (onNavigateToDiagnosticReport) {
+        onNavigateToDiagnosticReport({
+          result: res,
+          title: 'Hepatic Function & ILPD Risk Assessment',
+          diseaseKey: 'liver',
+          sourceTab: 'liver',
+          inputs: preset.values,
+          onWorkflowStageChange: pipelineProgress.handleWorkflowStageChange,
+        });
+      } else {
+        setResult(res);
+      }
     } catch (err) {
-      setError(err.message || 'Liver profile evaluation failed');
+      const msg = err.message || 'Liver profile evaluation failed';
+      setError(msg);
+      pipelineProgress.fail(msg, 'prediction');
     } finally {
       setLoading(false);
     }
@@ -127,6 +160,8 @@ export default function LiverDiseaseView({ setTab, initialData }) {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setResult(null);
+    pipelineProgress.start();
     try {
       const payload = {
         ...formData,
@@ -141,9 +176,23 @@ export default function LiverDiseaseView({ setTab, initialData }) {
         ag_ratio: Number(formData.ag_ratio)
       };
       const res = await predictLiverDisease(payload);
-      setResult(res);
+      pipelineProgress.transition('awaiting_review');
+      if (onNavigateToDiagnosticReport) {
+        onNavigateToDiagnosticReport({
+          result: res,
+          title: 'Hepatic Function & ILPD Risk Assessment',
+          diseaseKey: 'liver',
+          sourceTab: 'liver',
+          inputs: formData,
+          onWorkflowStageChange: pipelineProgress.handleWorkflowStageChange,
+        });
+      } else {
+        setResult(res);
+      }
     } catch (err) {
-      setError(err.message || 'Liver screening evaluation failed');
+      const msg = err.message || 'Liver screening evaluation failed';
+      setError(msg);
+      pipelineProgress.fail(msg, 'prediction');
     } finally {
       setLoading(false);
     }
@@ -151,6 +200,17 @@ export default function LiverDiseaseView({ setTab, initialData }) {
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <ClinicalPipelineProgressModal
+        isOpen={pipelineProgress.isOpen}
+        moduleName="LIVER DISEASE SCREENING (ILPD)"
+        modality="tabular"
+        stage={pipelineProgress.stage}
+        error={pipelineProgress.error}
+        failedAt={pipelineProgress.failedAt}
+        onClose={pipelineProgress.close}
+        onDownloadMLReport={handleDownloadMLReportFromModal}
+        onGenerateLLMReport={handleGenerateLLMReportFromModal}
+      />
       
       {/* Header Banner */}
       <div>
@@ -367,13 +427,55 @@ export default function LiverDiseaseView({ setTab, initialData }) {
       </form>
 
       {/* Result Display */}
-      {result && (
+      {result && (!onNavigateToDiagnosticReport ? (
         <DiagnosticResultCard 
           result={result} 
           title="Hepatic Function & ILPD Risk Assessment"
+          diseaseKey="liver"
+          inputs={formData}
           onReset={() => setResult(null)}
+          onNavigateToLLMReport={onNavigateToLLMReport}
         />
-      )}
+      ) : (
+        <div style={{
+          padding: '1rem 1.25rem',
+          background: '#f0fdf4',
+          border: '1px solid #86efac',
+          borderRadius: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Activity size={20} color="#15803d" />
+            <div>
+              <div style={{ fontWeight: 700, color: '#15803d', fontSize: '0.92rem' }}>
+                Active Liver Disease Assessment Available
+              </div>
+              <div style={{ fontSize: '0.8rem', color: '#166534' }}>
+                ILPD hepatic panel evaluation and SHAP analysis are open on the dedicated report route.
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => onNavigateToDiagnosticReport({
+              result,
+              title: 'Hepatic Function & ILPD Risk Assessment',
+              diseaseKey: 'liver',
+              sourceTab: 'liver',
+              inputs: formData,
+              onWorkflowStageChange: pipelineProgress.handleWorkflowStageChange,
+            })}
+            className="btn-primary"
+            style={{ padding: '6px 14px', fontSize: '0.82rem' }}
+          >
+            Open Dedicated Diagnostic Report →
+          </button>
+        </div>
+      ))}
 
     </div>
   );

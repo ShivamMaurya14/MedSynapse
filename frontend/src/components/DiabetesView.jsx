@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Droplets, Sparkles, AlertCircle, FileText, Play, RefreshCw, Activity, ArrowRight } from 'lucide-react';
+import { Droplets, Sparkles, AlertCircle, FileText, Play, RefreshCw, Activity } from 'lucide-react';
 import { predictDiabetes } from '../services/api';
 import DiagnosticResultCard from './DiagnosticResultCard';
 import DiabetesPipelineProgressModal from './DiabetesPipelineProgressModal';
 import useDiabetesPipelineProgress from '../hooks/useDiabetesPipelineProgress';
 
-export default function DiabetesView({ initialData, extractedHighlights, setTab }) {
+export default function DiabetesView({ 
+  initialData, 
+  extractedHighlights, 
+  setTab, 
+  onNavigateToLLMReport,
+  onNavigateToDiagnosticReport 
+}) {
   const [formData, setFormData] = useState({
     pregnancies: 1,
     glucose: 120,
@@ -37,11 +43,26 @@ export default function DiabetesView({ initialData, extractedHighlights, setTab 
     setLoading(true);
     setError(null);
     setResult(null);
+    pipelineProgress.start();
     try {
       const res = await predictDiabetes(preset);
-      setResult(res);
+      pipelineProgress.transition('awaiting_review');
+      if (onNavigateToDiagnosticReport) {
+        onNavigateToDiagnosticReport({
+          result: res,
+          title: 'Diabetes Mellitus Risk Evaluation',
+          diseaseKey: 'diabetes',
+          sourceTab: 'diabetes',
+          inputs: preset,
+          onWorkflowStageChange: pipelineProgress.handleWorkflowStageChange,
+        });
+      } else {
+        setResult(res);
+      }
     } catch (err) {
-      setError(err.message || 'Diabetes prediction failed');
+      const msg = err.message || 'Diabetes prediction failed';
+      setError(msg);
+      pipelineProgress.fail(msg, 'prediction');
     } finally {
       setLoading(false);
     }
@@ -55,8 +76,19 @@ export default function DiabetesView({ initialData, extractedHighlights, setTab 
     pipelineProgress.start();
     try {
       const res = await predictDiabetes(formData);
-      setResult(res);
       pipelineProgress.transition('awaiting_review');
+      if (onNavigateToDiagnosticReport) {
+        onNavigateToDiagnosticReport({
+          result: res,
+          title: 'Diabetes Mellitus Risk Evaluation',
+          diseaseKey: 'diabetes',
+          sourceTab: 'diabetes',
+          inputs: formData,
+          onWorkflowStageChange: pipelineProgress.handleWorkflowStageChange,
+        });
+      } else {
+        setResult(res);
+      }
     } catch (err) {
       const message = err.message || 'Prediction failed';
       setError(message);
@@ -64,6 +96,21 @@ export default function DiabetesView({ initialData, extractedHighlights, setTab 
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDownloadMLReportFromModal = () => {
+    window.print();
+  };
+
+  const handleGenerateLLMReportFromModal = () => {
+    pipelineProgress.close();
+    onNavigateToLLMReport?.({
+      diseaseKey: 'diabetes',
+      prediction: result?.data || result || {},
+      inputs: formData,
+      clinicalReport: result?.clinical_report || null,
+      modelRunId: result?.model_run_id || null,
+    });
   };
 
   return (
@@ -74,6 +121,8 @@ export default function DiabetesView({ initialData, extractedHighlights, setTab 
         error={pipelineProgress.error}
         failedAt={pipelineProgress.failedAt}
         onClose={pipelineProgress.close}
+        onDownloadMLReport={handleDownloadMLReportFromModal}
+        onGenerateLLMReport={handleGenerateLLMReportFromModal}
       />
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
@@ -317,14 +366,55 @@ export default function DiabetesView({ initialData, extractedHighlights, setTab 
       )}
 
       {/* Results Card */}
-      {result && (
+      {result && (!onNavigateToDiagnosticReport ? (
         <DiagnosticResultCard
           result={result}
           title="Diabetes Mellitus Risk Evaluation"
-          onWorkflowStageChange={pipelineProgress.handleWorkflowStageChange}
+          diseaseKey="diabetes"
+          inputs={formData}
           onReset={() => { setResult(null); pipelineProgress.reset(); }}
+          onNavigateToLLMReport={onNavigateToLLMReport}
         />
-      )}
+      ) : (
+        <div style={{
+          padding: '1rem 1.25rem',
+          background: '#f0fdf4',
+          border: '1px solid #86efac',
+          borderRadius: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Activity size={20} color="#15803d" />
+            <div>
+              <div style={{ fontWeight: 700, color: '#15803d', fontSize: '0.92rem' }}>
+                Active Diabetes Assessment Available
+              </div>
+              <div style={{ fontSize: '0.8rem', color: '#166534' }}>
+                Screening report is open on the dedicated report route.
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => onNavigateToDiagnosticReport({
+              result,
+              title: 'Diabetes Mellitus Risk Evaluation',
+              diseaseKey: 'diabetes',
+              sourceTab: 'diabetes',
+              inputs: formData,
+              onWorkflowStageChange: pipelineProgress.handleWorkflowStageChange,
+            })}
+            className="btn-primary"
+            style={{ padding: '6px 14px', fontSize: '0.82rem' }}
+          >
+            Open Dedicated Diagnostic Report →
+          </button>
+        </div>
+      ))}
     </div>
   );
 }

@@ -1,7 +1,9 @@
 import React, { useRef, useState } from 'react';
-import { Brain, Upload, RefreshCw, FileText, CheckCircle2, ShieldCheck, AlertCircle, Sparkles } from 'lucide-react';
+import { Brain, Upload, RefreshCw, FileText, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
 import { predictBrainTumor } from '../services/api';
 import DiagnosticResultCard from './DiagnosticResultCard';
+import ClinicalPipelineProgressModal from './ClinicalPipelineProgressModal';
+import useClinicalPipelineProgress from '../hooks/useClinicalPipelineProgress';
 
 const DEMO_CASES = [
   {
@@ -38,7 +40,7 @@ const DEMO_CASES = [
   }
 ];
 
-export default function BrainTumorView({ setTab }) {
+export default function BrainTumorView({ setTab, onNavigateToLLMReport, onNavigateToDiagnosticReport }) {
   const inputRef = useRef(null);
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -46,6 +48,7 @@ export default function BrainTumorView({ setTab }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
+  const pipelineProgress = useClinicalPipelineProgress();
 
   const handleFileChange = (e) => {
     const selected = e.target.files?.[0];
@@ -57,11 +60,27 @@ export default function BrainTumorView({ setTab }) {
     setError(null);
   };
 
+  const handleDownloadMLReportFromModal = () => {
+    window.print();
+  };
+
+  const handleGenerateLLMReportFromModal = () => {
+    pipelineProgress.close();
+    onNavigateToLLMReport?.({
+      diseaseKey: 'brain-tumor',
+      prediction: result?.data || result || {},
+      inputs: { source_filename: file?.name || 'cranial_mri_scan.jpg' },
+      clinicalReport: result?.clinical_report || null,
+      modelRunId: result?.model_run_id || null,
+    });
+  };
+
   const handleSelectDemo = async (demo) => {
     setSelectedDemo(demo);
     setError(null);
     setResult(null);
     setLoading(true);
+    pipelineProgress.start();
     try {
       const res = await fetch(demo.image);
       if (!res.ok) throw new Error(`HTTP ${res.status} loading ${demo.image}`);
@@ -71,9 +90,23 @@ export default function BrainTumorView({ setTab }) {
       setFile(sampleFile);
       
       const analysisRes = await predictBrainTumor(sampleFile);
-      setResult(analysisRes);
+      pipelineProgress.transition('awaiting_review');
+      if (onNavigateToDiagnosticReport) {
+        onNavigateToDiagnosticReport({
+          result: analysisRes,
+          title: 'Cranial MRI Brain Tumor Assessment',
+          diseaseKey: 'brain-tumor',
+          sourceTab: 'brain-tumor',
+          inputs: { source_filename: sampleFile.name, demo_id: demo.id },
+          onWorkflowStageChange: pipelineProgress.handleWorkflowStageChange,
+        });
+      } else {
+        setResult(analysisRes);
+      }
     } catch (err) {
-      setError('Brain tumor analysis failed: ' + (err.message || err));
+      const msg = 'Brain tumor analysis failed: ' + (err.message || err);
+      setError(msg);
+      pipelineProgress.fail(msg, 'prediction');
     } finally {
       setLoading(false);
     }
@@ -86,11 +119,27 @@ export default function BrainTumorView({ setTab }) {
     }
     setLoading(true);
     setError(null);
+    setResult(null);
+    pipelineProgress.start();
     try {
       const res = await predictBrainTumor(file);
-      setResult(res);
+      pipelineProgress.transition('awaiting_review');
+      if (onNavigateToDiagnosticReport) {
+        onNavigateToDiagnosticReport({
+          result: res,
+          title: 'Cranial MRI Brain Tumor Assessment',
+          diseaseKey: 'brain-tumor',
+          sourceTab: 'brain-tumor',
+          inputs: { source_filename: file.name },
+          onWorkflowStageChange: pipelineProgress.handleWorkflowStageChange,
+        });
+      } else {
+        setResult(res);
+      }
     } catch (err) {
-      setError(err.message || 'Brain tumor analysis failed');
+      const msg = err.message || 'Brain tumor analysis failed';
+      setError(msg);
+      pipelineProgress.fail(msg, 'prediction');
     } finally {
       setLoading(false);
     }
@@ -98,6 +147,17 @@ export default function BrainTumorView({ setTab }) {
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <ClinicalPipelineProgressModal
+        isOpen={pipelineProgress.isOpen}
+        moduleName="CRANIAL BRAIN TUMOR (MRI) ANALYZER"
+        modality="imaging"
+        stage={pipelineProgress.stage}
+        error={pipelineProgress.error}
+        failedAt={pipelineProgress.failedAt}
+        onClose={pipelineProgress.close}
+        onDownloadMLReport={handleDownloadMLReportFromModal}
+        onGenerateLLMReport={handleGenerateLLMReportFromModal}
+      />
       
       <div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
@@ -252,13 +312,55 @@ export default function BrainTumorView({ setTab }) {
 
       </div>
 
-      {result && (
+      {result && (!onNavigateToDiagnosticReport ? (
         <DiagnosticResultCard 
           result={result} 
           title="Cranial MRI Brain Tumor Assessment"
+          diseaseKey="brain-tumor"
+          inputs={{ source_filename: file?.name || 'cranial_mri_scan.jpg' }}
           onReset={() => { setResult(null); setFile(null); setPreview(null); setSelectedDemo(null); }}
+          onNavigateToLLMReport={onNavigateToLLMReport}
         />
-      )}
+      ) : (
+        <div style={{
+          padding: '1rem 1.25rem',
+          background: '#f0fdf4',
+          border: '1px solid #86efac',
+          borderRadius: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <CheckCircle2 size={20} color="#15803d" />
+            <div>
+              <div style={{ fontWeight: 700, color: '#15803d', fontSize: '0.92rem' }}>
+                Active Cranial MRI Assessment Available
+              </div>
+              <div style={{ fontSize: '0.8rem', color: '#166534' }}>
+                Brain tumor localization and Grad-CAM visualizations are open on the dedicated report route.
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => onNavigateToDiagnosticReport({
+              result,
+              title: 'Cranial MRI Brain Tumor Assessment',
+              diseaseKey: 'brain-tumor',
+              sourceTab: 'brain-tumor',
+              inputs: { source_filename: file?.name || 'cranial_mri_scan.jpg' },
+              onWorkflowStageChange: pipelineProgress.handleWorkflowStageChange,
+            })}
+            className="btn-primary"
+            style={{ padding: '6px 14px', fontSize: '0.82rem' }}
+          >
+            Open Dedicated Diagnostic Report →
+          </button>
+        </div>
+      ))}
 
     </div>
   );

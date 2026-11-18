@@ -66,7 +66,7 @@ class GemmaService:
         self.timeout_seconds = (
             timeout_seconds
             if timeout_seconds is not None
-            else float(os.getenv("GEMMA_TIMEOUT_SECONDS", "180"))
+            else float(os.getenv("GEMMA_TIMEOUT_SECONDS", "30"))
         )
 
     @property
@@ -192,7 +192,7 @@ class GemmaService:
             # Ollama accepts a JSON Schema here.  Generic JSON mode permits
             # the model to drop keys; this schema requires all seven fields.
             "format": json_schema or diabetes_extraction_json_schema(),
-            "options": {"temperature": 0},
+            "options": {"temperature": 0, "num_predict": 350},
         }
         request = Request(
             f"{self.base_url}/api/generate",

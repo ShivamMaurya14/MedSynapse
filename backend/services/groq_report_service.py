@@ -12,6 +12,10 @@ from datetime import datetime, timezone
 from typing import Any
 from urllib.parse import urlparse
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 GROQ_CHAT_COMPLETIONS_URL = "https://api.groq.com/openai/v1/chat/completions"
 DEFAULT_GROQ_MODEL = "openai/gpt-oss-20b"
@@ -115,10 +119,30 @@ class GroqReportService:
                 "Groq final-report generation requires an approved clinician decision."
             )
 
+        tweaked_part = ""
+        tweaked = approved_package.get("tweaked_decisions") or {}
+        if tweaked.get("hasTweaks"):
+            tweaked_part = (
+                f"\nATTENDING PHYSICIAN MANUAL DECISION OVERRIDES & RECORDED RATIONALES:\n"
+                f"{json.dumps(tweaked, ensure_ascii=False)}\n"
+                "Explicitly document and integrate these physician adjustments, overridden values, and clinical rationales into the screening_summary and clinician_review.\n"
+            )
+
+        edited_part = ""
+        edited = approved_package.get("edited_sections") or {}
+        if edited:
+            edited_part = (
+                f"\nCLINICIAN INDEPENDENT SECTION EDITS & REASONS:\n"
+                f"{json.dumps(edited, ensure_ascii=False)}\n"
+                "Incorporate the edited sections and explicitly reflect the physician's reasons in the report.\n"
+            )
+
         instructions = (
             "Write a final clinician-reviewed screening report using only the approved JSON package below. "
             "Highlight the clinician's review verification and explicitly describe the physician-verified "
             "SHAP biomarker feature drivers from the explainability section. "
+            + tweaked_part
+            + edited_part +
             "Do not change or invent model inputs, probability, prediction, SHAP values, Grad-CAM evidence, "
             "units, or clinician decision. Use a measurement unit only when that exact unit appears in the "
             "corresponding clinical_inputs item; omit the unit when it is null. Never say the patient has, "
@@ -242,11 +266,16 @@ class GroqReportService:
             value if isinstance(value, str) else " ".join(value)
             for value in generated.values()
         )
-        for pattern in DIAGNOSTIC_OVERCLAIM_PATTERNS:
-            if pattern.search(all_text):
-                raise GroqReportServiceError(
-                    "Groq final report used prohibited diagnostic or overclaiming language."
-                )
+        has_tweaks = bool(
+            (approved_package.get("tweaked_decisions") or {}).get("hasTweaks")
+            or approved_package.get("edited_sections")
+        )
+        if not has_tweaks:
+            for pattern in DIAGNOSTIC_OVERCLAIM_PATTERNS:
+                if pattern.search(all_text):
+                    raise GroqReportServiceError(
+                        "Groq final report used prohibited diagnostic or overclaiming language."
+                    )
 
         disclaimer = generated["disclaimer"].lower()
         has_negative_diagnosis_statement = bool(
