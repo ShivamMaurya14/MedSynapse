@@ -1,0 +1,17 @@
+MEDSYNAPSE - SYNTHETIC TEST FIXTURE
+Ophthalmology Screening Report - Normal Reference Scenario
+Synthetic retinal-screening narrative with no flagged referral finding.
+Not patient data. Not a diagnosis. For local pipeline testing only.
+
+PATIENT CONTEXT
+Age: 41 years
+Screening type: Routine retinal photograph review
+
+OBSERVATION SUMMARY
+Macula: documented as unremarkable in this synthetic scenario
+Optic disc: documented as within expected appearance in this synthetic scenario
+Retinal vessels: documented as no obvious screening flag in this synthetic scenario
+
+TEST USE
+Expected workflow: retain as document/OCR fixture only.
+Eye model input remains a companion color fundus image, not this report text.

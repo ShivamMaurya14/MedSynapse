@@ -1,0 +1,88 @@
+================================================================================
+MEDSYNAPSE CLINICAL DECISION SUPPORT PLATFORM - DIAGNOSTIC REPORT
+================================================================================
+Case Identification : EVAL-BREAST-004
+Clinical Module     : Clinical Disease
+Diagnostic Modality : Standard Clinical Panel
+Scenario Description: Benign Fibroadenoma Regular Nuclear Profile
+Attending Clinician : Dr. Sarah Chen, MD (Senior Attending Physician)
+Report Timestamp    : 2026-11-19 04:20 UTC
+System Purpose      : AI Platform Benchmark & Evaluation Dataset
+--------------------------------------------------------------------------------
+1. CLINICAL INPUT PARAMETERS & OBSERVATIONS
+--------------------------------------------------------------------------------
+  * Radius Mean                         : 13.54              [Standard reference]
+  * Texture Mean                        : 14.36              [Standard reference]
+  * Perimeter Mean                      : 87.46              [Standard reference]
+  * Area Mean                           : 566.3              [Standard reference]
+  * Smoothness Mean                     : 0.09779            [Standard reference]
+  * Compactness Mean                    : 0.08129            [Standard reference]
+  * Concavity Mean                      : 0.06664            [Standard reference]
+  * Concave Points Mean                 : 0.04781            [Standard reference]
+  * Symmetry Mean                       : 0.1885             [Standard reference]
+  * Fractal Dimension Mean              : 0.05766            [Standard reference]
+  * Radius Se                           : 0.2699             [Standard reference]
+  * Texture Se                          : 0.7886             [Standard reference]
+  * Perimeter Se                        : 2.058              [Standard reference]
+  * Area Se                             : 23.56              [Standard reference]
+  * Smoothness Se                       : 0.008462           [Standard reference]
+  * Compactness Se                      : 0.0146             [Standard reference]
+  * Concavity Se                        : 0.02387            [Standard reference]
+  * Concave Points Se                   : 0.01315            [Standard reference]
+  * Symmetry Se                         : 0.0198             [Standard reference]
+  * Fractal Dimension Se                : 0.0023             [Standard reference]
+  * Radius Worst                        : 15.11              [Standard reference]
+  * Texture Worst                       : 19.26              [Standard reference]
+  * Perimeter Worst                     : 99.7               [Standard reference]
+  * Area Worst                          : 711.2              [Standard reference]
+  * Smoothness Worst                    : 0.144              [Standard reference]
+  * Compactness Worst                   : 0.1773             [Standard reference]
+  * Concavity Worst                     : 0.239              [Standard reference]
+  * Concave Points Worst                : 0.1288             [Standard reference]
+  * Symmetry Worst                      : 0.2977             [Standard reference]
+  * Fractal Dimension Worst             : 0.07259            [Standard reference]
+
+--------------------------------------------------------------------------------
+2. AI MODEL DIAGNOSTIC INFERENCE & RISK ASSESSMENT
+--------------------------------------------------------------------------------
+  * Primary Diagnostic Finding : Benign
+  * Assessed Risk Tier         : Low Risk
+  * Calibrated Probability     : 0.0476 (4.8%)
+  * Decision Boundary Cutoff   : 0.50 (Standard Decision Cutoff)
+  * Ground-Truth Scenario Fit  : Regular nuclear margins, small mean radius (13.54), low concavity and uniform chromatin
+
+--------------------------------------------------------------------------------
+3. EXPLAINABLE AI (XAI) ATTRIBUTION
+--------------------------------------------------------------------------------
+  * Explainability Architecture: SHAP PermutationExplainer (raw WDBC features through scaler/PCA/classifier)
+  * Primary Risk-Increasing Drivers (Positive SHAP φ):
+      - smoothness_worst              : φ = +0.0324 (patient value: 0.144)
+      - fractal_dimension_se          : φ = +0.0274 (patient value: 0.0023)
+      - texture_se                    : φ = +0.0269 (patient value: 0.7886)
+      - smoothness_se                 : φ = +0.0243 (patient value: 0.008462)
+  * Protective / Mitigating Factors (Negative SHAP φ):
+      - texture_mean                  : φ = -0.0915 (patient value: 14.36)
+      - texture_worst                 : φ = -0.0862 (patient value: 19.26)
+      - radius_se                     : φ = -0.0473 (patient value: 0.2699)
+      - radius_worst                  : φ = -0.0394 (patient value: 15.11)
+
+--------------------------------------------------------------------------------
+4. ATTENDING PHYSICIAN PERSPECTIVE & ACTIONABLE RECOMMENDATIONS
+--------------------------------------------------------------------------------
+Screening Summary:
+  MedSynapse Clinical AI completed a multivariable assessment for Breast Cancer. The evaluated patient profile (Radius Mean: 13.54 units; Texture Mean: 14.36 units; Perimeter Mean: 87.46 units; Area Mean: 566.3 units; Smoothness Mean: 0.09779 units; Compactness Mean: 0.08129 units) yielded an estimated model risk probability of 0.0476 (4.8%), categorizing the screening status into the Low Risk tier with an active assessment of 'Benign'.
+
+Physician Perspective Analysis:
+  CLINICAL EVALUATION FROM ATTENDING PHYSICIAN'S POINT OF VIEW (Dr. Sarah Chen, MD, Senior Attending Physician):
+1. AI Model Concordance: The automated multivariable evaluation for Breast Cancer (4.8% probability, Low Risk) was audited against the patient's submitted parameters (Radius Mean: 13.54 units; Texture Mean: 14.36 units; Perimeter Mean: 87.46 units; Area Mean: 566.3 units; Smoothness Mean: 0.09779 units; Compactness Mean: 0.08129 units).
+2. Clinical Correlation: The model's baseline classification of 'Benign' is clinically congruent with standard diagnostic guidelines. No acute discordant biomarker patterns were identified.
+3. Recommendation: Endorsed for standard protocol follow-up and surveillance under continuous clinical oversight.
+
+Actionable Recommendations:
+  1. This research screening output requires qualified clinician review.
+
+================================================================================
+SAFETY & COMPLIANCE NOTICE: This diagnostic evaluation report is generated for
+benchmarking and clinician decision support. It is not an autonomous medical
+diagnosis. All therapeutic strategies require licensed clinician confirmation.
+================================================================================

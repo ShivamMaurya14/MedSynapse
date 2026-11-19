@@ -1,0 +1,18 @@
+ST. JUDE CARDIOLOGY INSTITUTE - CARDIOVASCULAR REPORT
+Patient: Arthur Pendelton | Age: 59 | Sex: Male
+
+COMPREHENSIVE CARDIAC & LIPID EVALUATION
+------------------------------------------------------------
+Resting Blood Pressure (trestbps): 152/94 mm Hg  [Target: < 120/80 mm Hg]
+Serum Total Cholesterol (chol)   : 275.0 mg/dL   [Desirable: < 200 mg/dL] * HIGH
+Fasting Blood Glucose            : 135.0 mg/dL   [Target: 70-99 mg/dL]
+Maximum Heart Rate (thalach)     : 122 bpm       [Expected Max: 161 bpm]
+Chest Pain Presentation (cp)     : Typical Angina (Type 0)
+Exercise Induced Angina (exang)  : Positive (Yes)
+Resting Electrocardiogram (ECG)  : ST-T wave abnormality
+ST Depression (oldpeak)          : 2.6 mm
+Slope of Peak ST Segment         : Flat (1)
+Major Vessels by Fluoroscopy (ca): 2 major vessels
+Thalassemia Status (thal)        : Reversible Defect (3)
+------------------------------------------------------------
+Clinical Impression: High Risk Coronary Artery Disease with Myocardial Ischemia.

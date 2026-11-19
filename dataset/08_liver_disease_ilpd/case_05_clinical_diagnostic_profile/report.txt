@@ -1,0 +1,70 @@
+================================================================================
+MEDSYNAPSE CLINICAL DECISION SUPPORT PLATFORM - DIAGNOSTIC REPORT
+================================================================================
+Case Identification : EVAL-LIVER-005
+Clinical Module     : Clinical Disease
+Diagnostic Modality : Standard Clinical Panel
+Scenario Description: Chronic Low-Grade Hepatic Inflammation Profile
+Attending Clinician : Dr. Sarah Chen, MD (Senior Attending Physician)
+Report Timestamp    : 2026-11-19 04:20 UTC
+System Purpose      : AI Platform Benchmark & Evaluation Dataset
+--------------------------------------------------------------------------------
+1. CLINICAL INPUT PARAMETERS & OBSERVATIONS
+--------------------------------------------------------------------------------
+  * Patient Age                         : 45 years           [Adult reference]
+  * Biological Gender                   : Male string        [Male / Female]
+  * Total Serum Bilirubin               : 1.4 mg/dL          [Normal: 0.2 - 1.2 mg/dL]
+  * Direct Conjugated Bilirubin         : 0.6 mg/dL          [Normal: 0.0 - 0.4 mg/dL]
+  * Alkaline Phosphatase (ALP)          : 260 IU/L           [Normal: 44 - 147 IU/L]
+  * ALT / SGPT Transaminase             : 48 IU/L            [Normal: 7 - 56 IU/L]
+  * AST / SGOT Transaminase             : 56 IU/L            [Normal: 10 - 40 IU/L]
+  * Total Serum Proteins                : 6.8 g/dL           [Normal: 6.0 - 8.3 g/dL]
+  * Serum Albumin                       : 3.1 g/dL           [Normal: 3.5 - 5.5 g/dL]
+  * Albumin / Globulin Ratio            : 0.83 ratio         [Normal: 1.0 - 2.5]
+
+--------------------------------------------------------------------------------
+2. AI MODEL DIAGNOSTIC INFERENCE & RISK ASSESSMENT
+--------------------------------------------------------------------------------
+  * Primary Diagnostic Finding : Liver Disease Detected
+  * Assessed Risk Tier         : High Risk
+  * Calibrated Probability     : 0.7501 (75.0%)
+  * Decision Boundary Cutoff   : 0.50 (Standard Decision Cutoff)
+  * Ground-Truth Scenario Fit  : Slight transaminase elevation with borderline alkaline phosphatase elevation
+
+--------------------------------------------------------------------------------
+3. EXPLAINABLE AI (XAI) ATTRIBUTION
+--------------------------------------------------------------------------------
+  * Explainability Architecture: SHAP TreeExplainer
+  * Primary Risk-Increasing Drivers (Positive SHAP φ):
+      - Alkaline_Phosphotase          : φ = +0.0523 (patient value: 260.0)
+      - Aspartate_Aminotransferase    : φ = +0.0392 (patient value: 56.0)
+      - Albumin                       : φ = +0.0173 (patient value: 3.1)
+      - Total_Protiens                : φ = +0.0123 (patient value: 6.8)
+  * Protective / Mitigating Factors (Negative SHAP φ):
+      - Direct_Bilirubin              : φ = -0.0497 (patient value: 0.6)
+      - Alamine_Aminotransferase      : φ = -0.0169 (patient value: 48.0)
+      - Total_Bilirubin               : φ = -0.0082 (patient value: 1.4)
+      - Albumin_and_Globulin_Ratio    : φ = -0.0031 (patient value: 0.83)
+
+--------------------------------------------------------------------------------
+4. ATTENDING PHYSICIAN PERSPECTIVE & ACTIONABLE RECOMMENDATIONS
+--------------------------------------------------------------------------------
+Screening Summary:
+  MedSynapse Clinical AI completed a multivariable assessment for Liver Disease (Ilpd). The evaluated patient profile (Patient Age: 45 years; Biological Gender: Male Male/Female; Total Bilirubin: 1.4 mg/dL; Direct Bilirubin: 0.6 mg/dL; Alkaline Phosphatase (ALP): 260 IU/L; Alanine Aminotransferase (ALT): 48 IU/L) yielded an estimated model risk probability of 0.7501 (75.0%), categorizing the screening status into the High Risk tier with an active assessment of 'Liver Disease Detected'.
+
+Physician Perspective Analysis:
+  CLINICAL EVALUATION FROM ATTENDING PHYSICIAN'S POINT OF VIEW (Dr. Sarah Chen, MD, Senior Attending Physician):
+1. AI Model Concordance: The automated multivariable evaluation for Liver Disease (Ilpd) (75.0% probability, High Risk) was audited against the patient's submitted parameters (Patient Age: 45 years; Biological Gender: Male Male/Female; Total Bilirubin: 1.4 mg/dL; Direct Bilirubin: 0.6 mg/dL; Alkaline Phosphatase (ALP): 260 IU/L; Alanine Aminotransferase (ALT): 48 IU/L).
+2. Clinical Correlation: The model's baseline classification of 'Liver Disease Detected' is clinically congruent with standard diagnostic guidelines. No acute discordant biomarker patterns were identified.
+3. Recommendation: Endorsed for standard protocol follow-up and surveillance under continuous clinical oversight.
+
+Actionable Recommendations:
+  1. Comprehensive gastroenterology/hepatology clinical assessment.
+  2. Abdominal ultrasound to evaluate hepatic parenchymal echotexture.
+  3. Review alcohol intake and hepatotoxic medication profile.
+
+================================================================================
+SAFETY & COMPLIANCE NOTICE: This diagnostic evaluation report is generated for
+benchmarking and clinician decision support. It is not an autonomous medical
+diagnosis. All therapeutic strategies require licensed clinician confirmation.
+================================================================================

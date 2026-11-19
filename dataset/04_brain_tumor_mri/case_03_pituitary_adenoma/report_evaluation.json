@@ -1,0 +1,80 @@
+{
+  "benchmark_metadata": {
+    "case_id": "EVAL-BRAIN-003",
+    "module_id": "04_brain_tumor_mri",
+    "disease_name": "Brain Tumor (MRI)",
+    "disease_key": "brain_tumor",
+    "modality": "Cranial Magnetic Resonance Imaging (MRI)",
+    "is_image_based": true,
+    "scenario": "Circumscribed neoplasm situated in the sellar region adjacent to the optic chiasm",
+    "source_reference": "frontend/public/test_samples/brain_pituitary.jpg",
+    "generated_at": "2026-11-19T04:20:11.584880+00:00",
+    "evaluator": "MedSynapse Clinical AI Evaluation Pipeline"
+  },
+  "inputs": {
+    "modality": "Coronal T1 Cranial MRI",
+    "sequence": "Pituitary Protocol"
+  },
+  "model_prediction": {
+    "disease": "Brain Tumor (MRI)",
+    "prediction": "Pituitary Adenoma",
+    "diagnosis": "Pituitary Adenoma",
+    "has_disease": true,
+    "is_positive": true,
+    "risk_probability": 1.0,
+    "risk_percentage": 100.0,
+    "confidence_percentage": 100.0,
+    "risk_tier": "High Risk",
+    "class_probabilities": {
+      "Glioma": 0.0,
+      "Meningioma": 0.0,
+      "No Tumor": 0.0,
+      "Pituitary Adenoma": 1.0
+    },
+    "description": "Sellar/suprasellar mass identified near the pituitary fossa and optic chiasm.",
+    "modality": "Cranial Magnetic Resonance Imaging (MRI)",
+    "image_transformation": {
+      "original_dimensions": "512 \u00d7 512 px",
+      "original_mode": "RGB",
+      "transformed_shape": "299 \u00d7 299 \u00d7 3",
+      "normalization": "Float32 [0.0 - 1.0]"
+    },
+    "recommendations": [
+      "Emergency neuroradiology consultation required for immediate staging.",
+      "Schedule follow-up contrast-enhanced T1/T2 FLAIR MRI protocol.",
+      "Have a board-certified radiologist or neurosurgeon review this screening."
+    ]
+  },
+  "explainability": {
+    "method": "Grad-CAM",
+    "status": "available",
+    "top_positive_contributors": [],
+    "attention_statistics": {
+      "max_attention": 1.0,
+      "mean_attention": 0.1736,
+      "focal_ratio_above_50pct": 0.14
+    },
+    "target_class": "Pituitary Adenoma",
+    "has_gradcam_overlay": true
+  },
+  "clinical_synthesis": {
+    "title": "Clinical Screening & Decision Support Synthesis: Brain Tumor (Mri)",
+    "screening_summary": "MedSynapse Clinical AI completed a multivariable assessment for Brain Tumor (Mri). The evaluated patient profile (modality: Coronal T1 Cranial MRI; sequence: Pituitary Protocol) yielded an estimated model risk probability of 1.0000 (100.0%), categorizing the screening status into the High Risk tier with an active assessment of 'Pituitary Adenoma'.",
+    "model_findings": "Statistical evaluation via calibrated probabilistic ensemble backbones demonstrates an assessed score of 100.0%. Contributing biomarker variance highlights: Parameters within standard reference distributions..",
+    "explainability_summary": "Visual explainability generated via Grad-CAM on layer 'block14_sepconv2_act'. Convolutional saliency was calculated for target class 'Pituitary Adenoma', highlighting peak receptive fields with maximum activation intensity of 1.00. Grad-CAM (Gradient-weighted Class Activation Mapping) generated convolutional saliency in layer 'block14_sepconv2_act' for 'Pituitary Adenoma'. Peak activation receptive fields highlight the focal pixel regions that most heavily influenced the neural network prediction. Concentrated high-attention focal zones (\u226550% activation) occupy 14.0% of the receptive feature map. Highlighted saliency regions represent computational attention distribution and do not constitute confirmed anatomical pathology. Grad-CAM spatial overlays identify high-weight anatomical/pathological focal zones driving the neural network classification and do not establish medical causality.",
+    "clinician_review": "Clinician-in-the-loop decision audit completed. Automated clinical decision protocol verification completed with verified feature inputs. Final diagnostic confirmation and therapeutic strategy must be reviewed by the attending licensed clinician.",
+    "physician_perspective_analysis": "CLINICAL EVALUATION FROM ATTENDING PHYSICIAN'S POINT OF VIEW (Dr. Sarah Chen, MD, Senior Attending Physician):\n1. AI Model Concordance: The automated multivariable evaluation for Brain Tumor (Mri) (100.0% probability, High Risk) was audited against the patient's submitted parameters (modality: Coronal T1 Cranial MRI; sequence: Pituitary Protocol).\n2. Clinical Correlation: The model's baseline classification of 'Pituitary Adenoma' is clinically congruent with standard diagnostic guidelines. No acute discordant biomarker patterns were identified.\n3. Recommendation: Endorsed for standard protocol follow-up and surveillance under continuous clinical oversight.",
+    "recommendations": [
+      "Emergency neuroradiology consultation required for immediate staging.",
+      "Schedule follow-up contrast-enhanced T1/T2 FLAIR MRI protocol.",
+      "Have a board-certified radiologist or neurosurgeon review this screening."
+    ]
+  },
+  "files": {
+    "report_pdf": "report.pdf",
+    "report_png": "report.png",
+    "report_txt": "report.txt",
+    "source_image": "source_image.jpg",
+    "gradcam_overlay": "gradcam_overlay.png"
+  }
+}

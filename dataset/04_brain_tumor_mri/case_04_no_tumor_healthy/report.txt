@@ -1,0 +1,61 @@
+================================================================================
+MEDSYNAPSE CLINICAL DECISION SUPPORT PLATFORM - DIAGNOSTIC REPORT
+================================================================================
+Case Identification : EVAL-BRAIN-004
+Clinical Module     : Clinical Disease
+Diagnostic Modality : Standard Clinical Panel
+Scenario Description: Normal Cranial MRI Screening (No Tumor)
+Attending Clinician : Dr. Sarah Chen, MD (Senior Attending Physician)
+Report Timestamp    : 2026-11-19 04:20 UTC
+System Purpose      : AI Platform Benchmark & Evaluation Dataset
+--------------------------------------------------------------------------------
+1. CLINICAL INPUT PARAMETERS & OBSERVATIONS
+--------------------------------------------------------------------------------
+  * Modality                            : Standard Cranial MRI Screening [Standard reference]
+  * Sequence                            : Axial Slice        [Standard reference]
+
+--------------------------------------------------------------------------------
+2. AI MODEL DIAGNOSTIC INFERENCE & RISK ASSESSMENT
+--------------------------------------------------------------------------------
+  * Primary Diagnostic Finding : No Tumor
+  * Assessed Risk Tier         : Low Risk
+  * Calibrated Probability     : 0.0003 (100.0%)
+  * Decision Boundary Cutoff   : 0.50 (Standard Decision Cutoff)
+  * Ground-Truth Scenario Fit  : Unremarkable cerebral and cerebellar parenchyma without focal mass lesions or midline shift
+  * Posterior Probability Distribution:
+      - Glioma                          :  0.00%
+      - Meningioma                      :  0.02%
+      - No Tumor                        : 99.97%
+      - Pituitary Adenoma               :  0.00%
+
+--------------------------------------------------------------------------------
+3. EXPLAINABLE AI (XAI) ATTRIBUTION
+--------------------------------------------------------------------------------
+  * Explainability Architecture: Grad-CAM
+  * Saliency Target Class      : No Tumor
+  * Backpropagated Layer       : block14_sepconv2_act
+  * Peak Attention Intensity   : 1.0000
+  * Heatmap Resolution Shape   : [10, 10]
+
+--------------------------------------------------------------------------------
+4. ATTENDING PHYSICIAN PERSPECTIVE & ACTIONABLE RECOMMENDATIONS
+--------------------------------------------------------------------------------
+Screening Summary:
+  MedSynapse Clinical AI completed a multivariable assessment for Brain Tumor (Mri). The evaluated patient profile (modality: Standard Cranial MRI Screening; sequence: Axial Slice) yielded an estimated model risk probability of 0.0003 (0.0%), categorizing the screening status into the Low Risk tier with an active assessment of 'No Tumor'.
+
+Physician Perspective Analysis:
+  CLINICAL EVALUATION FROM ATTENDING PHYSICIAN'S POINT OF VIEW (Dr. Sarah Chen, MD, Senior Attending Physician):
+1. AI Model Concordance: The automated multivariable evaluation for Brain Tumor (Mri) (0.0% probability, Low Risk) was audited against the patient's submitted parameters (modality: Standard Cranial MRI Screening; sequence: Axial Slice).
+2. Clinical Correlation: The model's baseline classification of 'No Tumor' is clinically congruent with standard diagnostic guidelines. No acute discordant biomarker patterns were identified.
+3. Recommendation: Endorsed for standard protocol follow-up and surveillance under continuous clinical oversight.
+
+Actionable Recommendations:
+  1. Routine neuro-anatomical screening within normal parameters.
+  2. Continue baseline preventative wellness surveillance.
+  3. Have a board-certified radiologist or neurosurgeon review this screening.
+
+================================================================================
+SAFETY & COMPLIANCE NOTICE: This diagnostic evaluation report is generated for
+benchmarking and clinician decision support. It is not an autonomous medical
+diagnosis. All therapeutic strategies require licensed clinician confirmation.
+================================================================================

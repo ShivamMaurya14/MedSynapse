@@ -1,0 +1,67 @@
+================================================================================
+MEDSYNAPSE CLINICAL DECISION SUPPORT PLATFORM - DIAGNOSTIC REPORT
+================================================================================
+Case Identification : EVAL-DIAB-005
+Clinical Module     : Clinical Disease
+Diagnostic Modality : Standard Clinical Panel
+Scenario Description: Severe Hyperglycemia with Hyperinsulinemia Preset
+Attending Clinician : Dr. Sarah Chen, MD (Senior Attending Physician)
+Report Timestamp    : 2026-11-19 04:20 UTC
+System Purpose      : AI Platform Benchmark & Evaluation Dataset
+--------------------------------------------------------------------------------
+1. CLINICAL INPUT PARAMETERS & OBSERVATIONS
+--------------------------------------------------------------------------------
+  * Gravida / Pregnancies               : 3 count            [Normal: 0-2]
+  * Fasting Plasma Glucose              : 168.0 mg/dL        [Normal: 70-99 mg/dL]
+  * Diastolic Blood Pressure            : 88.0 mm Hg         [Normal: < 80 mm Hg]
+  * Triceps Skinfold                    : 34.0 mm            [Normal: 15-25 mm]
+  * Fasting Serum Insulin               : 195.0 μU/mL        [Normal: 2.6-24.9 μU/mL]
+  * Body Mass Index                     : 34.2 kg/m²         [Normal: 18.5-24.9 kg/m²]
+  * Diabetes Pedigree Function          : 0.88 score         [Population: 0.1-0.5]
+  * Patient Age                         : 52 years           [Adult reference]
+
+--------------------------------------------------------------------------------
+2. AI MODEL DIAGNOSTIC INFERENCE & RISK ASSESSMENT
+--------------------------------------------------------------------------------
+  * Primary Diagnostic Finding : Diabetes Mellitus Detected
+  * Assessed Risk Tier         : High Risk
+  * Calibrated Probability     : 0.9335 (93.4%)
+  * Decision Boundary Cutoff   : 0.50 (Standard Decision Cutoff)
+  * Ground-Truth Scenario Fit  : Marked fasting glucose elevation and advanced insulin resistance
+
+--------------------------------------------------------------------------------
+3. EXPLAINABLE AI (XAI) ATTRIBUTION
+--------------------------------------------------------------------------------
+  * Explainability Architecture: SHAP PermutationExplainer (full diabetes voting ensemble)
+  * Primary Risk-Increasing Drivers (Positive SHAP φ):
+      - Glucose                       : φ = +0.3323 (patient value: 168.0)
+      - Age                           : φ = +0.0842 (patient value: 52.0)
+      - DiabetesPedigreeFunction      : φ = +0.0644 (patient value: 0.88)
+      - Insulin                       : φ = +0.0456 (patient value: 195.0)
+  * Protective / Mitigating Factors (Negative SHAP φ):
+      - Pregnancies                   : φ = -0.0084 (patient value: 3.0)
+      - BloodPressure                 : φ = -0.0064 (patient value: 88.0)
+
+--------------------------------------------------------------------------------
+4. ATTENDING PHYSICIAN PERSPECTIVE & ACTIONABLE RECOMMENDATIONS
+--------------------------------------------------------------------------------
+Screening Summary:
+  MedSynapse Clinical AI completed a multivariable assessment for Diabetes Mellitus. The evaluated patient profile (Pregnancies: 3 count; Fasting glucose: 168.0 mg/dL; Diastolic blood pressure: 88.0 mm Hg; Triceps skin thickness: 34.0 mm; Serum insulin: 195.0 μU/mL; Body mass index: 34.2 kg/m²) yielded an estimated model risk probability of 0.9335 (93.3%), categorizing the screening status into the High Risk tier with an active assessment of 'Diabetes Mellitus Detected'.
+
+Physician Perspective Analysis:
+  CLINICAL EVALUATION FROM ATTENDING PHYSICIAN'S POINT OF VIEW (Dr. Sarah Chen, MD, Senior Attending Physician):
+1. AI Model Concordance: The automated multivariable evaluation for Diabetes Mellitus (93.3% probability, High Risk) was audited against the patient's submitted parameters (Pregnancies: 3 count; Fasting glucose: 168.0 mg/dL; Diastolic blood pressure: 88.0 mm Hg; Triceps skin thickness: 34.0 mm; Serum insulin: 195.0 μU/mL; Body mass index: 34.2 kg/m²).
+2. Clinical Correlation: The model's baseline classification of 'Diabetes Mellitus Detected' is clinically congruent with standard diagnostic guidelines. No acute discordant biomarker patterns were identified.
+3. Recommendation: Endorsed for standard protocol follow-up and surveillance under continuous clinical oversight.
+
+Actionable Recommendations:
+  1. Schedule a clinical consultation for oral glucose tolerance test (OGTT) and HbA1c screening.
+  2. Adopt a low-glycemic dietary regimen rich in soluble fiber and lean protein.
+  3. Engage in at least 150 minutes per week of moderate-intensity aerobic and resistance exercise.
+  4. Monitor self-monitored blood glucose levels (fasting and 2-hr postprandial).
+
+================================================================================
+SAFETY & COMPLIANCE NOTICE: This diagnostic evaluation report is generated for
+benchmarking and clinician decision support. It is not an autonomous medical
+diagnosis. All therapeutic strategies require licensed clinician confirmation.
+================================================================================

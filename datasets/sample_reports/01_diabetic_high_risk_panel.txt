@@ -1,0 +1,15 @@
+METROPOLITAN CLINICAL LABORATORIES - GLYCEMIC PANEL
+Patient: Eleanor Vance | Age: 45 | Gender: Female | Gravida: 2
+
+CLINICAL BIOCHEMISTRY & METABOLIC PROFILE
+------------------------------------------------------------
+Fasting Blood Sugar (Glucose)  : 168.0 mg/dL   [Normal: 70 - 99 mg/dL]   * HIGH
+Serum Fasting Insulin          : 42.5 uU/mL    [Normal: 2.6 - 24.9 uU/mL]* ELEVATED
+HbA1c (Glycated Hemoglobin)    : 8.2 %         [Normal: 4.0 - 5.6 %]     * DIABETIC
+Blood Pressure (Resting BP)    : 142/90 mm Hg  [Normal: < 120/80 mm Hg]  * HYPERTENSION
+Body Mass Index (BMI)          : 33.4 kg/m2    [Normal: 18.5 - 24.9]     * OBESE CLASS I
+Patient Weight / Height        : 88 kg / 162 cm
+Triceps Skinfold Thickness     : 32.0 mm
+Diabetes Pedigree Function     : 0.78
+------------------------------------------------------------
+Clinical Impression: Uncontrolled Type 2 Diabetes Mellitus with Insulin Resistance.

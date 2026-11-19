@@ -1,0 +1,17 @@
+GLOBAL HEALTHCARE DIAGNOSTICS - EXECUTIVE CHECKUP
+Patient: Sophia Chen | Age: 28 | Sex: Female | Pregnancies: 0
+
+ANNUAL PREVENTATIVE HEALTH SCREENING
+------------------------------------------------------------
+Fasting Blood Glucose          : 84.0 mg/dL    [Normal: 70 - 99 mg/dL]   * OPTIMAL
+Blood Pressure (Resting BP)    : 116/74 mm Hg  [Normal: < 120/80 mm Hg]  * OPTIMAL
+Serum Total Cholesterol        : 165.0 mg/dL   [Desirable: < 200 mg/dL]  * DESIRABLE
+Serum Fasting Insulin          : 6.8 uU/mL     [Normal: 2.6 - 24.9 uU/mL]* OPTIMAL
+Body Mass Index (BMI)          : 21.4 kg/m2    [Normal: 18.5 - 24.9]     * HEALTHY
+Patient Weight / Height        : 58 kg / 165 cm
+Maximum Heart Rate (Pulse)     : 168 bpm       [Normal sinus rhythm]
+Resting ECG                    : Normal Sinus Rhythm
+Skinfold Thickness             : 18.0 mm
+Diabetes Pedigree Function     : 0.18
+------------------------------------------------------------
+Clinical Impression: Normal Physiological Baseline. No metabolic or cardiac anomalies.

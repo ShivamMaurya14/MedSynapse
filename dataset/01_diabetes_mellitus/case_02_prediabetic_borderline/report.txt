@@ -1,0 +1,64 @@
+================================================================================
+MEDSYNAPSE CLINICAL DECISION SUPPORT PLATFORM - DIAGNOSTIC REPORT
+================================================================================
+Case Identification : EVAL-DIAB-002
+Clinical Module     : Clinical Disease
+Diagnostic Modality : Standard Clinical Panel
+Scenario Description: Prediabetic Borderline Glycemic Screening
+Attending Clinician : Dr. Sarah Chen, MD (Senior Attending Physician)
+Report Timestamp    : 2026-11-19 04:20 UTC
+System Purpose      : AI Platform Benchmark & Evaluation Dataset
+--------------------------------------------------------------------------------
+1. CLINICAL INPUT PARAMETERS & OBSERVATIONS
+--------------------------------------------------------------------------------
+  * Gravida / Pregnancies               : 1 count            [Normal: 0-2]
+  * Fasting Plasma Glucose              : 114.0 mg/dL        [Normal: 70-99 mg/dL]
+  * Diastolic Blood Pressure            : 82.0 mm Hg         [Normal: < 80 mm Hg]
+  * Triceps Skinfold                    : 24.0 mm            [Normal: 15-25 mm]
+  * Fasting Serum Insulin               : 22.0 μU/mL         [Normal: 2.6-24.9 μU/mL]
+  * Body Mass Index                     : 27.6 kg/m²         [Normal: 18.5-24.9 kg/m²]
+  * Diabetes Pedigree Function          : 0.45 score         [Population: 0.1-0.5]
+  * Patient Age                         : 46 years           [Adult reference]
+
+--------------------------------------------------------------------------------
+2. AI MODEL DIAGNOSTIC INFERENCE & RISK ASSESSMENT
+--------------------------------------------------------------------------------
+  * Primary Diagnostic Finding : Baseline Physiological Control
+  * Assessed Risk Tier         : Low Risk
+  * Calibrated Probability     : 0.2140 (21.4%)
+  * Decision Boundary Cutoff   : 0.50 (Standard Decision Cutoff)
+  * Ground-Truth Scenario Fit  : Impaired fasting glucose with overweight BMI and borderline diastolic pressure
+
+--------------------------------------------------------------------------------
+3. EXPLAINABLE AI (XAI) ATTRIBUTION
+--------------------------------------------------------------------------------
+  * Explainability Architecture: SHAP PermutationExplainer (full diabetes voting ensemble)
+  * Primary Risk-Increasing Drivers (Positive SHAP φ):
+      - Age                           : φ = +0.0732 (patient value: 46.0)
+      - SkinThickness                 : φ = +0.0032 (patient value: 24.0)
+      - DiabetesPedigreeFunction      : φ = +0.0002 (patient value: 0.45)
+  * Protective / Mitigating Factors (Negative SHAP φ):
+      - Insulin                       : φ = -0.1060 (patient value: 22.0)
+      - Glucose                       : φ = -0.0391 (patient value: 114.0)
+      - Pregnancies                   : φ = -0.0337 (patient value: 1.0)
+      - BMI_Cat                       : φ = -0.0250 (patient value: 2.0)
+
+--------------------------------------------------------------------------------
+4. ATTENDING PHYSICIAN PERSPECTIVE & ACTIONABLE RECOMMENDATIONS
+--------------------------------------------------------------------------------
+Screening Summary:
+  The patient is a 46‑year‑old individual with a body mass index of 27.6 kg/m² (overweight) and a fasting glucose of 114 mg/dL, which meets criteria for impaired fasting glucose. Additional inputs include a modestly elevated diastolic blood pressure (82 mm Hg), a skin‑fold thickness of 24 mm, serum insulin of 22 μU/mL, and a diabetes pedigree function of 0.45. The AI model integrates these variables and yields a low‑risk classification (21.4 % predicted probability) for diabetes mellitus. From a clinical standpoint, the primary focus is preventative: reinforcing lifestyle modification, monitoring glycemic trends, and addressing modifiable risk factors such as weight and physical activity, while no immediate diagnostic work‑up is indicated. Dr. Sarah Chen, MD (Senior Attending Physician) confirms that the patient’s profile aligns with a preventive care pathway rather than an acute intervention.
+
+Physician Perspective Analysis:
+  From Dr. Sarah Chen, MD's perspective, the AI screening provides a valuable adjunct to routine preventive care. The low predicted probability (21.4 %) and the protective SHAP contributions, particularly the negative impact of insulin and fasting glucose, suggest that the patient’s current metabolic state is not yet at a threshold warranting diagnostic work‑up for diabetes. However, the presence of impaired fasting glucose and an overweight BMI represent modifiable risk factors that merit targeted lifestyle counseling. Dr. Chen would prioritize reinforcement of dietary quality and physical activity, schedule repeat metabolic panels in 12 months, and remain vigilant for any symptomatic changes. The clinician also acknowledges the model’s limitations, emphasizing that the screening output should complement—not replace—clinical judgment and that ongoing surveillance is essential to capture any trajectory toward higher risk.
+
+Actionable Recommendations:
+  1. Maintain a balanced, nutrient‑dense diet emphasizing whole grains, lean protein, and non‑starchy vegetables while limiting added sugars and saturated fats.
+  2. Engage in at least 150 minutes of moderate‑intensity aerobic activity per week and incorporate resistance training twice weekly to support weight management and insulin sensitivity.
+  3. Schedule routine annual wellness examinations, including repeat fasting glucose and HbA1c testing, to monitor for progression toward dysglycemia.
+
+================================================================================
+SAFETY & COMPLIANCE NOTICE: This diagnostic evaluation report is generated for
+benchmarking and clinician decision support. It is not an autonomous medical
+diagnosis. All therapeutic strategies require licensed clinician confirmation.
+================================================================================

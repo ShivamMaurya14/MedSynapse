@@ -1,0 +1,61 @@
+================================================================================
+MEDSYNAPSE CLINICAL DECISION SUPPORT PLATFORM - DIAGNOSTIC REPORT
+================================================================================
+Case Identification : EVAL-KIDNEY-003
+Clinical Module     : Clinical Disease
+Diagnostic Modality : Standard Clinical Panel
+Scenario Description: Solid Renal Parenchymal Tumor CT Scan
+Attending Clinician : Dr. Sarah Chen, MD (Senior Attending Physician)
+Report Timestamp    : 2026-11-19 04:20 UTC
+System Purpose      : AI Platform Benchmark & Evaluation Dataset
+--------------------------------------------------------------------------------
+1. CLINICAL INPUT PARAMETERS & OBSERVATIONS
+--------------------------------------------------------------------------------
+  * Modality                            : Non-contrast Abdominal CT [Standard reference]
+  * Slice                               : Transverse Renal Axial [Standard reference]
+
+--------------------------------------------------------------------------------
+2. AI MODEL DIAGNOSTIC INFERENCE & RISK ASSESSMENT
+--------------------------------------------------------------------------------
+  * Primary Diagnostic Finding : Tumor
+  * Assessed Risk Tier         : High Risk
+  * Calibrated Probability     : 0.9923 (95.4%)
+  * Decision Boundary Cutoff   : 0.50 (Standard Decision Cutoff)
+  * Ground-Truth Scenario Fit  : Solid hyperdense renal mass lesion with parenchymal architectural distortion
+  * Posterior Probability Distribution:
+      - Cyst                            :  3.37%
+      - Normal                          :  0.77%
+      - Stone                           :  0.49%
+      - Tumor                           : 95.37%
+
+--------------------------------------------------------------------------------
+3. EXPLAINABLE AI (XAI) ATTRIBUTION
+--------------------------------------------------------------------------------
+  * Explainability Architecture: Grad-CAM
+  * Saliency Target Class      : Tumor
+  * Backpropagated Layer       : top_conv
+  * Peak Attention Intensity   : 1.0000
+  * Heatmap Resolution Shape   : [5, 5]
+
+--------------------------------------------------------------------------------
+4. ATTENDING PHYSICIAN PERSPECTIVE & ACTIONABLE RECOMMENDATIONS
+--------------------------------------------------------------------------------
+Screening Summary:
+  MedSynapse Clinical AI completed a multivariable assessment for Kidney Pathology (Ct). The evaluated patient profile (modality: Non-contrast Abdominal CT; slice: Transverse Renal Axial) yielded an estimated model risk probability of 0.9923 (99.2%), categorizing the screening status into the High Risk tier with an active assessment of 'Tumor'.
+
+Physician Perspective Analysis:
+  CLINICAL EVALUATION FROM ATTENDING PHYSICIAN'S POINT OF VIEW (Dr. Sarah Chen, MD, Senior Attending Physician):
+1. AI Model Concordance: The automated multivariable evaluation for Kidney Pathology (Ct) (99.2% probability, High Risk) was audited against the patient's submitted parameters (modality: Non-contrast Abdominal CT; slice: Transverse Renal Axial).
+2. Clinical Correlation: The model's baseline classification of 'Tumor' is clinically congruent with standard diagnostic guidelines. No acute discordant biomarker patterns were identified.
+3. Recommendation: Endorsed for standard protocol follow-up and surveillance under continuous clinical oversight.
+
+Actionable Recommendations:
+  1. Urological evaluation recommended for definitive imaging.
+  2. Correlate with serum creatinine, eGFR, and urinalysis.
+  3. Review by a board-certified urologist or nephrologist.
+
+================================================================================
+SAFETY & COMPLIANCE NOTICE: This diagnostic evaluation report is generated for
+benchmarking and clinician decision support. It is not an autonomous medical
+diagnosis. All therapeutic strategies require licensed clinician confirmation.
+================================================================================

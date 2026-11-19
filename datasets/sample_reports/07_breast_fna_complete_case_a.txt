@@ -1,0 +1,39 @@
+MEDSYNAPSE - SYNTHETIC TEST FIXTURE
+Breast FNA Morphometry Report - Complete Case A
+All 30 WDBC nuclear morphometric measurements explicitly supplied
+Not patient data. Not a diagnosis. For local pipeline testing only.
+
+WDBC FNA MORPHOMETRIC MEASUREMENTS
+radius_mean: 14.2
+texture_mean: 20.1
+perimeter_mean: 92.5
+area_mean: 620
+smoothness_mean: 0.095
+compactness_mean: 0.12
+concavity_mean: 0.08
+concave_points_mean: 0.045
+symmetry_mean: 0.18
+fractal_dimension_mean: 0.062
+radius_se: 0.71
+texture_se: 1.005
+perimeter_se: 4.625
+area_se: 31
+smoothness_se: 0.00475
+compactness_se: 0.006
+concavity_se: 0.004
+concave_points_se: 0.00225
+symmetry_se: 0.009
+fractal_dimension_se: 0.0031
+radius_worst: 17.04
+texture_worst: 24.12
+perimeter_worst: 111
+area_worst: 744
+smoothness_worst: 0.114
+compactness_worst: 0.144
+concavity_worst: 0.096
+concave_points_worst: 0.054
+symmetry_worst: 0.216
+fractal_dimension_worst: 0.0744
+
+TEST EXPECTATION
+Complete feature contract: ready for breast-model feature validation.

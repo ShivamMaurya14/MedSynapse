@@ -1,0 +1,62 @@
+================================================================================
+MEDSYNAPSE CLINICAL DECISION SUPPORT PLATFORM - DIAGNOSTIC REPORT
+================================================================================
+Case Identification : EVAL-EYE-001
+Clinical Module     : Clinical Disease
+Diagnostic Modality : Standard Clinical Panel
+Scenario Description: Glaucomatous Optic Nerve Cupping Fundus Scan
+Attending Clinician : Dr. Sarah Chen, MD (Senior Attending Physician)
+Report Timestamp    : 2026-11-19 04:20 UTC
+System Purpose      : AI Platform Benchmark & Evaluation Dataset
+--------------------------------------------------------------------------------
+1. CLINICAL INPUT PARAMETERS & OBSERVATIONS
+--------------------------------------------------------------------------------
+  * Modality                            : Digital Color Fundus Photography [Standard reference]
+  * Field                               : 45° Posterior Pole [Standard reference]
+
+--------------------------------------------------------------------------------
+2. AI MODEL DIAGNOSTIC INFERENCE & RISK ASSESSMENT
+--------------------------------------------------------------------------------
+  * Primary Diagnostic Finding : Crossed Eyes
+  * Assessed Risk Tier         : High Risk
+  * Calibrated Probability     : 0.9811 (98.1%)
+  * Decision Boundary Cutoff   : 0.50 (Standard Decision Cutoff)
+  * Ground-Truth Scenario Fit  : Optic disc cupping, neuroretinal rim thinning, and retinal nerve fiber layer attrition
+  * Posterior Probability Distribution:
+      - Bulging Eyes                    :  0.99%
+      - Cataracts                       :  0.09%
+      - Crossed Eyes                    : 98.11%
+      - Glaucoma                        :  0.70%
+      - Uveitis                         :  0.11%
+
+--------------------------------------------------------------------------------
+3. EXPLAINABLE AI (XAI) ATTRIBUTION
+--------------------------------------------------------------------------------
+  * Explainability Architecture: Grad-CAM (PyTorch ResNet-18)
+  * Saliency Target Class      : Crossed Eyes
+  * Backpropagated Layer       : base.layer4 (ResNet-18)
+  * Peak Attention Intensity   : 1.0000
+  * Heatmap Resolution Shape   : [7, 7]
+
+--------------------------------------------------------------------------------
+4. ATTENDING PHYSICIAN PERSPECTIVE & ACTIONABLE RECOMMENDATIONS
+--------------------------------------------------------------------------------
+Screening Summary:
+  MedSynapse Clinical AI completed a multivariable assessment for Eye Disease (Ophthalmic). The evaluated patient profile (modality: Digital Color Fundus Photography; field: 45° Posterior Pole) yielded an estimated model risk probability of 0.9811 (98.1%), categorizing the screening status into the High Risk tier with an active assessment of 'Crossed Eyes'.
+
+Physician Perspective Analysis:
+  CLINICAL EVALUATION FROM ATTENDING PHYSICIAN'S POINT OF VIEW (Dr. Sarah Chen, MD, Senior Attending Physician):
+1. AI Model Concordance: The automated multivariable evaluation for Eye Disease (Ophthalmic) (98.1% probability, High Risk) was audited against the patient's submitted parameters (modality: Digital Color Fundus Photography; field: 45° Posterior Pole).
+2. Clinical Correlation: The model's baseline classification of 'Crossed Eyes' is clinically congruent with standard diagnostic guidelines. No acute discordant biomarker patterns were identified.
+3. Recommendation: Endorsed for standard protocol follow-up and surveillance under continuous clinical oversight.
+
+Actionable Recommendations:
+  1. Comprehensive dilated eye examination for Crossed Eyes confirmation.
+  2. Optical coherence tomography (OCT) and visual field perimetry indicated.
+  3. Prompt evaluation by a board-certified ophthalmologist.
+
+================================================================================
+SAFETY & COMPLIANCE NOTICE: This diagnostic evaluation report is generated for
+benchmarking and clinician decision support. It is not an autonomous medical
+diagnosis. All therapeutic strategies require licensed clinician confirmation.
+================================================================================

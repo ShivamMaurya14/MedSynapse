@@ -1,0 +1,71 @@
+{
+  "benchmark_metadata": {
+    "case_id": "EVAL-BREAST-005",
+    "module_id": "05_breast_cancer_fna",
+    "disease_name": "Breast Cancer",
+    "disease_key": "breast",
+    "modality": "Fine Needle Aspirate (FNA) Nuclear Morphometry",
+    "is_image_based": false,
+    "scenario": "Deliberately incomplete 10-feature panel requiring clinician completion under clinical contract",
+    "source_reference": "datasets/sample_reports/09_breast_fna_incomplete_review_case",
+    "generated_at": "2026-11-19T04:20:15.626124+00:00",
+    "evaluator": "MedSynapse Clinical AI Evaluation Pipeline"
+  },
+  "inputs": {
+    "radius_mean": 14.2,
+    "texture_mean": 20.1,
+    "perimeter_mean": 92.5,
+    "area_mean": 620.0,
+    "smoothness_mean": 0.095,
+    "compactness_mean": 0.12,
+    "concavity_mean": 0.08,
+    "concave_points_mean": 0.045,
+    "symmetry_mean": 0.18,
+    "fractal_dimension_mean": 0.062
+  },
+  "model_prediction": {
+    "disease": "Breast Cancer",
+    "prediction": "Incomplete Profile",
+    "diagnosis": "Review Required (Incomplete Feature Set)",
+    "has_disease": false,
+    "is_positive": false,
+    "risk_probability": 0.5,
+    "risk_percentage": 50.0,
+    "confidence_percentage": 50.0,
+    "risk_tier": "Review Required",
+    "validation_status": "incomplete_feature_contract",
+    "recommendations": [
+      "Incomplete morphometric panel: 10 of 30 WDBC features supplied.",
+      "Clinician review and completion of remaining 20 features required.",
+      "Do not infer missing features automatically."
+    ]
+  },
+  "explainability": {
+    "method": "Deferred (Feature set incomplete)",
+    "status": "deferred",
+    "top_positive_contributors": [],
+    "attention_statistics": null,
+    "target_class": null,
+    "has_gradcam_overlay": false
+  },
+  "clinical_synthesis": {
+    "title": "Incomplete FNA Morphometry Profile (Review Required)",
+    "screening_summary": "Incomplete WDBC FNA feature submission for EVAL-BREAST-005. Only 10 of 30 standard morphological attributes provided. Automated diagnosis suspended per patient safety protocol.",
+    "model_findings": "Feature vector incomplete. Inference deferred to protect patient safety.",
+    "explainability_summary": "Explainability computation deferred due to missing biometric parameters.",
+    "clinician_review": "Attending physician must review cytology slide and enter missing nuclear dimensions.",
+    "physician_perspective_analysis": "CLINICAL EVALUATION FROM ATTENDING PHYSICIAN'S POINT OF VIEW (Dr. Sarah Chen, MD):\nIncomplete morphometric profiles cannot be interpolated. Clinician completion required.",
+    "recommendations": [
+      "Incomplete morphometric panel: 10 of 30 WDBC features supplied.",
+      "Clinician review and completion of remaining 20 features required.",
+      "Do not infer missing features automatically."
+    ]
+  },
+  "files": {
+    "report_pdf": "report.pdf",
+    "report_png": "report.png",
+    "report_txt": "report.txt",
+    "source_image": null,
+    "gradcam_overlay": null
+  }
+}

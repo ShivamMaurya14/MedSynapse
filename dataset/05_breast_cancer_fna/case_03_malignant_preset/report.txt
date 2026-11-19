@@ -1,0 +1,88 @@
+================================================================================
+MEDSYNAPSE CLINICAL DECISION SUPPORT PLATFORM - DIAGNOSTIC REPORT
+================================================================================
+Case Identification : EVAL-BREAST-003
+Clinical Module     : Clinical Disease
+Diagnostic Modality : Standard Clinical Panel
+Scenario Description: High-Grade Malignant Invasive Ductal FNA Profile
+Attending Clinician : Dr. Sarah Chen, MD (Senior Attending Physician)
+Report Timestamp    : 2026-11-19 04:20 UTC
+System Purpose      : AI Platform Benchmark & Evaluation Dataset
+--------------------------------------------------------------------------------
+1. CLINICAL INPUT PARAMETERS & OBSERVATIONS
+--------------------------------------------------------------------------------
+  * Radius Mean                         : 17.99              [Standard reference]
+  * Texture Mean                        : 10.38              [Standard reference]
+  * Perimeter Mean                      : 122.8              [Standard reference]
+  * Area Mean                           : 1001.0             [Standard reference]
+  * Smoothness Mean                     : 0.1184             [Standard reference]
+  * Compactness Mean                    : 0.2776             [Standard reference]
+  * Concavity Mean                      : 0.3001             [Standard reference]
+  * Concave Points Mean                 : 0.1471             [Standard reference]
+  * Symmetry Mean                       : 0.2419             [Standard reference]
+  * Fractal Dimension Mean              : 0.07871            [Standard reference]
+  * Radius Se                           : 1.095              [Standard reference]
+  * Texture Se                          : 0.9053             [Standard reference]
+  * Perimeter Se                        : 8.589              [Standard reference]
+  * Area Se                             : 153.4              [Standard reference]
+  * Smoothness Se                       : 0.006399           [Standard reference]
+  * Compactness Se                      : 0.04904            [Standard reference]
+  * Concavity Se                        : 0.05373            [Standard reference]
+  * Concave Points Se                   : 0.01587            [Standard reference]
+  * Symmetry Se                         : 0.03003            [Standard reference]
+  * Fractal Dimension Se                : 0.006193           [Standard reference]
+  * Radius Worst                        : 25.38              [Standard reference]
+  * Texture Worst                       : 17.33              [Standard reference]
+  * Perimeter Worst                     : 184.6              [Standard reference]
+  * Area Worst                          : 2019.0             [Standard reference]
+  * Smoothness Worst                    : 0.1622             [Standard reference]
+  * Compactness Worst                   : 0.6656             [Standard reference]
+  * Concavity Worst                     : 0.7119             [Standard reference]
+  * Concave Points Worst                : 0.2654             [Standard reference]
+  * Symmetry Worst                      : 0.4601             [Standard reference]
+  * Fractal Dimension Worst             : 0.1189             [Standard reference]
+
+--------------------------------------------------------------------------------
+2. AI MODEL DIAGNOSTIC INFERENCE & RISK ASSESSMENT
+--------------------------------------------------------------------------------
+  * Primary Diagnostic Finding : Malignant
+  * Assessed Risk Tier         : High Risk
+  * Calibrated Probability     : 1.0000 (100.0%)
+  * Decision Boundary Cutoff   : 0.50 (Standard Decision Cutoff)
+  * Ground-Truth Scenario Fit  : Nuclear pleomorphism, enlarged mean radius (17.99), high perimeter and severe concavity
+
+--------------------------------------------------------------------------------
+3. EXPLAINABLE AI (XAI) ATTRIBUTION
+--------------------------------------------------------------------------------
+  * Explainability Architecture: SHAP PermutationExplainer (raw WDBC features through scaler/PCA/classifier)
+  * Primary Risk-Increasing Drivers (Positive SHAP φ):
+      - perimeter_worst               : φ = +0.0940 (patient value: 184.6)
+      - area_se                       : φ = +0.0726 (patient value: 153.4)
+      - radius_worst                  : φ = +0.0646 (patient value: 25.38)
+      - perimeter_se                  : φ = +0.0527 (patient value: 8.589)
+  * Protective / Mitigating Factors (Negative SHAP φ):
+      - texture_mean                  : φ = -0.0335 (patient value: 10.38)
+      - fractal_dimension_mean        : φ = -0.0314 (patient value: 0.07871)
+      - texture_worst                 : φ = -0.0164 (patient value: 17.33)
+      - fractal_dimension_se          : φ = -0.0119 (patient value: 0.006193)
+
+--------------------------------------------------------------------------------
+4. ATTENDING PHYSICIAN PERSPECTIVE & ACTIONABLE RECOMMENDATIONS
+--------------------------------------------------------------------------------
+Screening Summary:
+  MedSynapse Clinical AI completed a multivariable assessment for Breast Cancer. The evaluated patient profile (Radius Mean: 17.99 units; Texture Mean: 10.38 units; Perimeter Mean: 122.8 units; Area Mean: 1001.0 units; Smoothness Mean: 0.1184 units; Compactness Mean: 0.2776 units) yielded an estimated model risk probability of 1.0000 (100.0%), categorizing the screening status into the High Risk tier with an active assessment of 'Malignant'.
+
+Physician Perspective Analysis:
+  CLINICAL EVALUATION FROM ATTENDING PHYSICIAN'S POINT OF VIEW (Dr. Sarah Chen, MD, Senior Attending Physician):
+1. AI Model Concordance: The automated multivariable evaluation for Breast Cancer (100.0% probability, High Risk) was audited against the patient's submitted parameters (Radius Mean: 17.99 units; Texture Mean: 10.38 units; Perimeter Mean: 122.8 units; Area Mean: 1001.0 units; Smoothness Mean: 0.1184 units; Compactness Mean: 0.2776 units).
+2. Clinical Correlation: The model's baseline classification of 'Malignant' is clinically congruent with standard diagnostic guidelines. No acute discordant biomarker patterns were identified.
+3. Recommendation: Endorsed for standard protocol follow-up and surveillance under continuous clinical oversight.
+
+Actionable Recommendations:
+  1. This research screening output requires qualified clinician review.
+
+================================================================================
+SAFETY & COMPLIANCE NOTICE: This diagnostic evaluation report is generated for
+benchmarking and clinician decision support. It is not an autonomous medical
+diagnosis. All therapeutic strategies require licensed clinician confirmation.
+================================================================================

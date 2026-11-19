@@ -1,0 +1,20 @@
+{
+  "num_classes": 5,
+  "classes": {
+    "0": "Bulging_Eyes",
+    "1": "Cataracts",
+    "2": "Crossed_Eyes",
+    "3": "Glaucoma",
+    "4": "Uveitis"
+  },
+  "architecture": "ResNet18",
+  "img_size": [
+    224,
+    224
+  ],
+  "epochs": 20,
+  "final_train_loss": 0.03998424476859244,
+  "final_val_loss": 0.11959285289049149,
+  "final_train_acc": 0.9943181818181818,
+  "final_val_acc": 0.9511335790157318
+}

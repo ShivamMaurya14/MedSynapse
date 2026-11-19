@@ -1,0 +1,68 @@
+================================================================================
+MEDSYNAPSE CLINICAL DECISION SUPPORT PLATFORM - DIAGNOSTIC REPORT
+================================================================================
+Case Identification : EVAL-DIAB-004
+Clinical Module     : Clinical Disease
+Diagnostic Modality : Standard Clinical Panel
+Scenario Description: Moderate Risk Diabetic Screening Preset
+Attending Clinician : Dr. Sarah Chen, MD (Senior Attending Physician)
+Report Timestamp    : 2026-11-19 04:20 UTC
+System Purpose      : AI Platform Benchmark & Evaluation Dataset
+--------------------------------------------------------------------------------
+1. CLINICAL INPUT PARAMETERS & OBSERVATIONS
+--------------------------------------------------------------------------------
+  * Gravida / Pregnancies               : 2 count            [Normal: 0-2]
+  * Fasting Plasma Glucose              : 118.0 mg/dL        [Normal: 70-99 mg/dL]
+  * Diastolic Blood Pressure            : 78.0 mm Hg         [Normal: < 80 mm Hg]
+  * Triceps Skinfold                    : 25.0 mm            [Normal: 15-25 mm]
+  * Fasting Serum Insulin               : 95.0 μU/mL         [Normal: 2.6-24.9 μU/mL]
+  * Body Mass Index                     : 27.8 kg/m²         [Normal: 18.5-24.9 kg/m²]
+  * Diabetes Pedigree Function          : 0.52 score         [Population: 0.1-0.5]
+  * Patient Age                         : 44 years           [Adult reference]
+
+--------------------------------------------------------------------------------
+2. AI MODEL DIAGNOSTIC INFERENCE & RISK ASSESSMENT
+--------------------------------------------------------------------------------
+  * Primary Diagnostic Finding : Baseline Physiological Control
+  * Assessed Risk Tier         : Moderate Risk
+  * Calibrated Probability     : 0.3575 (35.7%)
+  * Decision Boundary Cutoff   : 0.50 (Standard Decision Cutoff)
+  * Ground-Truth Scenario Fit  : Mild fasting hyperglycemia with elevated body mass index
+
+--------------------------------------------------------------------------------
+3. EXPLAINABLE AI (XAI) ATTRIBUTION
+--------------------------------------------------------------------------------
+  * Explainability Architecture: SHAP PermutationExplainer (full diabetes voting ensemble)
+  * Primary Risk-Increasing Drivers (Positive SHAP φ):
+      - Age                           : φ = +0.0869 (patient value: 44.0)
+      - DiabetesPedigreeFunction      : φ = +0.0344 (patient value: 0.52)
+      - BloodPressure                 : φ = +0.0058 (patient value: 78.0)
+      - SkinThickness                 : φ = +0.0029 (patient value: 25.0)
+  * Protective / Mitigating Factors (Negative SHAP φ):
+      - Glucose                       : φ = -0.0417 (patient value: 118.0)
+      - Pregnancies                   : φ = -0.0298 (patient value: 2.0)
+      - BMI_Cat                       : φ = -0.0262 (patient value: 2.0)
+      - Insulin                       : φ = -0.0188 (patient value: 95.0)
+
+--------------------------------------------------------------------------------
+4. ATTENDING PHYSICIAN PERSPECTIVE & ACTIONABLE RECOMMENDATIONS
+--------------------------------------------------------------------------------
+Screening Summary:
+  MedSynapse Clinical AI completed a multivariable assessment for Diabetes Mellitus. The evaluated patient profile (Pregnancies: 2 count; Fasting glucose: 118.0 mg/dL; Diastolic blood pressure: 78.0 mm Hg; Triceps skin thickness: 25.0 mm; Serum insulin: 95.0 μU/mL; Body mass index: 27.8 kg/m²) yielded an estimated model risk probability of 0.3575 (35.8%), categorizing the screening status into the Moderate Risk tier with an active assessment of 'Baseline Physiological Control'.
+
+Physician Perspective Analysis:
+  CLINICAL EVALUATION FROM ATTENDING PHYSICIAN'S POINT OF VIEW (Dr. Sarah Chen, MD, Senior Attending Physician):
+1. AI Model Concordance: The automated multivariable evaluation for Diabetes Mellitus (35.8% probability, Moderate Risk) was audited against the patient's submitted parameters (Pregnancies: 2 count; Fasting glucose: 118.0 mg/dL; Diastolic blood pressure: 78.0 mm Hg; Triceps skin thickness: 25.0 mm; Serum insulin: 95.0 μU/mL; Body mass index: 27.8 kg/m²).
+2. Clinical Correlation: The model's baseline classification of 'Baseline Physiological Control' is clinically congruent with standard diagnostic guidelines. No acute discordant biomarker patterns were identified.
+3. Recommendation: Endorsed for standard protocol follow-up and surveillance under continuous clinical oversight.
+
+Actionable Recommendations:
+  1. Maintain a balanced, nutrient-dense diet and stay physically active.
+  2. Undergo routine annual wellness and preventative metabolic screenings.
+  3. Keep body mass index (BMI) within the healthy range (18.5 - 24.9 kg/m²).
+
+================================================================================
+SAFETY & COMPLIANCE NOTICE: This diagnostic evaluation report is generated for
+benchmarking and clinician decision support. It is not an autonomous medical
+diagnosis. All therapeutic strategies require licensed clinician confirmation.
+================================================================================

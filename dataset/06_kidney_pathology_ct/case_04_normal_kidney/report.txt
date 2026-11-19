@@ -1,0 +1,61 @@
+================================================================================
+MEDSYNAPSE CLINICAL DECISION SUPPORT PLATFORM - DIAGNOSTIC REPORT
+================================================================================
+Case Identification : EVAL-KIDNEY-004
+Clinical Module     : Clinical Disease
+Diagnostic Modality : Standard Clinical Panel
+Scenario Description: Normal Renal CT Examination
+Attending Clinician : Dr. Sarah Chen, MD (Senior Attending Physician)
+Report Timestamp    : 2026-11-19 04:20 UTC
+System Purpose      : AI Platform Benchmark & Evaluation Dataset
+--------------------------------------------------------------------------------
+1. CLINICAL INPUT PARAMETERS & OBSERVATIONS
+--------------------------------------------------------------------------------
+  * Modality                            : Non-contrast Abdominal CT [Standard reference]
+  * Slice                               : Transverse Renal Axial [Standard reference]
+
+--------------------------------------------------------------------------------
+2. AI MODEL DIAGNOSTIC INFERENCE & RISK ASSESSMENT
+--------------------------------------------------------------------------------
+  * Primary Diagnostic Finding : Normal
+  * Assessed Risk Tier         : Low Risk
+  * Calibrated Probability     : 0.0004 (100.0%)
+  * Decision Boundary Cutoff   : 0.50 (Standard Decision Cutoff)
+  * Ground-Truth Scenario Fit  : Bilateral unremarkable renal parenchyma with no calcifications, cysts, or masses
+  * Posterior Probability Distribution:
+      - Cyst                            :  0.00%
+      - Normal                          : 99.96%
+      - Stone                           :  0.04%
+      - Tumor                           :  0.00%
+
+--------------------------------------------------------------------------------
+3. EXPLAINABLE AI (XAI) ATTRIBUTION
+--------------------------------------------------------------------------------
+  * Explainability Architecture: Grad-CAM
+  * Saliency Target Class      : Normal
+  * Backpropagated Layer       : top_conv
+  * Peak Attention Intensity   : 1.0000
+  * Heatmap Resolution Shape   : [5, 5]
+
+--------------------------------------------------------------------------------
+4. ATTENDING PHYSICIAN PERSPECTIVE & ACTIONABLE RECOMMENDATIONS
+--------------------------------------------------------------------------------
+Screening Summary:
+  MedSynapse Clinical AI completed a multivariable assessment for Kidney Pathology (Ct). The evaluated patient profile (modality: Non-contrast Abdominal CT; slice: Transverse Renal Axial) yielded an estimated model risk probability of 0.0004 (0.0%), categorizing the screening status into the Low Risk tier with an active assessment of 'Normal'.
+
+Physician Perspective Analysis:
+  CLINICAL EVALUATION FROM ATTENDING PHYSICIAN'S POINT OF VIEW (Dr. Sarah Chen, MD, Senior Attending Physician):
+1. AI Model Concordance: The automated multivariable evaluation for Kidney Pathology (Ct) (0.0% probability, Low Risk) was audited against the patient's submitted parameters (modality: Non-contrast Abdominal CT; slice: Transverse Renal Axial).
+2. Clinical Correlation: The model's baseline classification of 'Normal' is clinically congruent with standard diagnostic guidelines. No acute discordant biomarker patterns were identified.
+3. Recommendation: Endorsed for standard protocol follow-up and surveillance under continuous clinical oversight.
+
+Actionable Recommendations:
+  1. Clear renal parenchyma; annual health checks.
+  2. Correlate with serum creatinine, eGFR, and urinalysis.
+  3. Review by a board-certified urologist or nephrologist.
+
+================================================================================
+SAFETY & COMPLIANCE NOTICE: This diagnostic evaluation report is generated for
+benchmarking and clinician decision support. It is not an autonomous medical
+diagnosis. All therapeutic strategies require licensed clinician confirmation.
+================================================================================

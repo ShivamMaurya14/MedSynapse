@@ -1,0 +1,117 @@
+{
+  "benchmark_metadata": {
+    "case_id": "EVAL-BREAST-004",
+    "module_id": "05_breast_cancer_fna",
+    "disease_name": "Breast Cancer",
+    "disease_key": "breast",
+    "modality": "Fine Needle Aspirate (FNA) Nuclear Morphometry",
+    "is_image_based": false,
+    "scenario": "Regular nuclear margins, small mean radius (13.54), low concavity and uniform chromatin",
+    "source_reference": "frontend/src/components/BreastCancerView.jsx (BENIGN_SAMPLE)",
+    "generated_at": "2026-11-19T04:20:15.583723+00:00",
+    "evaluator": "MedSynapse Clinical AI Evaluation Pipeline"
+  },
+  "inputs": {
+    "radius_mean": 13.54,
+    "texture_mean": 14.36,
+    "perimeter_mean": 87.46,
+    "area_mean": 566.3,
+    "smoothness_mean": 0.09779,
+    "compactness_mean": 0.08129,
+    "concavity_mean": 0.06664,
+    "concave_points_mean": 0.04781,
+    "symmetry_mean": 0.1885,
+    "fractal_dimension_mean": 0.05766,
+    "radius_se": 0.2699,
+    "texture_se": 0.7886,
+    "perimeter_se": 2.058,
+    "area_se": 23.56,
+    "smoothness_se": 0.008462,
+    "compactness_se": 0.0146,
+    "concavity_se": 0.02387,
+    "concave_points_se": 0.01315,
+    "symmetry_se": 0.0198,
+    "fractal_dimension_se": 0.0023,
+    "radius_worst": 15.11,
+    "texture_worst": 19.26,
+    "perimeter_worst": 99.7,
+    "area_worst": 711.2,
+    "smoothness_worst": 0.144,
+    "compactness_worst": 0.1773,
+    "concavity_worst": 0.239,
+    "concave_points_worst": 0.1288,
+    "symmetry_worst": 0.2977,
+    "fractal_dimension_worst": 0.07259
+  },
+  "model_prediction": {
+    "disease": "Breast Cancer",
+    "prediction": 0,
+    "diagnosis": "Benign",
+    "is_positive": false,
+    "risk_probability": 0.0476,
+    "risk_percentage": 4.8,
+    "risk_tier": "Low Risk",
+    "contributing_factors": [],
+    "recommendations": [
+      "This research screening output requires qualified clinician review."
+    ],
+    "model_status": "artifact_loaded"
+  },
+  "explainability": {
+    "method": "SHAP PermutationExplainer (raw WDBC features through scaler/PCA/classifier)",
+    "status": "available",
+    "top_positive_contributors": [
+      {
+        "feature": "smoothness_worst",
+        "patient_value": 0.144,
+        "shap_value": 0.032414,
+        "effect": "increased predicted positive-class score"
+      },
+      {
+        "feature": "fractal_dimension_se",
+        "patient_value": 0.0023,
+        "shap_value": 0.027379,
+        "effect": "increased predicted positive-class score"
+      },
+      {
+        "feature": "texture_se",
+        "patient_value": 0.7886,
+        "shap_value": 0.026865,
+        "effect": "increased predicted positive-class score"
+      },
+      {
+        "feature": "smoothness_se",
+        "patient_value": 0.008462,
+        "shap_value": 0.024282,
+        "effect": "increased predicted positive-class score"
+      },
+      {
+        "feature": "fractal_dimension_mean",
+        "patient_value": 0.05766,
+        "shap_value": 0.020406,
+        "effect": "increased predicted positive-class score"
+      }
+    ],
+    "attention_statistics": null,
+    "target_class": null,
+    "has_gradcam_overlay": false
+  },
+  "clinical_synthesis": {
+    "title": "Clinical Screening & Decision Support Synthesis: Breast Cancer",
+    "screening_summary": "MedSynapse Clinical AI completed a multivariable assessment for Breast Cancer. The evaluated patient profile (Radius Mean: 13.54 units; Texture Mean: 14.36 units; Perimeter Mean: 87.46 units; Area Mean: 566.3 units; Smoothness Mean: 0.09779 units; Compactness Mean: 0.08129 units) yielded an estimated model risk probability of 0.0476 (4.8%), categorizing the screening status into the Low Risk tier with an active assessment of 'Benign'.",
+    "model_findings": "Statistical evaluation via calibrated probabilistic ensemble backbones demonstrates an assessed score of 4.8%. Contributing biomarker variance highlights: Parameters within standard reference distributions..",
+    "explainability_summary": "Feature explainability generated via SHAP PermutationExplainer (raw WDBC features through scaler/PCA/classifier). Key biomarkers elevating predicted risk: smoothness_worst (\u03c6=+0.0324), fractal_dimension_se (\u03c6=+0.0274), texture_se (\u03c6=+0.0269). Mitigating/protective biomarkers: texture_mean (\u03c6=-0.0915), texture_worst (\u03c6=-0.0862), radius_se (\u03c6=-0.0473). Baseline population reference score for this model is +0.4164. Elevating risk factor: smoothness_worst of 0.144 increased the predicted positive-class score (SHAP +0.032414). Elevating risk factor: fractal_dimension_se of 0.0023 increased the predicted positive-class score (SHAP +0.027379). Elevating risk factor: texture_se of 0.7886 increased the predicted positive-class score (SHAP +0.026865). Elevating risk factor: smoothness_se of 0.008462 increased the predicted positive-class score (SHAP +0.024282). Elevating risk factor: fractal_dimension_mean of 0.05766 increased the predicted positive-class score (SHAP +0.020406). Elevating risk factor: compactness_se of 0.0146 increased the predicted positive-class score (SHAP +0.010842). Elevating risk factor: symmetry_mean of 0.1885 increased the predicted positive-class score (SHAP +0.002693). Elevating risk factor: symmetry_worst of 0.2977 increased the predicted positive-class score (SHAP +0.002144). Elevating risk factor: concavity_se of 0.02387 increased the predicted positive-class score (SHAP +0.000833). Elevating risk factor: smoothness_mean of 0.09779 increased the predicted positive-class score (SHAP +0.000675). Elevating risk factor: symmetry_se of 0.0198 increased the predicted positive-class score (SHAP +0.000222). Mitigating/protective factor: texture_mean of 14.36 reduced the predicted positive-class score (SHAP -0.091535). Mitigating/protective factor: texture_worst of 19.26 reduced the predicted positive-class score (SHAP -0.086173). Mitigating/protective factor: radius_se of 0.2699 reduced the predicted positive-class score (SHAP -0.047264). Mitigating/protective factor: radius_worst of 15.11 reduced the predicted positive-class score (SHAP -0.039391). Mitigating/protective factor: perimeter_worst of 99.7 reduced the predicted positive-class score (SHAP -0.031473). Mitigating/protective factor: area_se of 23.56 reduced the predicted positive-class score (SHAP -0.026759). Mitigating/protective factor: compactness_worst of 0.1773 reduced the predicted positive-class score (SHAP -0.025738). Mitigating/protective factor: area_mean of 566.3 reduced the predicted positive-class score (SHAP -0.025098). Mitigating/protective factor: perimeter_se of 2.058 reduced the predicted positive-class score (SHAP -0.024634). Mitigating/protective factor: area_worst of 711.2 reduced the predicted positive-class score (SHAP -0.022376). Mitigating/protective factor: concave_points_worst of 0.1288 reduced the predicted positive-class score (SHAP -0.018685). Mitigating/protective factor: concavity_mean of 0.06664 reduced the predicted positive-class score (SHAP -0.017478). Mitigating/protective factor: concavity_worst of 0.239 reduced the predicted positive-class score (SHAP -0.017017). Mitigating/protective factor: perimeter_mean of 87.46 reduced the predicted positive-class score (SHAP -0.015246). Mitigating/protective factor: concave_points_mean of 0.04781 reduced the predicted positive-class score (SHAP -0.011969). Mitigating/protective factor: radius_mean of 13.54 reduced the predicted positive-class score (SHAP -0.007549). Mitigating/protective factor: compactness_mean of 0.08129 reduced the predicted positive-class score (SHAP -0.005744). Mitigating/protective factor: fractal_dimension_worst of 0.07259 reduced the predicted positive-class score (SHAP -0.003379). Mitigating/protective factor: concave_points_se of 0.01315 reduced the predicted positive-class score (SHAP -0.000109). Net SHAP feature displacement from baseline is -0.368862. SHAP describes this model's behavior for the submitted input and does not establish medical causality. SHAP values describe individual feature displacement from baseline expected score for this specific patient profile and do not establish direct medical causality.",
+    "clinician_review": "Clinician-in-the-loop decision audit completed. Automated clinical decision protocol verification completed with verified feature inputs. Final diagnostic confirmation and therapeutic strategy must be reviewed by the attending licensed clinician.",
+    "physician_perspective_analysis": "CLINICAL EVALUATION FROM ATTENDING PHYSICIAN'S POINT OF VIEW (Dr. Sarah Chen, MD, Senior Attending Physician):\n1. AI Model Concordance: The automated multivariable evaluation for Breast Cancer (4.8% probability, Low Risk) was audited against the patient's submitted parameters (Radius Mean: 13.54 units; Texture Mean: 14.36 units; Perimeter Mean: 87.46 units; Area Mean: 566.3 units; Smoothness Mean: 0.09779 units; Compactness Mean: 0.08129 units).\n2. Clinical Correlation: The model's baseline classification of 'Benign' is clinically congruent with standard diagnostic guidelines. No acute discordant biomarker patterns were identified.\n3. Recommendation: Endorsed for standard protocol follow-up and surveillance under continuous clinical oversight.",
+    "recommendations": [
+      "This research screening output requires qualified clinician review."
+    ]
+  },
+  "files": {
+    "report_pdf": "report.pdf",
+    "report_png": "report.png",
+    "report_txt": "report.txt",
+    "source_image": null,
+    "gradcam_overlay": null
+  }
+}

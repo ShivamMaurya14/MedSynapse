@@ -1,0 +1,98 @@
+{
+  "benchmark_metadata": {
+    "case_id": "EVAL-DIAB-002",
+    "module_id": "01_diabetes_mellitus",
+    "disease_name": "Diabetes Mellitus",
+    "disease_key": "diabetes",
+    "modality": "Biochemical Glycemic Panel (Tabular)",
+    "is_image_based": false,
+    "scenario": "Impaired fasting glucose with overweight BMI and borderline diastolic pressure",
+    "source_reference": "datasets/sample_reports/04_prediabetic_borderline_report",
+    "generated_at": "2026-11-19T04:20:02.202977+00:00",
+    "evaluator": "MedSynapse Clinical AI Evaluation Pipeline"
+  },
+  "inputs": {
+    "pregnancies": 1,
+    "glucose": 114.0,
+    "blood_pressure": 82.0,
+    "skin_thickness": 24.0,
+    "insulin": 22.0,
+    "bmi": 27.6,
+    "dpf": 0.45,
+    "age": 46
+  },
+  "model_prediction": {
+    "disease": "Diabetes Mellitus",
+    "prediction": 0,
+    "diagnosis": "Baseline Physiological Control",
+    "has_disease": false,
+    "is_positive": false,
+    "risk_probability": 0.214,
+    "risk_percentage": 21.4,
+    "risk_tier": "Low Risk",
+    "contributing_factors": [
+      {
+        "factor": "Fasting Glucose",
+        "value": "114.0 mg/dL",
+        "impact": "Moderate (Impaired fasting glucose)"
+      },
+      {
+        "factor": "Body Mass Index",
+        "value": "27.6 kg/m\u00b2",
+        "impact": "Moderate (Overweight)"
+      }
+    ],
+    "recommendations": [
+      "Maintain a balanced, nutrient-dense diet and stay physically active.",
+      "Undergo routine annual wellness and preventative metabolic screenings.",
+      "Keep body mass index (BMI) within the healthy range (18.5 - 24.9 kg/m\u00b2)."
+    ]
+  },
+  "explainability": {
+    "method": "SHAP PermutationExplainer (full diabetes voting ensemble)",
+    "status": "available",
+    "top_positive_contributors": [
+      {
+        "feature": "Age",
+        "patient_value": 46.0,
+        "shap_value": 0.073201,
+        "effect": "increased predicted positive-class score"
+      },
+      {
+        "feature": "SkinThickness",
+        "patient_value": 24.0,
+        "shap_value": 0.003162,
+        "effect": "increased predicted positive-class score"
+      },
+      {
+        "feature": "DiabetesPedigreeFunction",
+        "patient_value": 0.45,
+        "shap_value": 0.000235,
+        "effect": "increased predicted positive-class score"
+      }
+    ],
+    "attention_statistics": null,
+    "target_class": null,
+    "has_gradcam_overlay": false
+  },
+  "clinical_synthesis": {
+    "title": "Diabetes Mellitus Screening Report \u2013 AI Model Assessment",
+    "screening_summary": "The patient is a 46\u2011year\u2011old individual with a body mass index of 27.6\u202fkg/m\u00b2 (overweight) and a fasting glucose of 114\u202fmg/dL, which meets criteria for impaired fasting glucose. Additional inputs include a modestly elevated diastolic blood pressure (82\u202fmm\u202fHg), a skin\u2011fold thickness of 24\u202fmm, serum insulin of 22\u202f\u03bcU/mL, and a diabetes pedigree function of 0.45. The AI model integrates these variables and yields a low\u2011risk classification (21.4\u202f% predicted probability) for diabetes mellitus. From a clinical standpoint, the primary focus is preventative: reinforcing lifestyle modification, monitoring glycemic trends, and addressing modifiable risk factors such as weight and physical activity, while no immediate diagnostic work\u2011up is indicated. Dr. Sarah Chen, MD (Senior Attending Physician) confirms that the patient\u2019s profile aligns with a preventive care pathway rather than an acute intervention.",
+    "model_findings": "The diabetes screening algorithm generated a predicted probability of 0.214 (21.4\u202f%) for a positive diabetes outcome, well below the pre\u2011specified decision threshold of 0.50. Consequently, the model output is a negative screen (prediction\u202f=\u202f0) and the risk tier is designated as \"Low Risk.\" The underlying statistical model utilizes an ensemble of logistic\u2011type learners calibrated to a baseline reference score of +0.3610; the net SHAP displacement for this case is \u20130.14697, reflecting a net protective effect from the input features. The probability estimate is derived from the aggregated contribution of each feature, weighted by its SHAP value, and therefore reflects the model\u2019s best estimate given the supplied biometric data.",
+    "explainability_summary": "SHAP (SHapley Additive exPlanations) analysis identified three modest positive contributors to the predicted risk: age\u202f=\u202f46\u202fyears (SHAP\u202f+0.073201), skin\u2011fold thickness\u202f=\u202f24\u202fmm (SHAP\u202f+0.003162), and diabetes pedigree function\u202f=\u202f0.45 (SHAP\u202f+0.000235). Protective contributors that reduced the predicted risk included insulin\u202f=\u202f22\u202f\u03bcU/mL (SHAP\u202f\u20130.106029), fasting glucose\u202f=\u202f114\u202fmg/dL (SHAP\u202f\u20130.039117), pregnancies\u202f=\u202f1 (SHAP\u202f\u20130.033654), derived BMI category\u202f=\u202f2 (overweight) (SHAP\u202f\u20130.025034), BMI\u202f=\u202f27.6\u202fkg/m\u00b2 (SHAP\u202f\u20130.014872), and diastolic blood pressure\u202f=\u202f82\u202fmm\u202fHg (SHAP\u202f\u20130.004864). The net SHAP displacement of \u20130.146972 indicates that the protective features outweigh the risk\u2011enhancing ones. Importantly, SHAP describes how the model arrived at its output for this specific input set; it does not establish a causal relationship between any individual biomarker and the development of diabetes.",
+    "clinician_review": "Dr. Sarah Chen, MD (Senior Attending Physician) reviewed the AI screening output and confirmed that the model\u2019s low\u2011risk classification is consistent with the patient\u2019s current biometric profile. The modestly elevated fasting glucose and overweight status are acknowledged as early metabolic concerns, yet the protective influence of relatively normal insulin levels and the overall SHAP profile support the negative screen. Dr. Chen notes that the algorithm\u2019s decision aligns with current clinical practice guidelines, which recommend continued surveillance rather than immediate diagnostic testing in asymptomatic individuals with low predicted risk.",
+    "physician_perspective_analysis": "From Dr. Sarah Chen, MD's perspective, the AI screening provides a valuable adjunct to routine preventive care. The low predicted probability (21.4\u202f%) and the protective SHAP contributions, particularly the negative impact of insulin and fasting glucose, suggest that the patient\u2019s current metabolic state is not yet at a threshold warranting diagnostic work\u2011up for diabetes. However, the presence of impaired fasting glucose and an overweight BMI represent modifiable risk factors that merit targeted lifestyle counseling. Dr. Chen would prioritize reinforcement of dietary quality and physical activity, schedule repeat metabolic panels in 12\u202fmonths, and remain vigilant for any symptomatic changes. The clinician also acknowledges the model\u2019s limitations, emphasizing that the screening output should complement\u2014not replace\u2014clinical judgment and that ongoing surveillance is essential to capture any trajectory toward higher risk.",
+    "recommendations": [
+      "Maintain a balanced, nutrient\u2011dense diet emphasizing whole grains, lean protein, and non\u2011starchy vegetables while limiting added sugars and saturated fats.",
+      "Engage in at least 150\u202fminutes of moderate\u2011intensity aerobic activity per week and incorporate resistance training twice weekly to support weight management and insulin sensitivity.",
+      "Schedule routine annual wellness examinations, including repeat fasting glucose and HbA1c testing, to monitor for progression toward dysglycemia."
+    ]
+  },
+  "files": {
+    "report_pdf": "report.pdf",
+    "report_png": "report.png",
+    "report_txt": "report.txt",
+    "source_image": null,
+    "gradcam_overlay": null
+  }
+}

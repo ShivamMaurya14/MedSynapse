@@ -1,0 +1,66 @@
+================================================================================
+MEDSYNAPSE CLINICAL DECISION SUPPORT PLATFORM - DIAGNOSTIC REPORT
+================================================================================
+Case Identification : EVAL-DIAB-001
+Clinical Module     : Clinical Disease
+Diagnostic Modality : Standard Clinical Panel
+Scenario Description: High Risk Uncontrolled Type 2 Diabetes Panel
+Attending Clinician : Dr. Sarah Chen, MD (Senior Attending Physician)
+Report Timestamp    : 2026-11-19 04:19 UTC
+System Purpose      : AI Platform Benchmark & Evaluation Dataset
+--------------------------------------------------------------------------------
+1. CLINICAL INPUT PARAMETERS & OBSERVATIONS
+--------------------------------------------------------------------------------
+  * Gravida / Pregnancies               : 2 count            [Normal: 0-2]
+  * Fasting Plasma Glucose              : 168.0 mg/dL        [Normal: 70-99 mg/dL]
+  * Diastolic Blood Pressure            : 90.0 mm Hg         [Normal: < 80 mm Hg]
+  * Triceps Skinfold                    : 32.0 mm            [Normal: 15-25 mm]
+  * Fasting Serum Insulin               : 42.5 μU/mL         [Normal: 2.6-24.9 μU/mL]
+  * Body Mass Index                     : 33.4 kg/m²         [Normal: 18.5-24.9 kg/m²]
+  * Diabetes Pedigree Function          : 0.78 score         [Population: 0.1-0.5]
+  * Patient Age                         : 45 years           [Adult reference]
+
+--------------------------------------------------------------------------------
+2. AI MODEL DIAGNOSTIC INFERENCE & RISK ASSESSMENT
+--------------------------------------------------------------------------------
+  * Primary Diagnostic Finding : Diabetes Mellitus Detected
+  * Assessed Risk Tier         : Moderate Risk
+  * Calibrated Probability     : 0.5021 (50.2%)
+  * Decision Boundary Cutoff   : 0.50 (Standard Decision Cutoff)
+  * Ground-Truth Scenario Fit  : Severe hyperglycemia with high fasting insulin resistance and class I obesity
+
+--------------------------------------------------------------------------------
+3. EXPLAINABLE AI (XAI) ATTRIBUTION
+--------------------------------------------------------------------------------
+  * Explainability Architecture: SHAP PermutationExplainer (full diabetes voting ensemble)
+  * Primary Risk-Increasing Drivers (Positive SHAP φ):
+      - Glucose                       : φ = +0.2582 (patient value: 168.0)
+      - DiabetesPedigreeFunction      : φ = +0.0489 (patient value: 0.78)
+      - Age                           : φ = +0.0235 (patient value: 45.0)
+      - BMI_Cat                       : φ = +0.0234 (patient value: 3.0)
+  * Protective / Mitigating Factors (Negative SHAP φ):
+      - Insulin                       : φ = -0.2110 (patient value: 42.5)
+      - Pregnancies                   : φ = -0.0163 (patient value: 2.0)
+      - SkinThickness                 : φ = -0.0075 (patient value: 32.0)
+
+--------------------------------------------------------------------------------
+4. ATTENDING PHYSICIAN PERSPECTIVE & ACTIONABLE RECOMMENDATIONS
+--------------------------------------------------------------------------------
+Screening Summary:
+  Dr. Sarah Chen, MD (Senior Attending Physician) reviewed the submitted clinical inputs for a 45‑year‑old individual with a fasting glucose of 168 mg/dL, body mass index of 33.4 kg/m² (obesity class I), diastolic blood pressure of 90 mm Hg, and additional laboratory values. The AI model generated a moderate‑risk classification (50.2 % probability) for Diabetes Mellitus. Given the elevated glucose and obesity metrics, the immediate clinical priority is to confirm glycemic status with definitive testing, while also initiating preventive lifestyle measures to mitigate progression toward overt diabetes and associated vascular complications.
+
+Physician Perspective Analysis:
+  From Dr. Sarah Chen, MD's clinical perspective, the AI screening highlights a patient whose metabolic profile places them at moderate risk for Diabetes Mellitus. The dominant SHAP drivers—high fasting glucose, elevated BMI, and age—are classic risk factors that warrant prompt confirmatory testing (OGTT, HbA1c) to differentiate between impaired glucose tolerance and overt diabetes. While the insulin level provides a modest protective signal, it is insufficient to counterbalance the hyperglycemic and adiposity‑related risk. Differential considerations include stress‑induced hyperglycemia, medication effects, or early‑stage type 2 diabetes. Dr. Chen recommends prioritizing diagnostic confirmation, initiating evidence‑based lifestyle modifications, and establishing a structured monitoring schedule to track glycemic trends and cardiovascular risk factors. Referral to endocrinology should be considered if diagnostic testing confirms diabetes or if glycemic control remains suboptimal despite initial interventions.
+
+Actionable Recommendations:
+  1. Schedule a clinical consultation for an oral glucose tolerance test (OGTT) and HbA1c measurement within the next 2 weeks to confirm glycemic status.
+  2. Implement a low‑glycemic dietary plan emphasizing soluble fiber, whole grains, and lean protein, with a follow‑up nutrition counseling session in 4 weeks.
+  3. Engage in at least 150 minutes per week of moderate‑intensity aerobic activity combined with resistance training, reassessed at the 3‑month follow‑up visit.
+  4. Begin self‑monitoring of fasting and 2‑hour post‑prandial blood glucose levels, recording values daily for the next 4 weeks and reviewing trends with the primary care provider.
+  5. Arrange a follow‑up appointment in 3 months to review diagnostic results, reassess risk tier, and adjust management plan as needed.
+
+================================================================================
+SAFETY & COMPLIANCE NOTICE: This diagnostic evaluation report is generated for
+benchmarking and clinician decision support. It is not an autonomous medical
+diagnosis. All therapeutic strategies require licensed clinician confirmation.
+================================================================================

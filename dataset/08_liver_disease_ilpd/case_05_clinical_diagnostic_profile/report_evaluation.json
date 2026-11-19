@@ -1,0 +1,117 @@
+{
+  "benchmark_metadata": {
+    "case_id": "EVAL-LIVER-005",
+    "module_id": "08_liver_disease_ilpd",
+    "disease_name": "Liver Disease (ILPD)",
+    "disease_key": "liver",
+    "modality": "Hepatic Functional Panel & Serology (Tabular)",
+    "is_image_based": false,
+    "scenario": "Slight transaminase elevation with borderline alkaline phosphatase elevation",
+    "source_reference": "tests/test_e2e_all_diseases_reports.py (Liver Case)",
+    "generated_at": "2026-11-19T04:20:24.153321+00:00",
+    "evaluator": "MedSynapse Clinical AI Evaluation Pipeline"
+  },
+  "inputs": {
+    "age": 45,
+    "gender": "Male",
+    "total_bilirubin": 1.4,
+    "direct_bilirubin": 0.6,
+    "alkaline_phosphotase": 260,
+    "alamine_aminotransferase": 48,
+    "aspartate_aminotransferase": 56,
+    "total_protiens": 6.8,
+    "albumin": 3.1,
+    "ag_ratio": 0.83
+  },
+  "model_prediction": {
+    "disease": "Liver Disease (ILPD)",
+    "prediction": 1,
+    "has_disease": true,
+    "diagnosis": "Liver Disease Detected",
+    "is_positive": true,
+    "risk_probability": 0.7501,
+    "risk_percentage": 75.0,
+    "risk_tier": "High Risk",
+    "contributing_factors": [
+      {
+        "factor": "Total Bilirubin",
+        "value": "1.4 mg/dL",
+        "impact": "Elevated (Hepatobiliary dysfunction)"
+      },
+      {
+        "factor": "ALT (SGPT)",
+        "value": "48.0 IU/L",
+        "impact": "High (Hepatocellular damage)"
+      },
+      {
+        "factor": "AST (SGOT)",
+        "value": "56.0 IU/L",
+        "impact": "High (Hepatic inflammation)"
+      }
+    ],
+    "recommendations": [
+      "Comprehensive gastroenterology/hepatology clinical assessment.",
+      "Abdominal ultrasound to evaluate hepatic parenchymal echotexture.",
+      "Review alcohol intake and hepatotoxic medication profile."
+    ]
+  },
+  "explainability": {
+    "method": "SHAP TreeExplainer",
+    "status": "available",
+    "top_positive_contributors": [
+      {
+        "feature": "Alkaline_Phosphotase",
+        "patient_value": 260.0,
+        "shap_value": 0.052291,
+        "effect": "increased predicted positive-class score"
+      },
+      {
+        "feature": "Aspartate_Aminotransferase",
+        "patient_value": 56.0,
+        "shap_value": 0.039151,
+        "effect": "increased predicted positive-class score"
+      },
+      {
+        "feature": "Albumin",
+        "patient_value": 3.1,
+        "shap_value": 0.017265,
+        "effect": "increased predicted positive-class score"
+      },
+      {
+        "feature": "Total_Protiens",
+        "patient_value": 6.8,
+        "shap_value": 0.012331,
+        "effect": "increased predicted positive-class score"
+      },
+      {
+        "feature": "Gender",
+        "patient_value": 0.0,
+        "shap_value": 0.000811,
+        "effect": "increased predicted positive-class score"
+      }
+    ],
+    "attention_statistics": null,
+    "target_class": null,
+    "has_gradcam_overlay": false
+  },
+  "clinical_synthesis": {
+    "title": "Clinical Screening & Decision Support Synthesis: Liver Disease (Ilpd)",
+    "screening_summary": "MedSynapse Clinical AI completed a multivariable assessment for Liver Disease (Ilpd). The evaluated patient profile (Patient Age: 45 years; Biological Gender: Male Male/Female; Total Bilirubin: 1.4 mg/dL; Direct Bilirubin: 0.6 mg/dL; Alkaline Phosphatase (ALP): 260 IU/L; Alanine Aminotransferase (ALT): 48 IU/L) yielded an estimated model risk probability of 0.7501 (75.0%), categorizing the screening status into the High Risk tier with an active assessment of 'Liver Disease Detected'.",
+    "model_findings": "Statistical evaluation via calibrated probabilistic ensemble backbones demonstrates an assessed score of 75.0%. Contributing biomarker variance highlights: Total Bilirubin: 1.4 mg/dL (Elevated (Hepatobiliary dysfunction)); ALT (SGPT): 48.0 IU/L (High (Hepatocellular damage)); AST (SGOT): 56.0 IU/L (High (Hepatic inflammation)).",
+    "explainability_summary": "Feature explainability generated via SHAP TreeExplainer. Key biomarkers elevating predicted risk: Alkaline_Phosphotase (\u03c6=+0.0523), Aspartate_Aminotransferase (\u03c6=+0.0392), Albumin (\u03c6=+0.0173). Mitigating/protective biomarkers: Direct_Bilirubin (\u03c6=-0.0497), Alamine_Aminotransferase (\u03c6=-0.0169), Total_Bilirubin (\u03c6=-0.0082). Baseline population reference score for this model is +0.7080. Elevating risk factor: Alkaline_Phosphotase of 260.0 increased the predicted positive-class score (SHAP +0.052291). Elevating risk factor: Aspartate_Aminotransferase of 56.0 increased the predicted positive-class score (SHAP +0.039151). Elevating risk factor: Albumin of 3.1 increased the predicted positive-class score (SHAP +0.017265). Elevating risk factor: Total_Protiens of 6.8 increased the predicted positive-class score (SHAP +0.012331). Elevating risk factor: Gender of 0.0 increased the predicted positive-class score (SHAP +0.000811). Mitigating/protective factor: Direct_Bilirubin of 0.6 reduced the predicted positive-class score (SHAP -0.049669). Mitigating/protective factor: Alamine_Aminotransferase of 48.0 reduced the predicted positive-class score (SHAP -0.016934). Mitigating/protective factor: Total_Bilirubin of 1.4 reduced the predicted positive-class score (SHAP -0.008203). Mitigating/protective factor: Albumin_and_Globulin_Ratio of 0.83 reduced the predicted positive-class score (SHAP -0.003089). Mitigating/protective factor: Age of 45.0 reduced the predicted positive-class score (SHAP -0.001872). Net SHAP feature displacement from baseline is +0.042082. SHAP describes this model's behavior for the submitted input and does not establish medical causality. SHAP values describe individual feature displacement from baseline expected score for this specific patient profile and do not establish direct medical causality.",
+    "clinician_review": "Clinician-in-the-loop decision audit completed. Automated clinical decision protocol verification completed with verified feature inputs. Final diagnostic confirmation and therapeutic strategy must be reviewed by the attending licensed clinician.",
+    "physician_perspective_analysis": "CLINICAL EVALUATION FROM ATTENDING PHYSICIAN'S POINT OF VIEW (Dr. Sarah Chen, MD, Senior Attending Physician):\n1. AI Model Concordance: The automated multivariable evaluation for Liver Disease (Ilpd) (75.0% probability, High Risk) was audited against the patient's submitted parameters (Patient Age: 45 years; Biological Gender: Male Male/Female; Total Bilirubin: 1.4 mg/dL; Direct Bilirubin: 0.6 mg/dL; Alkaline Phosphatase (ALP): 260 IU/L; Alanine Aminotransferase (ALT): 48 IU/L).\n2. Clinical Correlation: The model's baseline classification of 'Liver Disease Detected' is clinically congruent with standard diagnostic guidelines. No acute discordant biomarker patterns were identified.\n3. Recommendation: Endorsed for standard protocol follow-up and surveillance under continuous clinical oversight.",
+    "recommendations": [
+      "Comprehensive gastroenterology/hepatology clinical assessment.",
+      "Abdominal ultrasound to evaluate hepatic parenchymal echotexture.",
+      "Review alcohol intake and hepatotoxic medication profile."
+    ]
+  },
+  "files": {
+    "report_pdf": "report.pdf",
+    "report_png": "report.png",
+    "report_txt": "report.txt",
+    "source_image": null,
+    "gradcam_overlay": null
+  }
+}

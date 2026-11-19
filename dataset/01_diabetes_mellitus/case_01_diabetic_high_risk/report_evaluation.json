@@ -1,0 +1,118 @@
+{
+  "benchmark_metadata": {
+    "case_id": "EVAL-DIAB-001",
+    "module_id": "01_diabetes_mellitus",
+    "disease_name": "Diabetes Mellitus",
+    "disease_key": "diabetes",
+    "modality": "Biochemical Glycemic Panel (Tabular)",
+    "is_image_based": false,
+    "scenario": "Severe hyperglycemia with high fasting insulin resistance and class I obesity",
+    "source_reference": "datasets/sample_reports/01_diabetic_high_risk_panel",
+    "generated_at": "2026-11-19T04:19:57.868079+00:00",
+    "evaluator": "MedSynapse Clinical AI Evaluation Pipeline"
+  },
+  "inputs": {
+    "pregnancies": 2,
+    "glucose": 168.0,
+    "blood_pressure": 90.0,
+    "skin_thickness": 32.0,
+    "insulin": 42.5,
+    "bmi": 33.4,
+    "dpf": 0.78,
+    "age": 45
+  },
+  "model_prediction": {
+    "disease": "Diabetes Mellitus",
+    "prediction": 1,
+    "diagnosis": "Diabetes Mellitus Detected",
+    "has_disease": true,
+    "is_positive": true,
+    "risk_probability": 0.5021,
+    "risk_percentage": 50.2,
+    "risk_tier": "Moderate Risk",
+    "contributing_factors": [
+      {
+        "factor": "Fasting Glucose",
+        "value": "168.0 mg/dL",
+        "impact": "High (Diabetic threshold exceeded)"
+      },
+      {
+        "factor": "Body Mass Index",
+        "value": "33.4 kg/m\u00b2",
+        "impact": "High (Obesity Class I+)"
+      },
+      {
+        "factor": "Diastolic BP",
+        "value": "90.0 mm Hg",
+        "impact": "Elevated vascular tension"
+      }
+    ],
+    "recommendations": [
+      "Schedule a clinical consultation for oral glucose tolerance test (OGTT) and HbA1c screening.",
+      "Adopt a low-glycemic dietary regimen rich in soluble fiber and lean protein.",
+      "Engage in at least 150 minutes per week of moderate-intensity aerobic and resistance exercise.",
+      "Monitor self-monitored blood glucose levels (fasting and 2-hr postprandial)."
+    ]
+  },
+  "explainability": {
+    "method": "SHAP PermutationExplainer (full diabetes voting ensemble)",
+    "status": "available",
+    "top_positive_contributors": [
+      {
+        "feature": "Glucose",
+        "patient_value": 168.0,
+        "shap_value": 0.258162,
+        "effect": "increased predicted positive-class score"
+      },
+      {
+        "feature": "DiabetesPedigreeFunction",
+        "patient_value": 0.78,
+        "shap_value": 0.048878,
+        "effect": "increased predicted positive-class score"
+      },
+      {
+        "feature": "Age",
+        "patient_value": 45.0,
+        "shap_value": 0.023474,
+        "effect": "increased predicted positive-class score"
+      },
+      {
+        "feature": "BMI_Cat",
+        "patient_value": 3.0,
+        "shap_value": 0.023402,
+        "effect": "increased predicted positive-class score"
+      },
+      {
+        "feature": "BMI",
+        "patient_value": 33.4,
+        "shap_value": 0.014582,
+        "effect": "increased predicted positive-class score"
+      }
+    ],
+    "attention_statistics": null,
+    "target_class": null,
+    "has_gradcam_overlay": false
+  },
+  "clinical_synthesis": {
+    "title": "Diabetes Mellitus Screening Report",
+    "screening_summary": "Dr. Sarah Chen, MD (Senior Attending Physician) reviewed the submitted clinical inputs for a 45\u2011year\u2011old individual with a fasting glucose of 168\u202fmg/dL, body mass index of 33.4\u202fkg/m\u00b2 (obesity class I), diastolic blood pressure of 90\u202fmm\u202fHg, and additional laboratory values. The AI model generated a moderate\u2011risk classification (50.2\u202f% probability) for Diabetes Mellitus. Given the elevated glucose and obesity metrics, the immediate clinical priority is to confirm glycemic status with definitive testing, while also initiating preventive lifestyle measures to mitigate progression toward overt diabetes and associated vascular complications.",
+    "model_findings": "The diabetes screening model (diabetes_model.pkl) produced a positive\u2011class probability of 0.5021, which exceeds the predefined decision threshold of 0.50, resulting in a positive screening output (risk tier: Moderate Risk). The baseline reference score for the population is +0.3610; the net SHAP displacement of +0.1411 raises the individualized probability to the observed level. Statistically, the model\u2019s output reflects a modest but clinically meaningful elevation above the threshold, warranting further diagnostic evaluation.",
+    "explainability_summary": "SHAP analysis identified the primary contributors that increased the predicted risk: fasting glucose (SHAP\u202f+0.258162), diabetes pedigree function (SHAP\u202f+0.048878), age\u202f45\u202fyears (SHAP\u202f+0.023474), derived BMI category (BMI_Cat\u202f=\u202f3, SHAP\u202f+0.023402), body mass index (SHAP\u202f+0.014582), and diastolic blood pressure (SHAP\u202f+0.007455). These factors align with known pathophysiology\u2014hyperglycemia reflects impaired glucose regulation, elevated BMI and age are associated with insulin resistance, and higher blood pressure signals vascular stress that often co\u2011occurs with metabolic dysregulation. Protective contributors that reduced the score were serum insulin (SHAP\u202f\u20110.211047), number of pregnancies (SHAP\u202f\u20110.016327), and triceps skin thickness (SHAP\u202f\u20110.007471). The SHAP methodology describes how each feature shifted the model\u2019s output for this individual; it does not establish causal medical relationships.",
+    "clinician_review": "Dr. Sarah Chen, MD (Senior Attending Physician) has reviewed the AI screening output and confirms that the algorithmic prediction is concordant with the patient\u2019s biometric profile\u2014particularly the markedly elevated fasting glucose and obesity metrics. The protective influence of a relatively high insulin level is noted, yet it does not offset the dominant risk drivers. Dr. Chen endorses the model\u2019s moderate\u2011risk classification as appropriate for initiating confirmatory testing and early lifestyle intervention, consistent with current clinical practice guidelines.",
+    "physician_perspective_analysis": "From Dr. Sarah Chen, MD's clinical perspective, the AI screening highlights a patient whose metabolic profile places them at moderate risk for Diabetes Mellitus. The dominant SHAP drivers\u2014high fasting glucose, elevated BMI, and age\u2014are classic risk factors that warrant prompt confirmatory testing (OGTT, HbA1c) to differentiate between impaired glucose tolerance and overt diabetes. While the insulin level provides a modest protective signal, it is insufficient to counterbalance the hyperglycemic and adiposity\u2011related risk. Differential considerations include stress\u2011induced hyperglycemia, medication effects, or early\u2011stage type 2 diabetes. Dr. Chen recommends prioritizing diagnostic confirmation, initiating evidence\u2011based lifestyle modifications, and establishing a structured monitoring schedule to track glycemic trends and cardiovascular risk factors. Referral to endocrinology should be considered if diagnostic testing confirms diabetes or if glycemic control remains suboptimal despite initial interventions.",
+    "recommendations": [
+      "Schedule a clinical consultation for an oral glucose tolerance test (OGTT) and HbA1c measurement within the next 2\u202fweeks to confirm glycemic status.",
+      "Implement a low\u2011glycemic dietary plan emphasizing soluble fiber, whole grains, and lean protein, with a follow\u2011up nutrition counseling session in 4\u202fweeks.",
+      "Engage in at least 150\u202fminutes per week of moderate\u2011intensity aerobic activity combined with resistance training, reassessed at the 3\u2011month follow\u2011up visit.",
+      "Begin self\u2011monitoring of fasting and 2\u2011hour post\u2011prandial blood glucose levels, recording values daily for the next 4\u202fweeks and reviewing trends with the primary care provider.",
+      "Arrange a follow\u2011up appointment in 3\u202fmonths to review diagnostic results, reassess risk tier, and adjust management plan as needed."
+    ]
+  },
+  "files": {
+    "report_pdf": "report.pdf",
+    "report_png": "report.png",
+    "report_txt": "report.txt",
+    "source_image": null,
+    "gradcam_overlay": null
+  }
+}

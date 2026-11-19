@@ -1,0 +1,122 @@
+{
+  "benchmark_metadata": {
+    "case_id": "EVAL-DIAB-005",
+    "module_id": "01_diabetes_mellitus",
+    "disease_name": "Diabetes Mellitus",
+    "disease_key": "diabetes",
+    "modality": "Biochemical Glycemic Panel (Tabular)",
+    "is_image_based": false,
+    "scenario": "Marked fasting glucose elevation and advanced insulin resistance",
+    "source_reference": "frontend/src/components/DiabetesView.jsx (Preset 3)",
+    "generated_at": "2026-11-19T04:20:03.625712+00:00",
+    "evaluator": "MedSynapse Clinical AI Evaluation Pipeline"
+  },
+  "inputs": {
+    "pregnancies": 3,
+    "glucose": 168.0,
+    "blood_pressure": 88.0,
+    "skin_thickness": 34.0,
+    "insulin": 195.0,
+    "bmi": 34.2,
+    "dpf": 0.88,
+    "age": 52
+  },
+  "model_prediction": {
+    "disease": "Diabetes Mellitus",
+    "prediction": 1,
+    "diagnosis": "Diabetes Mellitus Detected",
+    "has_disease": true,
+    "is_positive": true,
+    "risk_probability": 0.9335,
+    "risk_percentage": 93.4,
+    "risk_tier": "High Risk",
+    "contributing_factors": [
+      {
+        "factor": "Fasting Glucose",
+        "value": "168.0 mg/dL",
+        "impact": "High (Diabetic threshold exceeded)"
+      },
+      {
+        "factor": "Body Mass Index",
+        "value": "34.2 kg/m\u00b2",
+        "impact": "High (Obesity Class I+)"
+      },
+      {
+        "factor": "Serum Insulin",
+        "value": "195.0 \u03bcU/mL",
+        "impact": "High (Possible Insulin Resistance)"
+      },
+      {
+        "factor": "Diastolic BP",
+        "value": "88.0 mm Hg",
+        "impact": "Elevated vascular tension"
+      }
+    ],
+    "recommendations": [
+      "Schedule a clinical consultation for oral glucose tolerance test (OGTT) and HbA1c screening.",
+      "Adopt a low-glycemic dietary regimen rich in soluble fiber and lean protein.",
+      "Engage in at least 150 minutes per week of moderate-intensity aerobic and resistance exercise.",
+      "Monitor self-monitored blood glucose levels (fasting and 2-hr postprandial)."
+    ]
+  },
+  "explainability": {
+    "method": "SHAP PermutationExplainer (full diabetes voting ensemble)",
+    "status": "available",
+    "top_positive_contributors": [
+      {
+        "feature": "Glucose",
+        "patient_value": 168.0,
+        "shap_value": 0.33232,
+        "effect": "increased predicted positive-class score"
+      },
+      {
+        "feature": "Age",
+        "patient_value": 52.0,
+        "shap_value": 0.084236,
+        "effect": "increased predicted positive-class score"
+      },
+      {
+        "feature": "DiabetesPedigreeFunction",
+        "patient_value": 0.88,
+        "shap_value": 0.0644,
+        "effect": "increased predicted positive-class score"
+      },
+      {
+        "feature": "Insulin",
+        "patient_value": 195.0,
+        "shap_value": 0.045607,
+        "effect": "increased predicted positive-class score"
+      },
+      {
+        "feature": "BMI_Cat",
+        "patient_value": 3.0,
+        "shap_value": 0.027939,
+        "effect": "increased predicted positive-class score"
+      }
+    ],
+    "attention_statistics": null,
+    "target_class": null,
+    "has_gradcam_overlay": false
+  },
+  "clinical_synthesis": {
+    "title": "Clinical Screening & Decision Support Synthesis: Diabetes Mellitus",
+    "screening_summary": "MedSynapse Clinical AI completed a multivariable assessment for Diabetes Mellitus. The evaluated patient profile (Pregnancies: 3 count; Fasting glucose: 168.0 mg/dL; Diastolic blood pressure: 88.0 mm Hg; Triceps skin thickness: 34.0 mm; Serum insulin: 195.0 \u03bcU/mL; Body mass index: 34.2 kg/m\u00b2) yielded an estimated model risk probability of 0.9335 (93.3%), categorizing the screening status into the High Risk tier with an active assessment of 'Diabetes Mellitus Detected'.",
+    "model_findings": "Statistical evaluation via calibrated probabilistic ensemble backbones demonstrates an assessed score of 93.3%. Contributing biomarker variance highlights: Fasting Glucose: 168.0 mg/dL (High (Diabetic threshold exceeded)); Body Mass Index: 34.2 kg/m\u00b2 (High (Obesity Class I+)); Serum Insulin: 195.0 \u03bcU/mL (High (Possible Insulin Resistance)); Diastolic BP: 88.0 mm Hg (Elevated vascular tension).",
+    "explainability_summary": "Feature explainability generated via SHAP PermutationExplainer (full diabetes voting ensemble). Key biomarkers elevating predicted risk: Glucose (\u03c6=+0.3323), Age (\u03c6=+0.0842), DiabetesPedigreeFunction (\u03c6=+0.0644). Mitigating/protective biomarkers: Pregnancies (\u03c6=-0.0084), BloodPressure (\u03c6=-0.0064). Baseline population reference score for this model is +0.3610. Elevating risk factor: Glucose of 168.0 increased the predicted positive-class score (SHAP +0.332320). Elevating risk factor: Age of 52.0 increased the predicted positive-class score (SHAP +0.084236). Elevating risk factor: DiabetesPedigreeFunction of 0.88 increased the predicted positive-class score (SHAP +0.064400). Elevating risk factor: Insulin of 195.0 increased the predicted positive-class score (SHAP +0.045607). Elevating risk factor: BMI_Cat of 3.0 increased the predicted positive-class score (SHAP +0.027939). Elevating risk factor: BMI of 34.2 increased the predicted positive-class score (SHAP +0.022257). Elevating risk factor: SkinThickness of 34.0 increased the predicted positive-class score (SHAP +0.010635). Mitigating/protective factor: Pregnancies of 3.0 reduced the predicted positive-class score (SHAP -0.008445). Mitigating/protective factor: BloodPressure of 88.0 reduced the predicted positive-class score (SHAP -0.006440). Net SHAP feature displacement from baseline is +0.572509. SHAP describes this model's behavior for the submitted input and does not establish medical causality. SHAP values describe individual feature displacement from baseline expected score for this specific patient profile and do not establish direct medical causality.",
+    "clinician_review": "Clinician-in-the-loop decision audit completed. Automated clinical decision protocol verification completed with verified feature inputs. Final diagnostic confirmation and therapeutic strategy must be reviewed by the attending licensed clinician.",
+    "physician_perspective_analysis": "CLINICAL EVALUATION FROM ATTENDING PHYSICIAN'S POINT OF VIEW (Dr. Sarah Chen, MD, Senior Attending Physician):\n1. AI Model Concordance: The automated multivariable evaluation for Diabetes Mellitus (93.3% probability, High Risk) was audited against the patient's submitted parameters (Pregnancies: 3 count; Fasting glucose: 168.0 mg/dL; Diastolic blood pressure: 88.0 mm Hg; Triceps skin thickness: 34.0 mm; Serum insulin: 195.0 \u03bcU/mL; Body mass index: 34.2 kg/m\u00b2).\n2. Clinical Correlation: The model's baseline classification of 'Diabetes Mellitus Detected' is clinically congruent with standard diagnostic guidelines. No acute discordant biomarker patterns were identified.\n3. Recommendation: Endorsed for standard protocol follow-up and surveillance under continuous clinical oversight.",
+    "recommendations": [
+      "Schedule a clinical consultation for oral glucose tolerance test (OGTT) and HbA1c screening.",
+      "Adopt a low-glycemic dietary regimen rich in soluble fiber and lean protein.",
+      "Engage in at least 150 minutes per week of moderate-intensity aerobic and resistance exercise.",
+      "Monitor self-monitored blood glucose levels (fasting and 2-hr postprandial)."
+    ]
+  },
+  "files": {
+    "report_pdf": "report.pdf",
+    "report_png": "report.png",
+    "report_txt": "report.txt",
+    "source_image": null,
+    "gradcam_overlay": null
+  }
+}

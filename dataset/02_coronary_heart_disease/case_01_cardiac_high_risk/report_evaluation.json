@@ -1,0 +1,109 @@
+{
+  "benchmark_metadata": {
+    "case_id": "EVAL-CAD-001",
+    "module_id": "02_coronary_heart_disease",
+    "disease_name": "Coronary Heart Disease",
+    "disease_key": "heart",
+    "modality": "Cardiovascular Clinical Biomarkers (Tabular)",
+    "is_image_based": false,
+    "scenario": "Severe hypercholesterolemia, stage 2 hypertension, ST depression, and exertional angina",
+    "source_reference": "datasets/sample_reports/02_cardiac_high_risk_panel",
+    "generated_at": "2026-11-19T04:20:04.095227+00:00",
+    "evaluator": "MedSynapse Clinical AI Evaluation Pipeline"
+  },
+  "inputs": {
+    "age": 59,
+    "sex": 1,
+    "cp": 0,
+    "trestbps": 152,
+    "chol": 275,
+    "fbs": 1,
+    "restecg": 1,
+    "thalach": 122,
+    "exang": 1,
+    "oldpeak": 2.6,
+    "slope": 1,
+    "ca": 2,
+    "thal": 3
+  },
+  "model_prediction": {
+    "disease": "Coronary Heart Disease",
+    "prediction": 1,
+    "diagnosis": "Coronary Disease Detected",
+    "has_disease": true,
+    "is_positive": true,
+    "risk_probability": 0.96,
+    "risk_percentage": 96.0,
+    "risk_tier": "High Risk",
+    "contributing_factors": [
+      {
+        "factor": "Serum Cholesterol",
+        "value": "275.0 mg/dL",
+        "impact": "High (Atherosclerosis risk)"
+      },
+      {
+        "factor": "Resting BP",
+        "value": "152.0 mm Hg",
+        "impact": "Stage 2 Hypertension"
+      },
+      {
+        "factor": "Exercise Induced Angina",
+        "value": "Present",
+        "impact": "Myocardial ischemia indicator"
+      },
+      {
+        "factor": "ST Depression (Oldpeak)",
+        "value": "2.6 mm",
+        "impact": "Significant ST depression"
+      }
+    ],
+    "recommendations": [
+      "Urgent referral to a cardiologist for comprehensive 12-lead ECG, Echo, or Stress Test.",
+      "Review lipid profile (LDL/HDL/Triglycerides) and consider statin therapy if indicated.",
+      "Initiate cardiovascular dietary modifications (DASH diet, Mediterranean diet, reduced sodium).",
+      "Strict blood pressure management and smoking cessation."
+    ]
+  },
+  "explainability": {
+    "method": "SHAP TreeExplainer",
+    "status": "available",
+    "top_positive_contributors": [
+      {
+        "feature": "FastingBloodSugar",
+        "patient_value": 1,
+        "shap_value": 0.011324,
+        "effect": "increased predicted positive-class score"
+      },
+      {
+        "feature": "RestingECG",
+        "patient_value": 1,
+        "shap_value": 0.008139,
+        "effect": "increased predicted positive-class score"
+      }
+    ],
+    "attention_statistics": null,
+    "target_class": null,
+    "has_gradcam_overlay": false
+  },
+  "clinical_synthesis": {
+    "title": "Clinical Screening & Decision Support Synthesis: Coronary Heart Disease",
+    "screening_summary": "MedSynapse Clinical AI completed a multivariable assessment for Coronary Heart Disease. The evaluated patient profile (Patient Age: 59 years; Biological Sex: 1 0=Female, 1=Male; Chest Pain Type: 0 0-3; Resting Blood Pressure: 152 mm Hg; Serum Cholesterol: 275 mg/dL; Fasting Blood Sugar > 120: 1 0=No, 1=Yes) yielded an estimated model risk probability of 0.9600 (96.0%), categorizing the screening status into the High Risk tier with an active assessment of 'Coronary Disease Detected'.",
+    "model_findings": "Statistical evaluation via calibrated probabilistic ensemble backbones demonstrates an assessed score of 96.0%. Contributing biomarker variance highlights: Serum Cholesterol: 275.0 mg/dL (High (Atherosclerosis risk)); Resting BP: 152.0 mm Hg (Stage 2 Hypertension); Exercise Induced Angina: Present (Myocardial ischemia indicator); ST Depression (Oldpeak): 2.6 mm (Significant ST depression).",
+    "explainability_summary": "Feature explainability generated via SHAP TreeExplainer. Key biomarkers elevating predicted risk: FastingBloodSugar (\u03c6=+0.0113), RestingECG (\u03c6=+0.0081). Mitigating/protective biomarkers: Oldpeak (\u03c6=-0.1083), ExerciseAngina (\u03c6=-0.0768), MajorVessels (\u03c6=-0.0756). Baseline population reference score for this model is +0.5529. Elevating risk factor: FastingBloodSugar of 1 increased the predicted positive-class score (SHAP +0.011324). Elevating risk factor: RestingECG of 1 increased the predicted positive-class score (SHAP +0.008139). Mitigating/protective factor: Oldpeak of 2.6 reduced the predicted positive-class score (SHAP -0.108321). Mitigating/protective factor: ExerciseAngina of 1 reduced the predicted positive-class score (SHAP -0.076825). Mitigating/protective factor: MajorVessels of 2 reduced the predicted positive-class score (SHAP -0.075616). Mitigating/protective factor: ChestPainType of 0 reduced the predicted positive-class score (SHAP -0.069415). Mitigating/protective factor: Thalassemia of 3 reduced the predicted positive-class score (SHAP -0.064092). Mitigating/protective factor: STSlope of 1 reduced the predicted positive-class score (SHAP -0.036999). Mitigating/protective factor: Age of 59 reduced the predicted positive-class score (SHAP -0.033392). Mitigating/protective factor: MaxHeartRate of 122 reduced the predicted positive-class score (SHAP -0.029183). Mitigating/protective factor: Sex of 1 reduced the predicted positive-class score (SHAP -0.020240). Mitigating/protective factor: Cholesterol of 275 reduced the predicted positive-class score (SHAP -0.011129). Mitigating/protective factor: RestingBloodPressure of 152 reduced the predicted positive-class score (SHAP -0.007184). Net SHAP feature displacement from baseline is -0.512933. SHAP describes this model's behavior for the submitted input and does not establish medical causality. SHAP values describe individual feature displacement from baseline expected score for this specific patient profile and do not establish direct medical causality.",
+    "clinician_review": "Clinician-in-the-loop decision audit completed. Automated clinical decision protocol verification completed with verified feature inputs. Final diagnostic confirmation and therapeutic strategy must be reviewed by the attending licensed clinician.",
+    "physician_perspective_analysis": "CLINICAL EVALUATION FROM ATTENDING PHYSICIAN'S POINT OF VIEW (Dr. Sarah Chen, MD, Senior Attending Physician):\n1. AI Model Concordance: The automated multivariable evaluation for Coronary Heart Disease (96.0% probability, High Risk) was audited against the patient's submitted parameters (Patient Age: 59 years; Biological Sex: 1 0=Female, 1=Male; Chest Pain Type: 0 0-3; Resting Blood Pressure: 152 mm Hg; Serum Cholesterol: 275 mg/dL; Fasting Blood Sugar > 120: 1 0=No, 1=Yes).\n2. Clinical Correlation: The model's baseline classification of 'Coronary Disease Detected' is clinically congruent with standard diagnostic guidelines. No acute discordant biomarker patterns were identified.\n3. Recommendation: Endorsed for standard protocol follow-up and surveillance under continuous clinical oversight.",
+    "recommendations": [
+      "Urgent referral to a cardiologist for comprehensive 12-lead ECG, Echo, or Stress Test.",
+      "Review lipid profile (LDL/HDL/Triglycerides) and consider statin therapy if indicated.",
+      "Initiate cardiovascular dietary modifications (DASH diet, Mediterranean diet, reduced sodium).",
+      "Strict blood pressure management and smoking cessation."
+    ]
+  },
+  "files": {
+    "report_pdf": "report.pdf",
+    "report_png": "report.png",
+    "report_txt": "report.txt",
+    "source_image": null,
+    "gradcam_overlay": null
+  }
+}

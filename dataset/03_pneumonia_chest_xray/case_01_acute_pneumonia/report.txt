@@ -1,0 +1,57 @@
+================================================================================
+MEDSYNAPSE CLINICAL DECISION SUPPORT PLATFORM - DIAGNOSTIC REPORT
+================================================================================
+Case Identification : EVAL-XRAY-001
+Clinical Module     : Clinical Disease
+Diagnostic Modality : Standard Clinical Panel
+Scenario Description: Acute Lobar Pneumonia Consolidation Scan
+Attending Clinician : Dr. Sarah Chen, MD (Senior Attending Physician)
+Report Timestamp    : 2026-11-19 04:20 UTC
+System Purpose      : AI Platform Benchmark & Evaluation Dataset
+--------------------------------------------------------------------------------
+1. CLINICAL INPUT PARAMETERS & OBSERVATIONS
+--------------------------------------------------------------------------------
+  * Modality                            : Chest X-Ray (AP)   [Standard reference]
+  * Projection                          : Anterior-Posterior [Standard reference]
+
+--------------------------------------------------------------------------------
+2. AI MODEL DIAGNOSTIC INFERENCE & RISK ASSESSMENT
+--------------------------------------------------------------------------------
+  * Primary Diagnostic Finding : Pneumonia
+  * Assessed Risk Tier         : High Risk
+  * Calibrated Probability     : 0.9999 (100.0%)
+  * Decision Boundary Cutoff   : 0.50 (Standard Decision Cutoff)
+  * Ground-Truth Scenario Fit  : High-density parenchymal infiltrate and consolidation across right lower pulmonary zone
+
+--------------------------------------------------------------------------------
+3. EXPLAINABLE AI (XAI) ATTRIBUTION
+--------------------------------------------------------------------------------
+  * Explainability Architecture: Grad-CAM
+  * Saliency Target Class      : Pneumonia
+  * Backpropagated Layer       : block14_sepconv2_act
+  * Peak Attention Intensity   : 1.0000
+  * Heatmap Resolution Shape   : [7, 7]
+
+--------------------------------------------------------------------------------
+4. ATTENDING PHYSICIAN PERSPECTIVE & ACTIONABLE RECOMMENDATIONS
+--------------------------------------------------------------------------------
+Screening Summary:
+  MedSynapse Clinical AI completed a multivariable assessment for Pneumonia. The evaluated patient profile (modality: Chest X-Ray (AP); projection: Anterior-Posterior) yielded an estimated model risk probability of 0.9999 (100.0%), categorizing the screening status into the High Risk tier with an active assessment of 'Pneumonia'.
+
+Physician Perspective Analysis:
+  CLINICAL EVALUATION FROM ATTENDING PHYSICIAN'S POINT OF VIEW (Dr. Sarah Chen, MD, Senior Attending Physician):
+1. AI Model Concordance: The automated multivariable evaluation for Pneumonia (100.0% probability, High Risk) was audited against the patient's submitted parameters (modality: Chest X-Ray (AP); projection: Anterior-Posterior).
+2. Clinical Correlation: The model's baseline classification of 'Pneumonia' is clinically congruent with standard diagnostic guidelines. No acute discordant biomarker patterns were identified.
+3. Recommendation: Endorsed for standard protocol follow-up and surveillance under continuous clinical oversight.
+
+Actionable Recommendations:
+  1. Immediate medical evaluation by a pulmonologist or primary care physician.
+  2. Confirm clinical symptoms (fever, productive cough, shortness of breath, pleuritic chest pain).
+  3. Evaluate for antibiotic or antiviral treatment depending on clinical etiology.
+  4. Pulse oximetry monitoring for adequate oxygen saturation (> 94%).
+
+================================================================================
+SAFETY & COMPLIANCE NOTICE: This diagnostic evaluation report is generated for
+benchmarking and clinician decision support. It is not an autonomous medical
+diagnosis. All therapeutic strategies require licensed clinician confirmation.
+================================================================================

@@ -1,0 +1,43 @@
+{
+    "classes": [
+        "nv",
+        "mel",
+        "bkl",
+        "bcc",
+        "akiec",
+        "vasc",
+        "df"
+    ],
+    "label_mapping": {
+        "0": "nv",
+        "1": "mel",
+        "2": "bkl",
+        "3": "bcc",
+        "4": "akiec",
+        "5": "vasc",
+        "6": "df"
+    },
+    "reverse_label_mapping": {
+        "nv": 0,
+        "mel": 1,
+        "bkl": 2,
+        "bcc": 3,
+        "akiec": 4,
+        "vasc": 5,
+        "df": 6
+    },
+    "lesion_type_dict": {
+        "nv": "Melanocytic nevi (nv)",
+        "mel": "Melanoma (mel)",
+        "bkl": "Benign keratosis-like lesions (bkl)",
+        "bcc": "Basal cell carcinoma (bcc)",
+        "akiec": "Actinic keratoses (akiec)",
+        "vasc": "Vascular lesions (vasc)",
+        "df": "Dermatofibroma (df)"
+    },
+    "input_shape": [
+        28,
+        28,
+        3
+    ]
+}

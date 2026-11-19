@@ -1,0 +1,19 @@
+MEDSYNAPSE - SYNTHETIC TEST FIXTURE
+Breast FNA Morphometry Report - Review Required
+Deliberately incomplete fixture to verify missing-feature handling
+Not patient data. Not a diagnosis. For local pipeline testing only.
+
+WDBC FNA MORPHOMETRIC MEASUREMENTS
+radius_mean: 14.2
+texture_mean: 20.1
+perimeter_mean: 92.5
+area_mean: 620
+smoothness_mean: 0.095
+compactness_mean: 0.12
+concavity_mean: 0.08
+concave_points_mean: 0.045
+symmetry_mean: 0.18
+fractal_dimension_mean: 0.062
+
+TEST EXPECTATION
+Incomplete feature contract: must require clinician completion; do not infer missing values.

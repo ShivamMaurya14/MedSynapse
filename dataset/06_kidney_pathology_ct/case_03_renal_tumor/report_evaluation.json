@@ -1,0 +1,80 @@
+{
+  "benchmark_metadata": {
+    "case_id": "EVAL-KIDNEY-003",
+    "module_id": "06_kidney_pathology_ct",
+    "disease_name": "Kidney Pathology (CT)",
+    "disease_key": "kidney_stone",
+    "modality": "Non-Contrast Abdominal CT Scan",
+    "is_image_based": true,
+    "scenario": "Solid hyperdense renal mass lesion with parenchymal architectural distortion",
+    "source_reference": "frontend/public/test_samples/kidney_tumor.jpg",
+    "generated_at": "2026-11-19T04:20:18.304237+00:00",
+    "evaluator": "MedSynapse Clinical AI Evaluation Pipeline"
+  },
+  "inputs": {
+    "modality": "Non-contrast Abdominal CT",
+    "slice": "Transverse Renal Axial"
+  },
+  "model_prediction": {
+    "disease": "Kidney Pathology (CT)",
+    "prediction": "Tumor",
+    "diagnosis": "Tumor",
+    "has_disease": true,
+    "is_positive": true,
+    "risk_probability": 0.9923,
+    "risk_percentage": 99.2,
+    "confidence_percentage": 95.4,
+    "risk_tier": "High Risk",
+    "class_probabilities": {
+      "Cyst": 0.0337,
+      "Normal": 0.0077,
+      "Stone": 0.0049,
+      "Tumor": 0.9537
+    },
+    "description": "Solid hyperdense renal parenchymal mass lesion identified.",
+    "modality": "Non-Contrast Abdominal CT Scan",
+    "image_transformation": {
+      "original_dimensions": "512 \u00d7 512 px",
+      "original_mode": "RGB",
+      "transformed_shape": "150 \u00d7 150 \u00d7 3",
+      "normalization": "Float32 [0.0 - 1.0]"
+    },
+    "recommendations": [
+      "Urological evaluation recommended for definitive imaging.",
+      "Correlate with serum creatinine, eGFR, and urinalysis.",
+      "Review by a board-certified urologist or nephrologist."
+    ]
+  },
+  "explainability": {
+    "method": "Grad-CAM",
+    "status": "available",
+    "top_positive_contributors": [],
+    "attention_statistics": {
+      "max_attention": 1.0,
+      "mean_attention": 0.3232,
+      "focal_ratio_above_50pct": 0.24
+    },
+    "target_class": "Tumor",
+    "has_gradcam_overlay": true
+  },
+  "clinical_synthesis": {
+    "title": "Clinical Screening & Decision Support Synthesis: Kidney Pathology (Ct)",
+    "screening_summary": "MedSynapse Clinical AI completed a multivariable assessment for Kidney Pathology (Ct). The evaluated patient profile (modality: Non-contrast Abdominal CT; slice: Transverse Renal Axial) yielded an estimated model risk probability of 0.9923 (99.2%), categorizing the screening status into the High Risk tier with an active assessment of 'Tumor'.",
+    "model_findings": "Statistical evaluation via calibrated probabilistic ensemble backbones demonstrates an assessed score of 99.2%. Contributing biomarker variance highlights: Parameters within standard reference distributions..",
+    "explainability_summary": "Visual explainability generated via Grad-CAM on layer 'top_conv'. Convolutional saliency was calculated for target class 'Tumor', highlighting peak receptive fields with maximum activation intensity of 1.00. Grad-CAM (Gradient-weighted Class Activation Mapping) generated convolutional saliency in layer 'top_conv' for 'Tumor'. Peak activation receptive fields highlight the focal pixel regions that most heavily influenced the neural network prediction. Concentrated high-attention focal zones (\u226550% activation) occupy 24.0% of the receptive feature map. Highlighted saliency regions represent computational attention distribution and do not constitute confirmed anatomical pathology. Grad-CAM spatial overlays identify high-weight anatomical/pathological focal zones driving the neural network classification and do not establish medical causality.",
+    "clinician_review": "Clinician-in-the-loop decision audit completed. Automated clinical decision protocol verification completed with verified feature inputs. Final diagnostic confirmation and therapeutic strategy must be reviewed by the attending licensed clinician.",
+    "physician_perspective_analysis": "CLINICAL EVALUATION FROM ATTENDING PHYSICIAN'S POINT OF VIEW (Dr. Sarah Chen, MD, Senior Attending Physician):\n1. AI Model Concordance: The automated multivariable evaluation for Kidney Pathology (Ct) (99.2% probability, High Risk) was audited against the patient's submitted parameters (modality: Non-contrast Abdominal CT; slice: Transverse Renal Axial).\n2. Clinical Correlation: The model's baseline classification of 'Tumor' is clinically congruent with standard diagnostic guidelines. No acute discordant biomarker patterns were identified.\n3. Recommendation: Endorsed for standard protocol follow-up and surveillance under continuous clinical oversight.",
+    "recommendations": [
+      "Urological evaluation recommended for definitive imaging.",
+      "Correlate with serum creatinine, eGFR, and urinalysis.",
+      "Review by a board-certified urologist or nephrologist."
+    ]
+  },
+  "files": {
+    "report_pdf": "report.pdf",
+    "report_png": "report.png",
+    "report_txt": "report.txt",
+    "source_image": "source_image.jpg",
+    "gradcam_overlay": "gradcam_overlay.png"
+  }
+}

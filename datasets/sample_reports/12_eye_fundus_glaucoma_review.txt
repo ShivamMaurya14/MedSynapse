@@ -1,0 +1,17 @@
+MEDSYNAPSE - SYNTHETIC TEST FIXTURE
+Ophthalmology Screening Report - Glaucoma Review Scenario
+Synthetic review scenario for optic-disc and referral-path testing.
+Not patient data. Not a diagnosis. For local pipeline testing only.
+
+PATIENT CONTEXT
+Age: 63 years
+Screening type: Optic nerve / retinal photograph review
+
+OBSERVATION SUMMARY
+Optic disc: synthetic scenario describes a review-required cup-to-disc observation
+Intraocular pressure: not supplied in this report fixture
+Disposition: clinician review and confirmatory assessment are required
+
+TEST USE
+Expected workflow: document extraction and manual review.
+Eye model input remains a companion color fundus image, not this report text.

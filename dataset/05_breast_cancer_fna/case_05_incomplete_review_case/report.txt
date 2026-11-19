@@ -1,0 +1,60 @@
+================================================================================
+MEDSYNAPSE CLINICAL DECISION SUPPORT PLATFORM - DIAGNOSTIC REPORT
+================================================================================
+Case Identification : EVAL-BREAST-005
+Clinical Module     : Clinical Disease
+Diagnostic Modality : Standard Clinical Panel
+Scenario Description: Incomplete FNA Morphometry Profile (Review Required)
+Attending Clinician : Dr. Sarah Chen, MD (Senior Attending Physician)
+Report Timestamp    : 2026-11-19 04:20 UTC
+System Purpose      : AI Platform Benchmark & Evaluation Dataset
+--------------------------------------------------------------------------------
+1. CLINICAL INPUT PARAMETERS & OBSERVATIONS
+--------------------------------------------------------------------------------
+  * Radius Mean                         : 14.2               [Standard reference]
+  * Texture Mean                        : 20.1               [Standard reference]
+  * Perimeter Mean                      : 92.5               [Standard reference]
+  * Area Mean                           : 620.0              [Standard reference]
+  * Smoothness Mean                     : 0.095              [Standard reference]
+  * Compactness Mean                    : 0.12               [Standard reference]
+  * Concavity Mean                      : 0.08               [Standard reference]
+  * Concave Points Mean                 : 0.045              [Standard reference]
+  * Symmetry Mean                       : 0.18               [Standard reference]
+  * Fractal Dimension Mean              : 0.062              [Standard reference]
+
+--------------------------------------------------------------------------------
+2. AI MODEL DIAGNOSTIC INFERENCE & RISK ASSESSMENT
+--------------------------------------------------------------------------------
+  * Primary Diagnostic Finding : Review Required (Incomplete Feature Set)
+  * Assessed Risk Tier         : Review Required
+  * Calibrated Probability     : 0.5000 (50.0%)
+  * Decision Boundary Cutoff   : 0.50 (Standard Decision Cutoff)
+  * Ground-Truth Scenario Fit  : Deliberately incomplete 10-feature panel requiring clinician completion under clinical contract
+
+--------------------------------------------------------------------------------
+3. EXPLAINABLE AI (XAI) ATTRIBUTION
+--------------------------------------------------------------------------------
+  * Explainability Architecture: Deferred (Feature set incomplete)
+  * Primary Risk-Increasing Drivers (Positive SHAP φ):
+  * Protective / Mitigating Factors (Negative SHAP φ):
+
+--------------------------------------------------------------------------------
+4. ATTENDING PHYSICIAN PERSPECTIVE & ACTIONABLE RECOMMENDATIONS
+--------------------------------------------------------------------------------
+Screening Summary:
+  Incomplete WDBC FNA feature submission for EVAL-BREAST-005. Only 10 of 30 standard morphological attributes provided. Automated diagnosis suspended per patient safety protocol.
+
+Physician Perspective Analysis:
+  CLINICAL EVALUATION FROM ATTENDING PHYSICIAN'S POINT OF VIEW (Dr. Sarah Chen, MD):
+Incomplete morphometric profiles cannot be interpolated. Clinician completion required.
+
+Actionable Recommendations:
+  1. Incomplete morphometric panel: 10 of 30 WDBC features supplied.
+  2. Clinician review and completion of remaining 20 features required.
+  3. Do not infer missing features automatically.
+
+================================================================================
+SAFETY & COMPLIANCE NOTICE: This diagnostic evaluation report is generated for
+benchmarking and clinician decision support. It is not an autonomous medical
+diagnosis. All therapeutic strategies require licensed clinician confirmation.
+================================================================================

@@ -1,0 +1,14 @@
+WELLSPRING CLINICAL LABS - GLUCOSE MONITORING
+Patient: Robert Miller | Age: 46 | Sex: Male
+
+METABOLIC & PRE-DIABETIC SCREENING
+------------------------------------------------------------
+Fasting Blood Sugar (Glucose)  : 114.0 mg/dL   [Normal: 70 - 99 mg/dL]   * BORDERLINE
+Blood Pressure (Resting BP)    : 128/82 mm Hg  [Normal: < 120/80 mm Hg]  * ELEVATED
+Serum Total Cholesterol        : 218.0 mg/dL   [Desirable: < 200 mg/dL]  * BORDERLINE
+Serum Fasting Insulin          : 22.0 uU/mL    [Normal: 2.6 - 24.9 uU/mL]
+Body Mass Index (BMI)          : 27.6 kg/m2    [Normal: 18.5 - 24.9]     * OVERWEIGHT
+Skin Thickness                 : 24.0 mm
+Diabetes Pedigree Score        : 0.45
+------------------------------------------------------------
+Clinical Impression: Impaired Fasting Glucose (Pre-diabetes) with borderline hypertension.

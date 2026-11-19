@@ -1,0 +1,71 @@
+================================================================================
+MEDSYNAPSE CLINICAL DECISION SUPPORT PLATFORM - DIAGNOSTIC REPORT
+================================================================================
+Case Identification : EVAL-CAD-002
+Clinical Module     : Clinical Disease
+Diagnostic Modality : Standard Clinical Panel
+Scenario Description: Healthy Cardiovascular Baseline Evaluation
+Attending Clinician : Dr. Sarah Chen, MD (Senior Attending Physician)
+Report Timestamp    : 2026-11-19 04:20 UTC
+System Purpose      : AI Platform Benchmark & Evaluation Dataset
+--------------------------------------------------------------------------------
+1. CLINICAL INPUT PARAMETERS & OBSERVATIONS
+--------------------------------------------------------------------------------
+  * Patient Age                         : 38 years           [Adult reference]
+  * Biological Sex                      : 0 binary           [1=Male, 0=Female]
+  * Chest Pain Type                     : 1 category         [1=Atypical Angina]
+  * Resting Blood Pressure              : 115 mm Hg          [Target: < 120 mm Hg]
+  * Serum Total Cholesterol             : 175 mg/dL          [Desirable: < 200 mg/dL]
+  * Fasting Blood Sugar > 120           : 0 binary           [1=Elevated, 0=Normal]
+  * Resting Electrocardiogram           : 0 category         [0=Normal]
+  * Maximum Heart Rate                  : 165 bpm            [Expected: 140-170 bpm]
+  * Exercise Induced Angina             : 0 binary           [1=Yes, 0=No]
+  * ST Depression (Oldpeak)             : 0.2 mm             [Normal: < 1.0 mm]
+  * Slope of Peak ST Segment            : 2 category         [2=Upsloping]
+  * Fluoroscopy Major Vessels           : 0 count            [0 vessels]
+  * Thalassemia Defect Status           : 1 category         [1=Normal]
+
+--------------------------------------------------------------------------------
+2. AI MODEL DIAGNOSTIC INFERENCE & RISK ASSESSMENT
+--------------------------------------------------------------------------------
+  * Primary Diagnostic Finding : Normal Cardiovascular Baseline
+  * Assessed Risk Tier         : Low Risk
+  * Calibrated Probability     : 0.0300 (3.0%)
+  * Decision Boundary Cutoff   : 0.50 (Standard Decision Cutoff)
+  * Ground-Truth Scenario Fit  : Normotensive adult, optimal lipid levels, no angina or ischemic ECG changes
+
+--------------------------------------------------------------------------------
+3. EXPLAINABLE AI (XAI) ATTRIBUTION
+--------------------------------------------------------------------------------
+  * Explainability Architecture: SHAP TreeExplainer
+  * Primary Risk-Increasing Drivers (Positive SHAP φ):
+      - MajorVessels                  : φ = +0.0835 (patient value: 0)
+      - Thalassemia                   : φ = +0.0639 (patient value: 1)
+      - Oldpeak                       : φ = +0.0565 (patient value: 0.2)
+      - ChestPainType                 : φ = +0.0471 (patient value: 1)
+  * Protective / Mitigating Factors (Negative SHAP φ):
+      - RestingECG                    : φ = -0.0141 (patient value: 0)
+      - FastingBloodSugar             : φ = -0.0018 (patient value: 0)
+
+--------------------------------------------------------------------------------
+4. ATTENDING PHYSICIAN PERSPECTIVE & ACTIONABLE RECOMMENDATIONS
+--------------------------------------------------------------------------------
+Screening Summary:
+  MedSynapse Clinical AI completed a multivariable assessment for Coronary Heart Disease. The evaluated patient profile (Patient Age: 38 years; Biological Sex: 0 0=Female, 1=Male; Chest Pain Type: 1 0-3; Resting Blood Pressure: 115 mm Hg; Serum Cholesterol: 175 mg/dL; Fasting Blood Sugar > 120: 0 0=No, 1=Yes) yielded an estimated model risk probability of 0.0300 (3.0%), categorizing the screening status into the Low Risk tier with an active assessment of 'Normal Cardiovascular Baseline'.
+
+Physician Perspective Analysis:
+  CLINICAL EVALUATION FROM ATTENDING PHYSICIAN'S POINT OF VIEW (Dr. Sarah Chen, MD, Senior Attending Physician):
+1. AI Model Concordance: The automated multivariable evaluation for Coronary Heart Disease (3.0% probability, Low Risk) was audited against the patient's submitted parameters (Patient Age: 38 years; Biological Sex: 0 0=Female, 1=Male; Chest Pain Type: 1 0-3; Resting Blood Pressure: 115 mm Hg; Serum Cholesterol: 175 mg/dL; Fasting Blood Sugar > 120: 0 0=No, 1=Yes).
+2. Clinical Correlation: The model's baseline classification of 'Normal Cardiovascular Baseline' is clinically congruent with standard diagnostic guidelines. No acute discordant biomarker patterns were identified.
+3. Recommendation: Endorsed for standard protocol follow-up and surveillance under continuous clinical oversight.
+
+Actionable Recommendations:
+  1. Continue heart-healthy lifestyle with regular physical exercise.
+  2. Maintain optimal blood pressure (< 120/80 mm Hg) and cholesterol levels (< 200 mg/dL).
+  3. Schedule annual preventative cardiac checkups.
+
+================================================================================
+SAFETY & COMPLIANCE NOTICE: This diagnostic evaluation report is generated for
+benchmarking and clinician decision support. It is not an autonomous medical
+diagnosis. All therapeutic strategies require licensed clinician confirmation.
+================================================================================

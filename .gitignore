@@ -1,0 +1,111 @@
+# Byte-compiled / optimized / ambient files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Operating System & IDEs
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.vscode/
+.idea/
+
+# Large Datasets (>100MB raw image dumps)
+datasets/brain tumor/
+datasets/chest_xray/
+
+# Large Model Weights & Unpacked Artifacts
+# (Production bundles are maintained as zipped artifacts below)
+models/brain_tumor_model/*.keras
+models/*.pkl
+models/*.h5
+models/*.keras
+models/*.weights.h5
+models/*.png
+models/diabetes_artifacts/
+models/kidney_stone_classes.json
+models/metrics.json
+models/classes.json
+*.zip
+*.tar.gz
+*.h5.zip
+
+# Whitelist production model bundles under GitHub's 100MB limit
+!models/skin_cancer_artifacts.zip
+!models/kidney_stone_artifacts.zip
+!models/liver_disease_artifacts.zip
+!models/breast_cancer_artifacts.zip
+!models/diabetes_artifacts.zip
+!models/heart_artifacts.zip
+
+# Logs
+*.log
+
+# Databases & local state
+*.db
+*.sqlite3
+data/*.db
+data/*.sqlite3
+
+# Local clinical feature store (contains sensitive extracted evidence)
+data/medsynapse.db
+data/medsynapse.db-*
+
+# Node / Frontend
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+.vite/
+frontend/.vite/
+
+# Output runs & Raw Datasets Cache
+output/
+data/raw/
+data/explanations/
+
+# Temporary, scratch & lock files
+.~lock*
+*.excalidraw
+WhatsApp*
+
+
+models/*.pt
+models/*.pth
+models/*.csv
+datasets/

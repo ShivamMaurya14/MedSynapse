@@ -1,0 +1,61 @@
+================================================================================
+MEDSYNAPSE CLINICAL DECISION SUPPORT PLATFORM - DIAGNOSTIC REPORT
+================================================================================
+Case Identification : EVAL-KIDNEY-001
+Clinical Module     : Clinical Disease
+Diagnostic Modality : Standard Clinical Panel
+Scenario Description: Nephrolithiasis / Calcified Calculus CT Scan
+Attending Clinician : Dr. Sarah Chen, MD (Senior Attending Physician)
+Report Timestamp    : 2026-11-19 04:20 UTC
+System Purpose      : AI Platform Benchmark & Evaluation Dataset
+--------------------------------------------------------------------------------
+1. CLINICAL INPUT PARAMETERS & OBSERVATIONS
+--------------------------------------------------------------------------------
+  * Modality                            : Non-contrast Abdominal CT [Standard reference]
+  * Slice                               : Transverse Renal Axial [Standard reference]
+
+--------------------------------------------------------------------------------
+2. AI MODEL DIAGNOSTIC INFERENCE & RISK ASSESSMENT
+--------------------------------------------------------------------------------
+  * Primary Diagnostic Finding : Stone
+  * Assessed Risk Tier         : High Risk
+  * Calibrated Probability     : 0.8455 (81.2%)
+  * Decision Boundary Cutoff   : 0.50 (Standard Decision Cutoff)
+  * Ground-Truth Scenario Fit  : High-attenuation calcified calculus identified within the renal pelvicalyceal system
+  * Posterior Probability Distribution:
+      - Cyst                            :  0.44%
+      - Normal                          : 15.45%
+      - Stone                           : 81.21%
+      - Tumor                           :  2.91%
+
+--------------------------------------------------------------------------------
+3. EXPLAINABLE AI (XAI) ATTRIBUTION
+--------------------------------------------------------------------------------
+  * Explainability Architecture: Grad-CAM
+  * Saliency Target Class      : Stone
+  * Backpropagated Layer       : top_conv
+  * Peak Attention Intensity   : 1.0000
+  * Heatmap Resolution Shape   : [5, 5]
+
+--------------------------------------------------------------------------------
+4. ATTENDING PHYSICIAN PERSPECTIVE & ACTIONABLE RECOMMENDATIONS
+--------------------------------------------------------------------------------
+Screening Summary:
+  MedSynapse Clinical AI completed a multivariable assessment for Kidney Pathology (Ct). The evaluated patient profile (modality: Non-contrast Abdominal CT; slice: Transverse Renal Axial) yielded an estimated model risk probability of 0.8455 (84.5%), categorizing the screening status into the High Risk tier with an active assessment of 'Stone'.
+
+Physician Perspective Analysis:
+  CLINICAL EVALUATION FROM ATTENDING PHYSICIAN'S POINT OF VIEW (Dr. Sarah Chen, MD, Senior Attending Physician):
+1. AI Model Concordance: The automated multivariable evaluation for Kidney Pathology (Ct) (84.5% probability, High Risk) was audited against the patient's submitted parameters (modality: Non-contrast Abdominal CT; slice: Transverse Renal Axial).
+2. Clinical Correlation: The model's baseline classification of 'Stone' is clinically congruent with standard diagnostic guidelines. No acute discordant biomarker patterns were identified.
+3. Recommendation: Endorsed for standard protocol follow-up and surveillance under continuous clinical oversight.
+
+Actionable Recommendations:
+  1. Urological evaluation recommended for definitive imaging.
+  2. Correlate with serum creatinine, eGFR, and urinalysis.
+  3. Review by a board-certified urologist or nephrologist.
+
+================================================================================
+SAFETY & COMPLIANCE NOTICE: This diagnostic evaluation report is generated for
+benchmarking and clinician decision support. It is not an autonomous medical
+diagnosis. All therapeutic strategies require licensed clinician confirmation.
+================================================================================

@@ -1,0 +1,18 @@
+MEDSYNAPSE - SYNTHETIC TEST FIXTURE
+Ophthalmology Screening Report - Retinopathy Referral Scenario
+Synthetic referral scenario for testing UI wording and review routing.
+Not patient data. Not a diagnosis. For local pipeline testing only.
+
+PATIENT CONTEXT
+Age: 56 years
+Screening type: Retinal photograph review
+Reported history: diabetes noted in synthetic test scenario
+
+OBSERVATION SUMMARY
+Retinal finding: synthetic scenario describes microvascular changes
+Disposition: ophthalmology review is required
+No automated diagnosis is implied by this document fixture
+
+TEST USE
+Expected workflow: document extraction and manual review.
+Eye model input remains a companion color fundus image, not this report text.

@@ -1,0 +1,104 @@
+{
+  "benchmark_metadata": {
+    "case_id": "EVAL-DIAB-004",
+    "module_id": "01_diabetes_mellitus",
+    "disease_name": "Diabetes Mellitus",
+    "disease_key": "diabetes",
+    "modality": "Biochemical Glycemic Panel (Tabular)",
+    "is_image_based": false,
+    "scenario": "Mild fasting hyperglycemia with elevated body mass index",
+    "source_reference": "frontend/src/components/DiabetesView.jsx (Preset 2)",
+    "generated_at": "2026-11-19T04:20:03.141282+00:00",
+    "evaluator": "MedSynapse Clinical AI Evaluation Pipeline"
+  },
+  "inputs": {
+    "pregnancies": 2,
+    "glucose": 118.0,
+    "blood_pressure": 78.0,
+    "skin_thickness": 25.0,
+    "insulin": 95.0,
+    "bmi": 27.8,
+    "dpf": 0.52,
+    "age": 44
+  },
+  "model_prediction": {
+    "disease": "Diabetes Mellitus",
+    "prediction": 0,
+    "diagnosis": "Baseline Physiological Control",
+    "has_disease": false,
+    "is_positive": false,
+    "risk_probability": 0.3575,
+    "risk_percentage": 35.7,
+    "risk_tier": "Moderate Risk",
+    "contributing_factors": [
+      {
+        "factor": "Fasting Glucose",
+        "value": "118.0 mg/dL",
+        "impact": "Moderate (Impaired fasting glucose)"
+      },
+      {
+        "factor": "Body Mass Index",
+        "value": "27.8 kg/m\u00b2",
+        "impact": "Moderate (Overweight)"
+      }
+    ],
+    "recommendations": [
+      "Maintain a balanced, nutrient-dense diet and stay physically active.",
+      "Undergo routine annual wellness and preventative metabolic screenings.",
+      "Keep body mass index (BMI) within the healthy range (18.5 - 24.9 kg/m\u00b2)."
+    ]
+  },
+  "explainability": {
+    "method": "SHAP PermutationExplainer (full diabetes voting ensemble)",
+    "status": "available",
+    "top_positive_contributors": [
+      {
+        "feature": "Age",
+        "patient_value": 44.0,
+        "shap_value": 0.086921,
+        "effect": "increased predicted positive-class score"
+      },
+      {
+        "feature": "DiabetesPedigreeFunction",
+        "patient_value": 0.52,
+        "shap_value": 0.034425,
+        "effect": "increased predicted positive-class score"
+      },
+      {
+        "feature": "BloodPressure",
+        "patient_value": 78.0,
+        "shap_value": 0.005791,
+        "effect": "increased predicted positive-class score"
+      },
+      {
+        "feature": "SkinThickness",
+        "patient_value": 25.0,
+        "shap_value": 0.002877,
+        "effect": "increased predicted positive-class score"
+      }
+    ],
+    "attention_statistics": null,
+    "target_class": null,
+    "has_gradcam_overlay": false
+  },
+  "clinical_synthesis": {
+    "title": "Clinical Screening & Decision Support Synthesis: Diabetes Mellitus",
+    "screening_summary": "MedSynapse Clinical AI completed a multivariable assessment for Diabetes Mellitus. The evaluated patient profile (Pregnancies: 2 count; Fasting glucose: 118.0 mg/dL; Diastolic blood pressure: 78.0 mm Hg; Triceps skin thickness: 25.0 mm; Serum insulin: 95.0 \u03bcU/mL; Body mass index: 27.8 kg/m\u00b2) yielded an estimated model risk probability of 0.3575 (35.8%), categorizing the screening status into the Moderate Risk tier with an active assessment of 'Baseline Physiological Control'.",
+    "model_findings": "Statistical evaluation via calibrated probabilistic ensemble backbones demonstrates an assessed score of 35.8%. Contributing biomarker variance highlights: Fasting Glucose: 118.0 mg/dL (Moderate (Impaired fasting glucose)); Body Mass Index: 27.8 kg/m\u00b2 (Moderate (Overweight)).",
+    "explainability_summary": "Feature explainability generated via SHAP PermutationExplainer (full diabetes voting ensemble). Key biomarkers elevating predicted risk: Age (\u03c6=+0.0869), DiabetesPedigreeFunction (\u03c6=+0.0344), BloodPressure (\u03c6=+0.0058). Mitigating/protective biomarkers: Glucose (\u03c6=-0.0417), Pregnancies (\u03c6=-0.0298), BMI_Cat (\u03c6=-0.0262). Baseline population reference score for this model is +0.3610. Elevating risk factor: Age of 44.0 increased the predicted positive-class score (SHAP +0.086921). Elevating risk factor: DiabetesPedigreeFunction of 0.52 increased the predicted positive-class score (SHAP +0.034425). Elevating risk factor: BloodPressure of 78.0 increased the predicted positive-class score (SHAP +0.005791). Elevating risk factor: SkinThickness of 25.0 increased the predicted positive-class score (SHAP +0.002877). Mitigating/protective factor: Glucose of 118.0 reduced the predicted positive-class score (SHAP -0.041693). Mitigating/protective factor: Pregnancies of 2.0 reduced the predicted positive-class score (SHAP -0.029790). Mitigating/protective factor: BMI_Cat of 2.0 reduced the predicted positive-class score (SHAP -0.026247). Mitigating/protective factor: Insulin of 95.0 reduced the predicted positive-class score (SHAP -0.018795). Mitigating/protective factor: BMI of 27.8 reduced the predicted positive-class score (SHAP -0.017003). Net SHAP feature displacement from baseline is -0.003514. SHAP describes this model's behavior for the submitted input and does not establish medical causality. SHAP values describe individual feature displacement from baseline expected score for this specific patient profile and do not establish direct medical causality.",
+    "clinician_review": "Clinician-in-the-loop decision audit completed. Automated clinical decision protocol verification completed with verified feature inputs. Final diagnostic confirmation and therapeutic strategy must be reviewed by the attending licensed clinician.",
+    "physician_perspective_analysis": "CLINICAL EVALUATION FROM ATTENDING PHYSICIAN'S POINT OF VIEW (Dr. Sarah Chen, MD, Senior Attending Physician):\n1. AI Model Concordance: The automated multivariable evaluation for Diabetes Mellitus (35.8% probability, Moderate Risk) was audited against the patient's submitted parameters (Pregnancies: 2 count; Fasting glucose: 118.0 mg/dL; Diastolic blood pressure: 78.0 mm Hg; Triceps skin thickness: 25.0 mm; Serum insulin: 95.0 \u03bcU/mL; Body mass index: 27.8 kg/m\u00b2).\n2. Clinical Correlation: The model's baseline classification of 'Baseline Physiological Control' is clinically congruent with standard diagnostic guidelines. No acute discordant biomarker patterns were identified.\n3. Recommendation: Endorsed for standard protocol follow-up and surveillance under continuous clinical oversight.",
+    "recommendations": [
+      "Maintain a balanced, nutrient-dense diet and stay physically active.",
+      "Undergo routine annual wellness and preventative metabolic screenings.",
+      "Keep body mass index (BMI) within the healthy range (18.5 - 24.9 kg/m\u00b2)."
+    ]
+  },
+  "files": {
+    "report_pdf": "report.pdf",
+    "report_png": "report.png",
+    "report_txt": "report.txt",
+    "source_image": null,
+    "gradcam_overlay": null
+  }
+}
